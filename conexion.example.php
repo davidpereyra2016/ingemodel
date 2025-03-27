@@ -11,7 +11,8 @@ class BD
             
             $opcionesPDO[PDO::ATTR_ERRMODE] = PDO::ERRMODE_EXCEPTION;
 
-            self::$instancia = new PDO('mysql:host=localhost; dbname=u255461636_ingenieros', 'u255461636_inge', 'E|v2g9JX1', $opcionesPDO);
+            // Replace with your database credentials
+            self::$instancia = new PDO('mysql:host=your_host; dbname=your_database', 'your_username', 'your_password', $opcionesPDO);
             self::$instancia->exec("SET CHARACTER SET utf8");
             
             // Establecer zona horaria para MySQL
@@ -19,5 +20,4 @@ class BD
         }
         return self::$instancia;
     }
-
 }
