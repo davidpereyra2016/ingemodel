@@ -107,15 +107,8 @@
             </div>
         </nav>
     <?php endif; ?>
-    <div class="hero">
-        <div class="container">
-            <h1>Reserva de Salón de Eventos</h1>
-            <p class="lead">Selecciona una fecha disponible para tu evento</p>
-        </div>
-    </div>
 
-
-    <main class="container py-4">
+    <main class="container">
         <div class="row">
             <div class="col-12">
                 <?php include_once("ruteador.php"); ?>
