@@ -12,6 +12,8 @@
     <link href="https://cdn.datatables.net/v/dt/dt-2.2.2/datatables.min.css" rel="stylesheet">
     <!-- Select2 -->
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <!-- FullCalendar -->
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.0/main.min.css" rel="stylesheet">
     <style>
         html,
         body {
@@ -33,6 +35,21 @@
             font-weight: bold;
             font-size: 14px;
             /* Se ajusta bien en móviles */
+        }
+        .hero {
+            background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('https://source.unsplash.com/random/1920x1080/?event-hall');
+            background-size: cover;
+            color: white;
+            padding: 100px 0;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .calendar-container {
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
+            padding: 20px;
+            margin-bottom: 30px;
         }
 
         @media (min-width: 768px) {
@@ -90,6 +107,12 @@
             </div>
         </nav>
     <?php endif; ?>
+    <div class="hero">
+        <div class="container">
+            <h1>Reserva de Salón de Eventos</h1>
+            <p class="lead">Selecciona una fecha disponible para tu evento</p>
+        </div>
+    </div>
 
 
     <main class="container py-4">
@@ -111,6 +134,9 @@
     <script src="https://cdn.datatables.net/v/dt/dt-2.2.2/datatables.min.js"></script>
     <!-- Select2 -->
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.0/main.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.0/locales/es.js"></script>
+    <script src="utils/js/fullcalendar.js"></script>
     <script>
         $(document).ready(function() {
             $('.js-example-basic-single').select2({
