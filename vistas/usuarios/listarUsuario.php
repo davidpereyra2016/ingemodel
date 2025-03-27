@@ -22,7 +22,7 @@
         </div>
         <div class="col-md-6 text-end">
             <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addUserModal">
-                Cargar Usuarios
+                <i class="fas fa-user-plus me-1"></i> Nuevo Usuario
             </button>
         </div>
     </div>
@@ -34,24 +34,40 @@
                     <thead>
                         <tr>
                             <th>ID</th>
+                            <th>Matrícula</th>
                             <th>Nombre</th>
+                            <th>Apellido</th>
                             <th>Email</th>
+                            <th>Teléfono</th>
                             <th>Rol</th>
+                            <th>Estado</th>
                             <th>Acciones</th>
                         </tr>
                     </thead>
                     <tbody>
                         <?php if (empty($usuarios)): ?>
                             <tr>
-                                <td colspan="1" class="text-center">No hay usuarios registrados</td>
+                                <td colspan="9" class="text-center">No hay usuarios registrados</td>
                             </tr>
                         <?php else: ?>
                             <?php foreach ($usuarios as $usuario): ?>
                                 <tr>
                                     <td><?php echo $usuario['id']; ?></td>
+                                    <td><?php echo $usuario['matricula']; ?></td>
                                     <td><?php echo $usuario['nombre']; ?></td>
+                                    <td><?php echo $usuario['apellido']; ?></td>
                                     <td><?php echo $usuario['email']; ?></td>
-                                    <td><?php echo $usuario['rol']; ?></td>
+                                    <td><?php echo $usuario['telefono']; ?></td>
+                                    <td>
+                                        <span class="badge <?php echo ($usuario['rol'] == 'administrador') ? 'bg-danger' : 'bg-primary'; ?>">
+                                            <?php echo $usuario['rol']; ?>
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <span class="badge <?php echo ($usuario['estado'] == 'activo') ? 'bg-success' : 'bg-secondary'; ?>">
+                                            <?php echo $usuario['estado']; ?>
+                                        </span>
+                                    </td>
                                     <td>
                                         <button type="button" class="btn btn-sm btn-warning edit-user" 
                                         data-bs-toggle="modal" data-bs-target="#editUserModal" 
@@ -77,44 +93,77 @@
 
 <!-- Modal para Cargar Usuario -->
 <div class="modal fade" id="addUserModal" tabindex="-1" aria-labelledby="addUserModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="addUserModalLabel">Cargar Usuario</h5>
+                <h5 class="modal-title" id="addUserModalLabel">Nuevo Usuario</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form id="addUserForm">
-                    <div class="mb-3">
-                        <label for="newUserName" class="form-label">Nombre</label>
-                        <input type="text" class="form-control" id="newUserName" name="nombre" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="newUserEmail" class="form-label">Email</label>
-                        <input type="email" class="form-control" id="newUserEmail" name="email" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="newUserPassword" class="form-label">Contraseña</label>
-                        <div class="input-group">
-                            <input type="password" class="form-control" id="newUserPassword" name="password" required>
-                            <button type="button" class="btn btn-outline-secondary" id="toggleNewPassword">
-                                <i class="fas fa-eye"></i>
-                            </button>
+                <form id="addUserForm" action="?controlador=usuarios&accion=crear" method="POST">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="matricula" class="form-label">Matrícula</label>
+                            <input type="text" class="form-control" id="matricula" name="matricula" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="nombre" class="form-label">Nombre</label>
+                            <input type="text" class="form-control" id="nombre" name="nombre" required>
                         </div>
                     </div>
-                    <div class="mb-3">
-                        <label for="newUserRole" class="form-label">Rol</label>
-                        <select class="form-select" id="newUserRole" name="rol" required>
-                            <option value="">Seleccionar Rol</option>
-                            <option value="admin">Admin</option>
-                            <option value="usuario">Usuario</option>
-                        </select>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="apellido" class="form-label">Apellido</label>
+                            <input type="text" class="form-control" id="apellido" name="apellido" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="email" name="email" required>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="telefono" class="form-label">Teléfono</label>
+                            <input type="text" class="form-control" id="telefono" name="telefono" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="domicilio" class="form-label">Domicilio</label>
+                            <input type="text" class="form-control" id="domicilio" name="domicilio" required>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="password" class="form-label">Contraseña</label>
+                            <div class="input-group">
+                                <input type="password" class="form-control" id="password" name="password" required>
+                                <button type="button" class="btn btn-outline-secondary toggle-password">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="rol" class="form-label">Rol</label>
+                            <select class="form-select" id="rol" name="rol" required>
+                                <option value="">Seleccionar Rol</option>
+                                <option value="administrador">Administrador</option>
+                                <option value="ingeniero">Ingeniero</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="estado" class="form-label">Estado</label>
+                            <select class="form-select" id="estado" name="estado" required>
+                                <option value="activo" selected>Activo</option>
+                                <option value="inactivo">Inactivo</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                        <button type="submit" class="btn btn-primary">Guardar</button>
                     </div>
                 </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                <button type="button" class="btn btn-primary" id="saveNewUser">Guardar</button>
             </div>
         </div>
     </div>
@@ -122,46 +171,91 @@
 
 <!-- Modal para Editar Usuario -->
 <div class="modal fade" id="editUserModal" tabindex="-1" aria-labelledby="editUserModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="editUserModalLabel">Editar Usuario</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form id="editUserForm">
+                <form id="editUserForm" action="?controlador=usuarios&accion=editar" method="POST">
                     <input type="hidden" id="editUserId" name="id" value="<?php echo isset($_SESSION['temp_usuario']) ? $_SESSION['temp_usuario']['id'] : ''; ?>">
-                    <div class="mb-3">
-                        <label for="editUserName" class="form-label">Nombre</label>
-                        <input type="text" class="form-control" id="editUserName" name="nombre" required value="<?php echo isset($_SESSION['temp_usuario']) ? $_SESSION['temp_usuario']['nombre'] : ''; ?>">
-                    </div>
-                    <div class="mb-3">
-                        <label for="editUserEmail" class="form-label">Email</label>
-                        <input type="email" class="form-control" id="editUserEmail" name="email" required value="<?php echo isset($_SESSION['temp_usuario']) ? $_SESSION['temp_usuario']['email'] : ''; ?>">
-                    </div>
-                    <div class="mb-3">
-                        <label for="editUserPassword" class="form-label">Contraseña</label>
-                        <div class="input-group">
-                            <input type="password" class="form-control" id="editUserPassword" name="password">
-                            <button type="button" class="btn btn-outline-secondary" id="toggleEditPassword">
-                                <i class="fas fa-eye"></i>
-                            </button>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="editMatricula" class="form-label">Matrícula</label>
+                            <input type="text" class="form-control" id="editMatricula" name="matricula" required 
+                                value="<?php echo isset($_SESSION['temp_usuario']) ? $_SESSION['temp_usuario']['matricula'] : ''; ?>">
                         </div>
-                        <small class="text-muted">Dejar en blanco para mantener la contraseña actual</small>
+                        <div class="col-md-6 mb-3">
+                            <label for="editNombre" class="form-label">Nombre</label>
+                            <input type="text" class="form-control" id="editNombre" name="nombre" required 
+                                value="<?php echo isset($_SESSION['temp_usuario']) ? $_SESSION['temp_usuario']['nombre'] : ''; ?>">
+                        </div>
                     </div>
-                    <div class="mb-3">
-                        <label for="editUserRole" class="form-label">Rol</label>
-                        <select class="form-select" id="editUserRole" name="rol" required>
-                            <option value="">Seleccionar Rol</option>
-                            <option value="admin" <?php echo (isset($_SESSION['temp_usuario']) && $_SESSION['temp_usuario']['rol'] == 'admin') ? 'selected' : ''; ?>>Admin</option>
-                            <option value="usuario" <?php echo (isset($_SESSION['temp_usuario']) && $_SESSION['temp_usuario']['rol'] == 'usuario') ? 'selected' : ''; ?>>Usuario</option>
-                        </select>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="editApellido" class="form-label">Apellido</label>
+                            <input type="text" class="form-control" id="editApellido" name="apellido" required 
+                                value="<?php echo isset($_SESSION['temp_usuario']) ? $_SESSION['temp_usuario']['apellido'] : ''; ?>">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="editEmail" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="editEmail" name="email" required 
+                                value="<?php echo isset($_SESSION['temp_usuario']) ? $_SESSION['temp_usuario']['email'] : ''; ?>">
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="editTelefono" class="form-label">Teléfono</label>
+                            <input type="text" class="form-control" id="editTelefono" name="telefono" required 
+                                value="<?php echo isset($_SESSION['temp_usuario']) ? $_SESSION['temp_usuario']['telefono'] : ''; ?>">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="editDomicilio" class="form-label">Domicilio</label>
+                            <input type="text" class="form-control" id="editDomicilio" name="domicilio" required 
+                                value="<?php echo isset($_SESSION['temp_usuario']) ? $_SESSION['temp_usuario']['domicilio'] : ''; ?>">
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="editPassword" class="form-label">Contraseña</label>
+                            <div class="input-group">
+                                <input type="password" class="form-control" id="editPassword" name="password">
+                                <button type="button" class="btn btn-outline-secondary toggle-password">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                            <small class="text-muted">Dejar en blanco para mantener la contraseña actual</small>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="editRol" class="form-label">Rol</label>
+                            <select class="form-select" id="editRol" name="rol" required>
+                                <option value="">Seleccionar Rol</option>
+                                <option value="administrador" <?php echo (isset($_SESSION['temp_usuario']) && $_SESSION['temp_usuario']['rol'] == 'administrador') ? 'selected' : ''; ?>>Administrador</option>
+                                <option value="ingeniero" <?php echo (isset($_SESSION['temp_usuario']) && $_SESSION['temp_usuario']['rol'] == 'ingeniero') ? 'selected' : ''; ?>>Ingeniero</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="editEstado" class="form-label">Estado</label>
+                            <select class="form-select" id="editEstado" name="estado" required>
+                                <option value="activo" <?php echo (isset($_SESSION['temp_usuario']) && $_SESSION['temp_usuario']['estado'] == 'activo') ? 'selected' : ''; ?>>Activo</option>
+                                <option value="inactivo" <?php echo (isset($_SESSION['temp_usuario']) && $_SESSION['temp_usuario']['estado'] == 'inactivo') ? 'selected' : ''; ?>>Inactivo</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                        <button type="submit" class="btn btn-primary">Guardar cambios</button>
                     </div>
                 </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
-                <button type="button" class="btn btn-primary" id="saveEditUser">Editar cambios</button>
             </div>
         </div>
     </div>
@@ -176,11 +270,14 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                ¿Estás seguro de que deseas eliminar este usuario?
+                ¿Estás seguro de que deseas eliminar este usuario? Esta acción no se puede deshacer.
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                <button type="button" class="btn btn-danger" id="confirmDelete">Eliminar</button>
+                <form action="?controlador=usuarios&accion=eliminar" method="POST" id="deleteUserForm">
+                    <input type="hidden" id="deleteUserId" name="id" value="">
+                    <button type="submit" class="btn btn-danger">Eliminar</button>
+                </form>
             </div>
         </div>
     </div>
@@ -188,131 +285,57 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // Inicializar modales
-        const addUserModal = new bootstrap.Modal(document.getElementById('addUserModal'));
-        const editUserModal = new bootstrap.Modal(document.getElementById('editUserModal'));
-        const deleteModal = new bootstrap.Modal(document.getElementById('confirmDeleteModal'));
-
-        // Referencias a formularios
-        const addUserForm = document.getElementById('addUserForm');
-        const editUserForm = document.getElementById('editUserForm');
-
-        // Referencias a botones
-        const saveNewUserButton = document.getElementById('saveNewUser');
-        const saveEditUserButton = document.getElementById('saveEditUser');
-        const confirmDeleteButton = document.getElementById('confirmDelete');
-
-        let deleteUserId = null;
-
-        // Mostrar modal de edición si hay datos temporales
-        <?php if (isset($_SESSION['temp_usuario'])): ?>
-            editUserModal.show();
-            <?php unset($_SESSION['temp_usuario']); ?>
-        <?php endif; ?>
-
-        // Manejar clic en botón editar
-        document.querySelectorAll('.edit-user').forEach(button => {
-            button.addEventListener('click', function(e) {
-                e.preventDefault();
-                const userId = this.getAttribute('data-id');
-
-                // Crear y enviar formulario para obtener datos del usuario
-                const form = document.createElement('form');
-                form.method = 'POST';
-                form.action = 'index.php?controlador=usuarios&accion=buscar';
-
-                const idInput = document.createElement('input');
-                idInput.type = 'hidden';
-                idInput.name = 'id';
-                idInput.value = userId;
-
-                form.appendChild(idInput);
-                document.body.appendChild(form);
-                form.submit();
-            });
-        });
-
-        // Manejar guardado de edición
-        saveEditUserButton.addEventListener('click', function() {
-            if (!editUserForm.checkValidity()) {
-                editUserForm.reportValidity();
-                return;
-            }
-            editUserForm.action = 'index.php?controlador=usuarios&accion=editar';
-            editUserForm.method = 'POST';
-            editUserForm.submit();
-        });
-
-        // Guardar nuevo usuario
-        saveNewUserButton.addEventListener('click', function() {
-            if (!addUserForm.checkValidity()) {
-                addUserForm.reportValidity();
-                return;
-            }
-            addUserForm.action = 'index.php?controlador=usuarios&accion=crear';
-            addUserForm.method = 'POST';
-            addUserForm.submit();
-        });
-
-        // Preparar eliminación de usuario
-        document.querySelectorAll('.delete-user').forEach(button => {
+        // Mostrar/ocultar contraseña
+        const togglePasswordButtons = document.querySelectorAll('.toggle-password');
+        togglePasswordButtons.forEach(button => {
             button.addEventListener('click', function() {
-                deleteUserId = this.getAttribute('data-id');
-                deleteModal.show();
+                const input = this.previousElementSibling;
+                const icon = this.querySelector('i');
+                
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    icon.classList.remove('fa-eye');
+                    icon.classList.add('fa-eye-slash');
+                } else {
+                    input.type = 'password';
+                    icon.classList.remove('fa-eye-slash');
+                    icon.classList.add('fa-eye');
+                }
             });
         });
-
-        // Confirmar eliminación de usuario
-        confirmDeleteButton.addEventListener('click', function() {
-            if (deleteUserId) {
-                const form = document.createElement('form');
-                form.method = 'POST';
-                form.action = 'index.php?controlador=usuarios&accion=eliminar';
-
-                const idInput = document.createElement('input');
-                idInput.type = 'hidden';
-                idInput.name = 'id';
-                idInput.value = deleteUserId;
-
-                form.appendChild(idInput);
-                document.body.appendChild(form);
-                form.submit();
-            }
+        
+        // Configurar modal de edición
+        const editUserButtons = document.querySelectorAll('.edit-user');
+        editUserButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const userId = this.getAttribute('data-id');
+                
+                // Realizar una solicitud AJAX para obtener los datos del usuario
+                const formData = new FormData();
+                formData.append('id', userId);
+                
+                fetch('?controlador=usuarios&accion=buscar', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => {
+                    // Redirigir para recargar la página con los datos temporales
+                    window.location.href = '?controlador=usuarios&accion=listar';
+                });
+            });
         });
-
-        // Limpiar formulario al abrir modal de crear usuario
-        document.querySelector('[data-bs-target="#addUserModal"]').addEventListener('click', function() {
-            addUserForm.reset();
-        });
-       
-        // Alternar visibilidad de la contraseña en el modal de agregar usuario
-        document.getElementById('toggleNewPassword').addEventListener('click', function() {
-            const passwordInput = document.getElementById('newUserPassword');
-            const icon = this.querySelector('i');
-            if (passwordInput.type === 'password') {
-                passwordInput.type = 'text';
-                icon.classList.remove('fa-eye');
-                icon.classList.add('fa-eye-slash');
-            } else {
-                passwordInput.type = 'password';
-                icon.classList.remove('fa-eye-slash');
-                icon.classList.add('fa-eye');
-            }
-        });
-
-        // Alternar visibilidad de la contraseña en el modal de editar usuario
-        document.getElementById('toggleEditPassword').addEventListener('click', function() {
-            const passwordInput = document.getElementById('editUserPassword');
-            const icon = this.querySelector('i');
-            if (passwordInput.type === 'password') {
-                passwordInput.type = 'text';
-                icon.classList.remove('fa-eye');
-                icon.classList.add('fa-eye-slash');
-            } else {
-                passwordInput.type = 'password';
-                icon.classList.remove('fa-eye-slash');
-                icon.classList.add('fa-eye');
-            }
+        
+        // Configurar modal de eliminación
+        const deleteUserButtons = document.querySelectorAll('.delete-user');
+        deleteUserButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const userId = this.getAttribute('data-id');
+                document.getElementById('deleteUserId').value = userId;
+                
+                // Mostrar modal de confirmación
+                const confirmDeleteModal = new bootstrap.Modal(document.getElementById('confirmDeleteModal'));
+                confirmDeleteModal.show();
+            });
         });
     });
 </script>

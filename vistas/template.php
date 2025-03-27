@@ -63,45 +63,65 @@
 </head>
 
 <body>
-    <?php if (isset($_SESSION['usuario_id'])): ?>
+    <?php if (isset($_SESSION['id_usuario'])): ?>
         <?php
-        $nombreUsuario = strtolower($_SESSION['usuario_nombre']); // Convertir a minúsculas para evitar problemas de mayúsculas
-        $usuariosRestringidos = $_SESSION['usuario_rol'] == 'usuario';
+        $rol = $_SESSION['rol']; // Obtener el rol del usuario
+        $esIngeniero = ($rol === 'ingeniero');
         ?>
         <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
             <div class="container">
-                
+                <a class="navbar-brand" href="?controlador=paginas&accion=inicio">
+                    <i class="fas fa-building me-2"></i>Colegio de Ingenieros
+                </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="collapse navbar-collapse" id="navbarNav">
                     <ul class="navbar-nav me-auto">
-                        <?php if (!$usuariosRestringidos): ?>
-                            <li class="nav-item">
-                                <a class="nav-link" href="?controlador=paginas&accion=inicio">Inicio</a>
-                            </li>
-                        <?php endif; ?>
                         <li class="nav-item">
-                            <a class="nav-link" href="?controlador=reservas&accion=listar">Reservas</a>
+                            <a class="nav-link" href="?controlador=paginas&accion=inicio">
+                                <i class="fas fa-home me-1"></i>Inicio
+                            </a>
                         </li>
-                       
-            
-                        <?php if (!$usuariosRestringidos): ?>
+                        <li class="nav-item">
+                            <a class="nav-link" href="?controlador=reservas&accion=calendario">
+                                <i class="fas fa-calendar-alt me-1"></i>Calendario
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="?controlador=reservas&accion=listar">
+                                <i class="fas fa-ticket-alt me-1"></i>Mis Reservas
+                            </a>
+                        </li>
+                        
+                        <?php if (!$esIngeniero): ?>
                             <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownConfig" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                    Configuración
+                                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownAdmin" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="fas fa-cogs me-1"></i>Administración
                                 </a>
-                                <ul class="dropdown-menu" aria-labelledby="navbarDropdownConfig">
-                                    <li><a class="dropdown-item" href="?controlador=usuarios&accion=listar">Usuarios</a></li>
+                                <ul class="dropdown-menu" aria-labelledby="navbarDropdownAdmin">
+                                    <li>
+                                        <a class="dropdown-item" href="?controlador=usuarios&accion=listar">
+                                            <i class="fas fa-users me-1"></i>Gestión de Usuarios
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" href="?controlador=reservas&accion=administrar">
+                                            <i class="fas fa-clipboard-list me-1"></i>Gestión de Reservas
+                                        </a>
+                                    </li>
                                 </ul>
                             </li>
                         <?php endif; ?>
                     </ul>
                     <div class="navbar-nav">
                         <span class="nav-item nav-link text-light">
-                            Bienvenido, <?php echo $_SESSION['usuario_nombre']; ?>
+                            <i class="fas fa-user-circle me-1"></i>
+                            Bienvenido, <?php echo $_SESSION['nombre'] . ' ' . $_SESSION['apellido']; ?>
                         </span>
-                        <a class="nav-link" href="?controlador=usuarios&accion=logout">Cerrar Sesión</a>
+                        <a class="nav-link" href="?controlador=usuarios&accion=logout">
+                            <i class="fas fa-sign-out-alt me-1"></i>Cerrar Sesión
+                        </a>
                     </div>
                 </div>
             </div>
@@ -117,7 +137,7 @@
     </main>
     <footer class="footer mt-auto py-3 bg-light">
         <div class="container">
-            <span class="text-muted">&copy; <?php echo date('Y'); ?>. Todos los derechos reservados. Empresa SoftForm</span>
+            <span class="text-muted">&copy; <?php echo date('Y'); ?>. Todos los derechos reservados. Colegio de Ingenieros</span>
         </div>
     </footer>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>

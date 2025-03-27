@@ -3,7 +3,7 @@ ob_start(); // Inicia el output buffering
 session_start();
 
 // Si no hay sesión activa y no estamos en la página de login, redirigir al login
-if (!isset($_SESSION['usuario_id']) && 
+if (!isset($_SESSION['id_usuario']) && 
     (!isset($_GET['controlador']) || $_GET['controlador'] !== 'usuarios' || 
      !isset($_GET['accion']) || $_GET['accion'] !== 'login')) {
     header('Location: index.php?controlador=usuarios&accion=login');
@@ -24,4 +24,3 @@ include_once("vistas/template.php");
 
 // Al final del archivo
 ob_end_flush();
-

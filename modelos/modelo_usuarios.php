@@ -12,11 +12,8 @@ class ModeloUsuarios
     {
         try {
             $stmt = $this->conexion->prepare("
-                SELECT u.*, r.nombre AS rol,ru.rol_id as rol_id
-                FROM usuarios u
-                LEFT JOIN rol_usuario ru ON u.id = ru.usuario_id
-                LEFT JOIN roles r ON ru.rol_id = r.id
-                WHERE u.email = :email LIMIT 1
+                SELECT * FROM usuarios
+                WHERE email = :email AND estado = 'activo' LIMIT 1
             ");
             $stmt->bindParam(":email", $email);
             $stmt->execute();
@@ -37,11 +34,9 @@ class ModeloUsuarios
     {
         try {
             $stmt = $this->conexion->prepare("
-                SELECT u.id, u.nombre, u.email, r.nombre as rol
-                FROM usuarios u
-                INNER JOIN rol_usuario ru ON u.id = ru.usuario_id
-                INNER JOIN roles r ON ru.rol_id = r.id
-                ORDER BY u.id DESC
+                SELECT id, matricula, nombre, apellido, email, telefono, domicilio, rol, estado
+                FROM usuarios
+                ORDER BY id DESC
             ");
             $stmt->execute();
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -51,85 +46,118 @@ class ModeloUsuarios
         }
     }
 
-    public function crear($nombre, $email, $password, $rol)
+    public function crear($matricula, $nombre, $apellido, $email, $telefono, $domicilio, $password, $rol = 'ingeniero', $estado = 'activo')
     {
         try {
-            $this->conexion->beginTransaction();
-
-            // Verificar si el rol existe
-            $stmtRol = $this->conexion->prepare("SELECT id FROM roles WHERE nombre = :rol");
-            $stmtRol->bindParam(":rol", $rol);
-            $stmtRol->execute();
-            $rolId = $stmtRol->fetchColumn();
-
-            if (!$rolId) {
-                throw new Exception("El rol especificado no existe");
+            // Verificar si ya existe un usuario con esa matrícula o email
+            $stmtVerificar = $this->conexion->prepare("
+                SELECT COUNT(*) FROM usuarios WHERE matricula = :matricula OR email = :email
+            ");
+            $stmtVerificar->bindParam(":matricula", $matricula);
+            $stmtVerificar->bindParam(":email", $email);
+            $stmtVerificar->execute();
+            
+            if ($stmtVerificar->fetchColumn() > 0) {
+                throw new Exception("Ya existe un usuario con esa matrícula o correo electrónico");
             }
 
             // Insertar usuario
             $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
-            $stmtUsuario = $this->conexion->prepare("INSERT INTO usuarios (nombre, email, password) VALUES (:nombre, :email, :password)");
-            $stmtUsuario->bindParam(":nombre", $nombre);
-            $stmtUsuario->bindParam(":email", $email);
-            $stmtUsuario->bindParam(":password", $hashedPassword);
-            $stmtUsuario->execute();
-
-            $usuarioId = $this->conexion->lastInsertId();
-
-            // Asignar rol
-            $stmtRolUsuario = $this->conexion->prepare("INSERT INTO rol_usuario (usuario_id, rol_id) VALUES (:usuario_id, :rol_id)");
-            $stmtRolUsuario->bindParam(":usuario_id", $usuarioId);
-            $stmtRolUsuario->bindParam(":rol_id", $rolId);
-            $stmtRolUsuario->execute();
-
-            $this->conexion->commit();
+            $stmt = $this->conexion->prepare("
+                INSERT INTO usuarios (matricula, nombre, apellido, email, telefono, domicilio, password, rol, estado) 
+                VALUES (:matricula, :nombre, :apellido, :email, :telefono, :domicilio, :password, :rol, :estado)
+            ");
+            
+            $stmt->bindParam(":matricula", $matricula);
+            $stmt->bindParam(":nombre", $nombre);
+            $stmt->bindParam(":apellido", $apellido);
+            $stmt->bindParam(":email", $email);
+            $stmt->bindParam(":telefono", $telefono);
+            $stmt->bindParam(":domicilio", $domicilio);
+            $stmt->bindParam(":password", $hashedPassword);
+            $stmt->bindParam(":rol", $rol);
+            $stmt->bindParam(":estado", $estado);
+            
+            $stmt->execute();
             return true;
         } catch (Exception $e) {
-            $this->conexion->rollBack();
             error_log("Error en crear usuario: " . $e->getMessage());
             return false;
         }
     }
 
-    public function actualizar($id, $nombre, $email, $password, $rol)
+    public function actualizar($id, $matricula, $nombre, $apellido, $email, $telefono, $domicilio, $password = null, $rol = null, $estado = null)
     {
         try {
-            $this->conexion->beginTransaction();
-
-            // Verificar si el rol existe
-            $stmtRol = $this->conexion->prepare("SELECT id FROM roles WHERE nombre = :rol");
-            $stmtRol->bindParam(":rol", $rol);
-            $stmtRol->execute();
-            $rolId = $stmtRol->fetchColumn();
-
-            if (!$rolId) {
-                throw new Exception("El rol especificado no existe");
+            // Verificar si el usuario existe
+            $stmtVerificar = $this->conexion->prepare("SELECT * FROM usuarios WHERE id = :id");
+            $stmtVerificar->bindParam(":id", $id);
+            $stmtVerificar->execute();
+            $usuario = $stmtVerificar->fetch(PDO::FETCH_ASSOC);
+            
+            if (!$usuario) {
+                throw new Exception("Usuario no encontrado");
             }
-            // Actualizar usuario (mejorar consulta para evitar SQL estático)
-            $sqlUsuario = "UPDATE usuarios SET nombre = :nombre, email = :email";
-            $params = [':nombre' => $nombre, ':email' => $email, ':id' => $id];
+            
+            // Verificar que la matrícula o el email no estén duplicados (excluyendo el usuario actual)
+            $stmtDuplicado = $this->conexion->prepare("
+                SELECT COUNT(*) FROM usuarios 
+                WHERE (matricula = :matricula OR email = :email) AND id != :id
+            ");
+            $stmtDuplicado->bindParam(":matricula", $matricula);
+            $stmtDuplicado->bindParam(":email", $email);
+            $stmtDuplicado->bindParam(":id", $id);
+            $stmtDuplicado->execute();
+            
+            if ($stmtDuplicado->fetchColumn() > 0) {
+                throw new Exception("La matrícula o el correo electrónico ya están en uso");
+            }
 
-            // Actualizar usuario
+            // Construir la consulta de actualización
+            $sql = "UPDATE usuarios SET 
+                matricula = :matricula, 
+                nombre = :nombre, 
+                apellido = :apellido, 
+                email = :email, 
+                telefono = :telefono, 
+                domicilio = :domicilio";
+            
+            $params = [
+                ':id' => $id,
+                ':matricula' => $matricula,
+                ':nombre' => $nombre,
+                ':apellido' => $apellido,
+                ':email' => $email,
+                ':telefono' => $telefono,
+                ':domicilio' => $domicilio
+            ];
+            
+            // Añadir contraseña si se ha proporcionado
             if (!empty($password)) {
                 $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+                $sql .= ", password = :password";
                 $params[':password'] = $hashedPassword;
-                $sqlUsuario .= ", password = :password";
             }
-            $sqlUsuario .= " WHERE id = :id";
-
-            $stmtUsuario = $this->conexion->prepare($sqlUsuario);
-            $stmtUsuario->execute($params);
-
-            // Actualizar rol
-            $stmtRolUsuario = $this->conexion->prepare("UPDATE rol_usuario SET rol_id = :rol_id WHERE usuario_id = :usuario_id");
-            $stmtRolUsuario->bindParam(":usuario_id", $id);
-            $stmtRolUsuario->bindParam(":rol_id", $rolId);
-            $stmtRolUsuario->execute();
-
-            $this->conexion->commit();
+            
+            // Añadir rol si se ha proporcionado
+            if (!empty($rol)) {
+                $sql .= ", rol = :rol";
+                $params[':rol'] = $rol;
+            }
+            
+            // Añadir estado si se ha proporcionado
+            if (!empty($estado)) {
+                $sql .= ", estado = :estado";
+                $params[':estado'] = $estado;
+            }
+            
+            $sql .= " WHERE id = :id";
+            
+            $stmt = $this->conexion->prepare($sql);
+            $stmt->execute($params);
+            
             return true;
         } catch (Exception $e) {
-            $this->conexion->rollBack();
             error_log("Error en actualizar usuario: " . $e->getMessage());
             return false;
         }
@@ -138,22 +166,25 @@ class ModeloUsuarios
     public function eliminar($id)
     {
         try {
-            $this->conexion->beginTransaction();
-
-            // Eliminar relación en rol_usuario
-            $stmtRolUsuario = $this->conexion->prepare("DELETE FROM rol_usuario WHERE usuario_id = :id");
-            $stmtRolUsuario->bindParam(":id", $id);
-            $stmtRolUsuario->execute();
-
-            // Eliminar usuario
-            $stmtUsuario = $this->conexion->prepare("DELETE FROM usuarios WHERE id = :id");
-            $stmtUsuario->bindParam(":id", $id);
-            $stmtUsuario->execute();
-
-            $this->conexion->commit();
+            // Verificar si el usuario existe
+            $stmtVerificar = $this->conexion->prepare("SELECT * FROM usuarios WHERE id = :id");
+            $stmtVerificar->bindParam(":id", $id);
+            $stmtVerificar->execute();
+            
+            if (!$stmtVerificar->fetch(PDO::FETCH_ASSOC)) {
+                throw new Exception("Usuario no encontrado");
+            }
+            
+            // En lugar de eliminar, se podría cambiar el estado a 'inactivo'
+            // $stmt = $this->conexion->prepare("UPDATE usuarios SET estado = 'inactivo' WHERE id = :id");
+            
+            // O eliminar permanentemente
+            $stmt = $this->conexion->prepare("DELETE FROM usuarios WHERE id = :id");
+            $stmt->bindParam(":id", $id);
+            $stmt->execute();
+            
             return true;
-        } catch (PDOException $e) {
-            $this->conexion->rollBack();
+        } catch (Exception $e) {
             error_log("Error en eliminar usuario: " . $e->getMessage());
             return false;
         }
@@ -163,11 +194,7 @@ class ModeloUsuarios
     {
         try {
             $stmt = $this->conexion->prepare("
-                SELECT u.id, u.nombre, u.email,u.password, r.nombre as rol
-                FROM usuarios u
-                INNER JOIN rol_usuario ru ON u.id = ru.usuario_id
-                INNER JOIN roles r ON ru.rol_id = r.id
-                WHERE u.id = :id
+                SELECT * FROM usuarios WHERE id = :id
             ");
             $stmt->bindParam(":id", $id);
             $stmt->execute();
