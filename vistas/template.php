@@ -105,11 +105,11 @@
                                             <i class="fas fa-users me-1"></i>Gestión de Usuarios
                                         </a>
                                     </li>
-                                    <li>
+                                    <!-- <li>
                                         <a class="dropdown-item" href="?controlador=reservas&accion=administrar">
                                             <i class="fas fa-clipboard-list me-1"></i>Gestión de Reservas
                                         </a>
-                                    </li>
+                                    </li> -->
                                 </ul>
                             </li>
                         <?php endif; ?>
@@ -137,7 +137,7 @@
     </main>
     <footer class="footer mt-auto py-3 bg-light">
         <div class="container">
-            <span class="text-muted">&copy; <?php echo date('Y'); ?>. Todos los derechos reservados. Colegio de Ingenieros</span>
+            <span class="text-muted">&copy; <?php echo date('Y'); ?>. Todos los derechos reservados. Empresa SoftForm</span>
         </div>
     </footer>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -150,6 +150,8 @@
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.0/main.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.0/locales/es.js"></script>
     <script src="utils/js/fullcalendar.js"></script>
+    <!-- <script src="utils/js/datatables.js"></script> -->
+
     <script>
         $(document).ready(function() {
             $('.js-example-basic-single').select2({
