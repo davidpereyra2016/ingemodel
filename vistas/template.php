@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema Empresarial</title>
+    <link rel="icon" href="assets/img/logo.png" type="image/png" sizes="16x16">
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome -->
@@ -14,52 +15,11 @@
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <!-- FullCalendar -->
     <link href="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.0/main.min.css" rel="stylesheet">
-    <style>
-        html,
-        body {
-            height: 100%;
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-        }
 
-        main {
-            flex: 1;
-            /* Hace que el contenido principal ocupe el espacio disponible */
-        }
-        footer {
-            text-align: center;
-            padding: 15px;
-            background-color: #f8f9fa;
-            border-top: 2px solid #dee2e6;
-            font-weight: bold;
-            font-size: 14px;
-            /* Se ajusta bien en móviles */
-        }
-        .hero {
-            background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('https://source.unsplash.com/random/1920x1080/?event-hall');
-            background-size: cover;
-            color: white;
-            padding: 100px 0;
-            margin-bottom: 30px;
-            text-align: center;
-        }
-        .calendar-container {
-            background-color: white;
-            border-radius: 10px;
-            box-shadow: 0 0 15px rgba(0,0,0,0.1);
-            padding: 20px;
-            margin-bottom: 30px;
-        }
-
-        @media (min-width: 768px) {
-            footer {
-                font-size: 16px;
-                /* Aumenta el tamaño del texto en pantallas más grandes */
-                padding: 20px;
-            }
-        }
-    </style>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
+    <link href="assets/css/template.css" rel="stylesheet">
 </head>
 
 <body>
@@ -68,76 +28,68 @@
         $rol = $_SESSION['rol']; // Obtener el rol del usuario
         $esIngeniero = ($rol === 'ingeniero');
         ?>
-        <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-            <div class="container">
-                <a class="navbar-brand" href="?controlador=paginas&accion=inicio">
-                    <i class="fas fa-building me-2"></i>Colegio de Ingenieros
+        <nav class="navbar navbar-expand-lg navbar-dark bg-success-2 text-light shadow-sm position-sticky">
+            <div class="container flex justify-content-between">
+                <a class="navbar-brand logo-header" href="?controlador=paginas&accion=inicio">
+                    <img src="assets/img/logo-2.png" alt="Logo" width="50" height="50" class="d-inline-block align-text-top me-2">
+                    <span class="text-light">Colegio Público de Ingenieros de Formosa</span>
                 </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-                <div class="collapse navbar-collapse" id="navbarNav">
-                    <ul class="navbar-nav me-auto">
+                <div class="text-uppercase " id="navbarNav">
+                    <ul class="navbar-nav me-auto nav-link-theme">
                         <li class="nav-item">
                             <a class="nav-link" href="?controlador=paginas&accion=inicio">
-                                <i class="fas fa-home me-1"></i>Inicio
+                                Inicio
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="?controlador=reservas&accion=calendario">
-                                <i class="fas fa-calendar-alt me-1"></i>Calendario
+                                Calendario
                             </a>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link" href="?controlador=reservas&accion=listar">
-                                <i class="fas fa-ticket-alt me-1"></i>Mis Reservas
+                                Mis Reservas
                             </a>
                         </li>
-                        
-                        <?php if (!$esIngeniero): ?>
-                            <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownAdmin" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                    <i class="fas fa-cogs me-1"></i>Administración
-                                </a>
-                                <ul class="dropdown-menu" aria-labelledby="navbarDropdownAdmin">
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownAdmin" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <i class="fas fa-user-circle me-1"></i>
+                                Bienvenido, <?php echo $_SESSION['nombre'] . ' ' . $_SESSION['apellido']; ?>
+                            </a>
+                            <ul class="dropdown-menu" aria-labelledby="navbarDropdownAdmin">
+                                <?php if (!$esIngeniero): ?>
                                     <li>
                                         <a class="dropdown-item" href="?controlador=usuarios&accion=listar">
-                                            <i class="fas fa-users me-1"></i>Gestión de Usuarios
+                                            Gestión de Usuarios
                                         </a>
                                     </li>
-                                    <!-- <li>
-                                        <a class="dropdown-item" href="?controlador=reservas&accion=administrar">
-                                            <i class="fas fa-clipboard-list me-1"></i>Gestión de Reservas
-                                        </a>
-                                    </li> -->
-                                </ul>
-                            </li>
-                        <?php endif; ?>
+                                <?php endif; ?>
+                                <li>
+                                    <a class="dropdown-item" href="?controlador=usuarios&accion=logout">
+                                        Cerrar Sesión
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
                     </ul>
-                    <div class="navbar-nav">
-                        <span class="nav-item nav-link text-light">
-                            <i class="fas fa-user-circle me-1"></i>
-                            Bienvenido, <?php echo $_SESSION['nombre'] . ' ' . $_SESSION['apellido']; ?>
-                        </span>
-                        <a class="nav-link" href="?controlador=usuarios&accion=logout">
-                            <i class="fas fa-sign-out-alt me-1"></i>Cerrar Sesión
-                        </a>
-                    </div>
                 </div>
             </div>
         </nav>
     <?php endif; ?>
 
-    <main class="container">
+    <main class="container mt-5 mb-5">
         <div class="row">
             <div class="col-12">
                 <?php include_once("ruteador.php"); ?>
             </div>
         </div>
     </main>
-    <footer class="footer mt-auto py-3 bg-light">
+    <footer class="footer mt-auto py-3 bg-success">
         <div class="container">
-            <span class="text-muted">&copy; <?php echo date('Y'); ?>. Todos los derechos reservados. Empresa SoftForm</span>
+            <span class="text-white">&copy; <?php echo date('Y'); ?>. Todos los derechos reservados. Empresa SoftForm</span>
         </div>
     </footer>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>

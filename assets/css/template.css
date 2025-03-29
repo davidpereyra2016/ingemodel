@@ -1,0 +1,81 @@
+:root {
+    --success-color: #009b1f;
+}
+
+html,
+body {
+    height: 100%;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    font-family: 'Poppins', sans-serif;
+}
+
+main {
+    flex: 1;
+    /* Hace que el contenido principal ocupe el espacio disponible */
+}
+
+footer {
+    text-align: center;
+    padding: 15px;
+    background-color: #f8f9fa;
+    border-top: 2px solid #dee2e6;
+    font-weight: bold;
+    font-size: 14px;
+    /* Se ajusta bien en móviles */
+}
+
+.hero {
+    background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('https://source.unsplash.com/random/1920x1080/?event-hall');
+    background-size: cover;
+    color: white;
+    padding: 100px 0;
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+.calendar-container {
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    margin-bottom: 30px;
+}
+
+@media (min-width: 768px) {
+    footer {
+        font-size: 16px;
+        /* Aumenta el tamaño del texto en pantallas más grandes */
+        padding: 20px;
+    }
+}
+
+.bg-success-2 {
+    background-color: var(--success-color) !important;
+}
+
+.nav-link-theme {
+    --bs-nav-link-color: #fff !important;
+    --bs-nav-link-hover-color: #fff !important;
+    color: #fff !important;
+    transition: all 0.3s ease-in-out;
+
+    &:hover {
+        text-transform: scale(1.1) !important;
+    }
+}
+
+.logo-header {
+    max-width: 300px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 14px;
+
+    & span {
+        text-wrap: balance;
+    }
+}
