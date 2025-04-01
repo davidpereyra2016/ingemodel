@@ -82,6 +82,14 @@ if (isset($_SESSION['error'])) {
 
                                 <?php if ($reserva['estado'] == 'aprobada'): ?>
                                     <a href="index.php?controlador=reservas&accion=generarPDF&id=<?php echo $reserva['id']; ?>" class="btn btn-sm btn-secondary">Descargar PDF</a>
+                                    <?php if (isset($_SESSION['rol']) && $_SESSION['rol'] == 'administrador'): ?>
+                                        <a href="index.php?controlador=reservas&accion=enviarCorreos&id=<?php echo $reserva['id']; ?>" class="btn btn-sm btn-primary">Enviar Correos</a>
+                                    <?php endif; ?>
+                                <?php endif; ?>
+                                <?php if ($reserva['estado'] == 'rechazada'): ?>
+                                    <?php if (isset($_SESSION['rol']) && $_SESSION['rol'] == 'administrador'): ?>
+                                        <a href="index.php?controlador=reservas&accion=enviarCorreos&id=<?php echo $reserva['id']; ?>" class="btn btn-sm btn-primary">Enviar Correos</a>
+                                    <?php endif; ?>
                                 <?php endif; ?>
                             </td>
                         </tr>

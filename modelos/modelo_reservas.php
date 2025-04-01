@@ -148,4 +148,12 @@ class ModeloReservas {
         $consulta->bindParam(':comentario', $comentario);
         return $consulta->execute();
     }
+    
+    // Obtener matriculados de un grupo
+    public function obtenerMatriculadosGrupo($id_reserva) {
+        $consulta = $this->conexion->prepare("SELECT * FROM grupo_matriculados WHERE id_reserva = :id_reserva");
+        $consulta->bindParam(':id_reserva', $id_reserva);
+        $consulta->execute();
+        return $consulta->fetchAll(PDO::FETCH_ASSOC);
+    }
 }

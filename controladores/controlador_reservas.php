@@ -177,4 +177,26 @@ class ControladorReservas
         header("Location: index.php?controlador=reservas&accion=ver&id=".$id_reserva);
         exit();
     }
+
+    public function enviarCorreos() {
+        $id_reserva = $_GET['id'];
+        $reserva = $this->modelo->obtenerReserva($id_reserva);
+        
+        // Verificar si el usuario puede acceder a esta reserva
+        if ($_SESSION['rol'] != 'administrador' && $_SESSION['id_usuario'] != $reserva['id_usuario']) {
+            header("Location: index.php?controlador=reservas&accion=listar");
+            exit();
+        }
+        
+        // Obtener los matriculados adicionales si los hay
+        $matriculados = $this->modelo->obtenerMatriculadosGrupo($id_reserva);
+        
+        // Incluir el archivo de envío de correos y pasar los datos
+        include_once("vistas/reservas/enviosCorreos.php");
+        
+        // Redireccionar a la vista de ver después de intentar enviar los correos
+        $_SESSION['mensaje'] = "Correos enviados correctamente.";
+        header("Location: index.php?controlador=reservas&accion=listar");
+        exit();
+    }
 }
