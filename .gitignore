@@ -1,5 +1,6 @@
 # Ignore sensitive configuration files
 conexion.php
+reservas/enviosCorreos.php
 
 # Logs and databases
 *.log
@@ -29,3 +30,7 @@ Thumbs.db
 
 # Cache files
 *.cache
+
+# PHPMailer
+
+
