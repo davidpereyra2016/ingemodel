@@ -11,14 +11,20 @@ if (isset($_SESSION['error'])) {
 ?>
 
 <div class="container">
-    <div class="row mb-5">
+    <div class="row mt-5 mb-5 flex-row align-items-center justify-content-between">
         <div class="col-md-8">
             <h2>Calendario de Reservas del Salón</h2>
             <p class="text-muted">Seleccione una fecha para ver la disponibilidad y reservar el salón.</p>
         </div>
-        <div class="col-md-4 text-right">
-            <a href="index.php?controlador=reservas&accion=crear" class="btn btn-primary">Nueva Reserva</a>
-            <a href="index.php?controlador=reservas&accion=listar" class="btn btn-secondary">Mis Reservas</a>
+        <div class="col-md-4 d-flex justify-content-end align-items-center gap-2">
+            <a href="index.php?controlador=reservas&accion=listar" class="btn btn-light">
+                <i class="bi bi-calendar2-event me-1"></i>
+                Mis Reservas
+            </a>
+            <a href="index.php?controlador=reservas&accion=crear" class="btn btn-success-theme">
+               <i class="bi bi-calendar2-plus me-1"></i>
+                Nueva Reserva
+            </a>
         </div>
     </div>
 
