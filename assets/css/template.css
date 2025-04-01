@@ -26,6 +26,21 @@ footer {
     /* Se ajusta bien en móviles */
 }
 
+.btn-success-theme{
+   background-color: var(--success-color) !important;
+   transition: all 0.3s ease-in-out !important;
+    color: #fff !important;
+
+    &:hover {
+        box-shadow: inset 0px 0px 10px 0px #01891c !important;
+        /* background-color: transparent !important; */
+    }
+}
+
+.mt-theme{
+    margin-top: -4rem;
+}
+
 .hero {
     background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('https://source.unsplash.com/random/1920x1080/?event-hall');
     background-size: cover;
@@ -36,11 +51,22 @@ footer {
 }
 
 .calendar-container {
-    background-color: white;
-    border-radius: 10px;
+    /* background-color: white; */
+    /* border-radius: 10px; */
+    /* box-shadow: 0 0 15px rgba(0, 0, 0, 0.1); */
+    /* padding: 40px 0px 0px 40px;
+    margin-bottom: 30px; */
+    /* border-top: 1px solid var(--success-color); */
+
+    background: #fff;
+    border-top: 4px solid var(--success-color);
     box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
-    padding: 20px;
-    margin-bottom: 30px;
+    flex-grow: 1;
+    /* margin-top: 36px; */
+    padding: 20px 20px 20px 20px;
+    border-radius: 8px;
+
+    position: relative;
 }
 
 @media (min-width: 768px) {
@@ -79,3 +105,83 @@ footer {
         text-wrap: balance;
     }
 }
+
+.nav-link-theme{
+    color: #fff !important;
+    font-size: 14px !important;
+    text-transform: uppercase !important;
+    letter-spacing: 1px !important;
+    transition: all 0.3s ease-in-out !important;
+
+    &:hover {
+        text-decoration: none !important;
+        color: #fff !important;
+        transform: scale(1.1) !important;
+    }
+}
+
+.hero-carousel {
+    height: 400px !important;
+    overflow: hidden !important;
+}
+
+.hero-img-overlay {
+    position: relative !important;
+    height: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    text-align: center !important;
+    color: white !important;
+    z-index: 0 !important;
+
+    &::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 1;
+    }
+
+}
+
+
+/* Custom styles fullcalendar */
+
+.fc {
+    font-family: 'Poppins', sans-serif;
+    font-size: 14px;
+    text-decoration: none;
+    color: #009b1f;
+}
+
+.fc-daygrid-day-number,
+.fc-col-header-cell-cushion {
+    text-decoration: none;
+    color: #555;
+}
+
+.fc-daygrid-day-number:hover,
+.fc-col-header-cell-cushion:hover {
+    color: #009b1f;
+}
+
+.fc-col-header-cell {
+    background-color: #f8f9fa;
+    color: #555;
+    font-weight: bold;
+    padding: 10px !important;
+    border-radius: 5px;
+}
+
+.fc-daygrid-event {
+    background-color: var(--success-color);
+    color: white;
+    padding: 5px;
+    margin: 2px;
+}
+
+
