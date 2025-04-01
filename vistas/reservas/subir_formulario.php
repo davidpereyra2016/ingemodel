@@ -28,8 +28,8 @@ if (isset($_SESSION['error'])) {
                                     <p><strong>Fecha:</strong> <?php echo date('d/m/Y', strtotime($reserva['fecha_evento'])); ?></p>
                                     <p><strong>Horario:</strong> <?php echo substr($reserva['hora_inicio'], 0, 5) . ' - ' . substr($reserva['hora_fin'], 0, 5); ?></p>
                                     <p><strong>Tipo de Uso:</strong> <?php echo $reserva['tipo_uso']; ?></p>
-                                    <p><strong>Monto Total:</strong> $<?php echo number_format($reserva['monto'], 2, ',', '.'); ?></p>
-                                    <p><strong>Anticipo (50%):</strong> $<?php echo number_format($reserva['monto'] / 2, 2, ',', '.'); ?></p>
+                                    <p><strong>Monto Total:</strong> $<?php echo sprintf("%.2f", $reserva['monto']); ?></p>
+                                    <p><strong>Anticipo (50%):</strong> $<?php echo sprintf("%.2f", $reserva['monto'] / 2); ?></p>
                                 </div>
                             </div>
                         </div>

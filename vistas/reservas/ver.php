@@ -44,7 +44,7 @@ if (isset($_SESSION['error'])) {
                             <p><strong>Horario:</strong> <?php echo substr($reserva['hora_inicio'], 0, 5) . ' - ' . substr($reserva['hora_fin'], 0, 5); ?></p>
                             <p><strong>Tipo de Uso:</strong> <?php echo $reserva['tipo_uso']; ?></p>
                             <p><strong>Fecha de Solicitud:</strong> <?php echo date('d/m/Y H:i', strtotime($reserva['fecha_solicitud'])); ?></p>
-                            <p><strong>Monto Total:</strong> $<?php echo number_format($reserva['monto'], 2, ',', '.'); ?></p>
+                            <p><strong>Monto Total:</strong> $<?php echo sprintf("%.2f", $reserva['monto']); ?></p>
                             <p>
                                 <strong>Anticipo:</strong> 
                                 <?php if ($reserva['anticipo_pagado']): ?>
