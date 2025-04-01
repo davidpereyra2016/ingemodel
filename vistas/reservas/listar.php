@@ -72,15 +72,7 @@ if (isset($_SESSION['error'])) {
                                 }
                                 ?>
                             </td>
-                            <td>$<?php
-                                    if (class_exists('NumberFormatter')) {
-                                        $fmt = new NumberFormatter('es_ES', NumberFormatter::DECIMAL);
-                                        $fmt->setAttribute(NumberFormatter::FRACTION_DIGITS, 2);
-                                        echo $fmt->format($reserva['monto']);
-                                    } else {
-                                        echo number_format($reserva['monto'], 2, ',', '.');
-                                    }
-                                    ?></td>
+                            <td>$<?php echo sprintf("%.2f", $reserva['monto']); ?></td>
                             <td>
                                 <a href="index.php?controlador=reservas&accion=ver&id=<?php echo $reserva['id']; ?>" class="btn btn-sm btn-info">Ver</a>
 
