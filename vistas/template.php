@@ -45,10 +45,14 @@
                                 Inicio
                             </a>
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link nav-link-theme" href="?controlador=reservas&accion=calendario">
-                                Calendario
+                        <li class="nav-item dropdown">
+                            <a class="nav-link nav-link-theme dropdown-toggle" href="#" id="navbarDropdownRegistro" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                Reservas
                             </a>
+                            <ul class="dropdown-menu" aria-labelledby="navbarDropdownRegistro">
+                                <li><a class="dropdown-item" href="?controlador=reservas&accion=calendario">Calendario</a></li>
+                                <li><a class="dropdown-item" href="?controlador=reservas&accion=listar">Cancha</a></li>
+                            </ul>
                         </li>
                         <li class="nav-item">
                             <a class="nav-link nav-link-theme" href="?controlador=reservas&accion=listar">
