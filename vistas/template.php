@@ -13,8 +13,7 @@
     <link href="https://cdn.datatables.net/v/dt/dt-2.2.2/datatables.min.css" rel="stylesheet">
     <!-- Select2 -->
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-    <!-- FullCalendar CSS -->
-    <!-- <link href='https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css' rel='stylesheet'> -->
+   
     <link href='https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css' rel='stylesheet'>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -29,66 +28,10 @@
         $rol = $_SESSION['rol']; // Obtener el rol del usuario
         $esIngeniero = ($rol === 'ingeniero');
         ?>
-        <nav class="navbar navbar-expand-lg navbar-dark bg-success-2 text-light shadow-sm position-sticky" style="z-index: 9;">
-            <div class="container flex justify-content-between">
-                <a class="navbar-brand logo-header" href="?controlador=paginas&accion=inicio">
-                    <img src="assets/img/logo-2.png" alt="Logo" width="50" height="50" class="d-inline-block align-text-top me-2">
-                    <span class="text-light">Colegio Público de Ingenieros de Formosa</span>
-                </a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="text-uppercase " id="navbarNav">
-                    <ul class="navbar-nav me-auto">
-                        <li class="nav-item">
-                            <a class="nav-link nav-link-theme" href="?controlador=paginas&accion=inicio">
-                                Inicio
-                            </a>
-                        </li>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link nav-link-theme dropdown-toggle" href="#" id="navbarDropdownRegistro" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                Reservas
-                            </a>
-                            <ul class="dropdown-menu" aria-labelledby="navbarDropdownRegistro">
-                                <li><a class="dropdown-item" href="?controlador=reservas&accion=calendario">Calendario</a></li>
-                                <li><a class="dropdown-item" href="?controlador=reservas&accion=listar">Cancha</a></li>
-                            </ul>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link nav-link-theme" href="?controlador=reservas&accion=listar">
-                                Mis Reservas
-                            </a>
-                        </li>
-                        <li class="nav-item py-2 py-lg-1 col-12 col-lg-auto">
-                            <div class="vr d-none d-lg-flex h-100 mx-lg-2 text-white"></div>
-                            <hr class="d-lg-none my-2 text-white-50">
-                        </li>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link nav-link-theme dropdown-toggle" href="#" id="navbarDropdownAdmin" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                <i class="fas fa-user-circle me-1"></i>
-                                <?php echo $_SESSION['nombre'] . ' ' . $_SESSION['apellido']; ?>
-                            </a>
-                            <ul class="dropdown-menu" aria-labelledby="navbarDropdownAdmin">
-                                <?php if (!$esIngeniero): ?>
-                                    <li>
-                                        <a class="dropdown-item" href="?controlador=usuarios&accion=listar">
-                                            <i class="bi bi-person-lines-fill"></i>
-                                            <span class="ms-2">Gestión de Usuarios</span>
-                                        </a>
-                                    </li>
-                                <?php endif; ?>
-                                <li>
-                                    <a class="dropdown-item" href="?controlador=usuarios&accion=logout">
-                                        <i class="bi bi-box-arrow-right"></i>
-                                        <span class="ms-2">Cerrar Sesión</span>
-                                    </a>
-                                </li>
-                            </ul>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-        </nav>
+
+        <!-- Menu -->
+        <?php include __DIR__ . './partials/header.php'; ?>
+
     <?php endif; ?>
 
     <main class="container-fluid mb-5" style="padding-inline: 0px;">
@@ -96,11 +39,10 @@
             <?php include_once("ruteador.php"); ?>
         </div>
     </main>
-    <footer class="footer mt-auto py-3 bg-success">
-        <div class="container">
-            <span class="text-white">&copy; <?php echo date('Y'); ?>. Todos los derechos reservados. Empresa SoftForm</span>
-        </div>
-    </footer>
+
+    <!-- Footer -->
+    <?php include __DIR__ . './partials/footer.php'; ?>
+
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <!-- Bootstrap Bundle JS (incluye Popper) -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
