@@ -183,6 +183,10 @@ footer {
     flex-wrap: wrap !important;
 }
 
+.fc .fc-daygrid-day-frame {
+    cursor: pointer !important;
+}
+
 
 
 /* Media queries */

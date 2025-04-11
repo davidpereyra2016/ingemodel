@@ -22,7 +22,7 @@ if (isset($_SESSION['error'])) {
                 Mis Reservas
             </a>
             <a href="index.php?controlador=reservas&accion=crear" class="btn btn-success-theme">
-               <i class="bi bi-calendar2-plus me-1"></i>
+                <i class="bi bi-calendar2-plus me-1"></i>
                 Nueva Reserva
             </a>
         </div>
@@ -32,22 +32,25 @@ if (isset($_SESSION['error'])) {
         <div class="col-md-12">
             <div class="card">
                 <div class="card-body">
-                    <div class="alert alert-info">
+                    <div class="alert alert-success">
                         <p><strong>Leyenda:</strong></p>
                         <div class="d-flex flex-wrap">
-                            <div class="mr-3 mb-2">
-                                <span class="badge badge-success mr-1">&nbsp;&nbsp;&nbsp;</span> Reservas aprobadas
+                            <div class="d-flex align-items-center me-3">
+                                <span class="dot bg-danger"></span>
+                                <span class="ms-2">Reservado</span>
                             </div>
-                            <div class="mr-3 mb-2">
-                                <span class="badge badge-warning mr-1">&nbsp;&nbsp;&nbsp;</span> Reservas pendientes
+                            <div class="d-flex align-items-center me-3">
+                                <span class="dot bg-success"></span>
+                                <span class="ms-2">Disponible</span>
                             </div>
-                            <div class="mr-3 mb-2">
-                                <span class="badge badge-danger mr-1">&nbsp;&nbsp;&nbsp;</span> Reservas rechazadas
+                            <div class="d-flex align-items-center me-3">
+                                <span class="dot bg-warning"></span>
+                                <span class="ms-2">En Espera</span>
                             </div>
                         </div>
                     </div>
-                    
-                    <div id="calendar"></div>
+
+                    <div id="calendarSalon"></div>
                 </div>
             </div>
         </div>
@@ -79,53 +82,3 @@ if (isset($_SESSION['error'])) {
         </div>
     </div>
 </div>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Inicializar FullCalendar
-    var calendarEl = document.getElementById('calendar');
-    
-    var calendar = new FullCalendar.Calendar(calendarEl, {
-        initialView: 'dayGridMonth',
-        locale: 'es',
-        headerToolbar: {
-            left: 'prev,next today',
-            center: 'title',
-            right: 'dayGridMonth,timeGridWeek,listMonth'
-        },
-        events: 'index.php?controlador=reservas&accion=obtenerEventos',
-        eventClick: function(info) {
-            // Mostrar modal con detalles del evento
-            $('#eventDate').text(info.event.start.toLocaleDateString());
-            $('#eventType').text(info.event.title);
-            
-            // Determinar estado según el color
-            let estado = '';
-            switch(info.event.backgroundColor) {
-                case '#28a745':
-                    estado = '<span class="badge badge-success">Aprobada</span>';
-                    break;
-                case '#ffc107':
-                    estado = '<span class="badge badge-warning">Pendiente</span>';
-                    break;
-                case '#dc3545':
-                    estado = '<span class="badge badge-danger">Rechazada</span>';
-                    break;
-                default:
-                    estado = '<span class="badge badge-secondary">Otro</span>';
-            }
-            
-            $('#eventStatus').html(estado);
-            $('#viewDetailBtn').attr('href', 'index.php?controlador=reservas&accion=ver&id=' + info.event.id);
-            
-            $('#eventModal').modal('show');
-        },
-        dateClick: function(info) {
-            // Redireccionar a la página de creación con la fecha seleccionada
-            window.location.href = 'index.php?controlador=reservas&accion=crear&fecha=' + info.dateStr;
-        }
-    });
-    
-    calendar.render();
-});
-</script>
