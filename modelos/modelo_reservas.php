@@ -35,7 +35,7 @@ class ModeloReservas {
     }
 
     // Crear una nueva reserva
-    public function crearReserva($id_usuario, $fecha_evento, $hora_inicio, $hora_fin, $tipo_uso) {
+    public function crearReserva($id_usuario, $fecha_evento, $hora_inicio, $hora_fin, $tipo_uso, $motivo_de_uso) {
         // Verificar si ya existe una reserva para esa fecha
         $consulta = $this->conexion->prepare("SELECT COUNT(*) as total FROM reservas 
                                              WHERE fecha_evento = :fecha_evento 
@@ -67,14 +67,15 @@ class ModeloReservas {
         $monto = ($hora_fin <= $hora_comparacion) ? $config_arancel['monto_antes_22'] : $config_arancel['monto_despues_22'];
         
         // Crear la reserva
-        $consulta = $this->conexion->prepare("INSERT INTO reservas (id_usuario, fecha_evento, hora_inicio, hora_fin, tipo_uso, monto) 
-                                             VALUES (:id_usuario, :fecha_evento, :hora_inicio, :hora_fin, :tipo_uso, :monto)");
+        $consulta = $this->conexion->prepare("INSERT INTO reservas (id_usuario, fecha_evento, hora_inicio, hora_fin, tipo_uso, monto, motivo_de_uso) 
+                                             VALUES (:id_usuario, :fecha_evento, :hora_inicio, :hora_fin, :tipo_uso, :monto, :motivo_de_uso)");
         $consulta->bindParam(':id_usuario', $id_usuario);
         $consulta->bindParam(':fecha_evento', $fecha_evento);
         $consulta->bindParam(':hora_inicio', $hora_inicio);
         $consulta->bindParam(':hora_fin', $hora_fin);
         $consulta->bindParam(':tipo_uso', $tipo_uso);
         $consulta->bindParam(':monto', $monto);
+        $consulta->bindParam(':motivo_de_uso', $motivo_de_uso);
         $consulta->execute();
         
         return $this->conexion->lastInsertId();
