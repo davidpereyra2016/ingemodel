@@ -32,8 +32,10 @@ class ControladorReservas
             $hora_inicio = $_POST['hora_inicio'];
             $hora_fin = $_POST['hora_fin'];
             $tipo_uso = $_POST['tipo_uso'];
+            $motivo_de_uso = $_POST['motivo_de_uso'];
             
-            $id_reserva = $this->modelo->crearReserva($id_usuario, $fecha_evento, $hora_inicio, $hora_fin, $tipo_uso);
+            
+            $id_reserva = $this->modelo->crearReserva($id_usuario, $fecha_evento, $hora_inicio, $hora_fin, $tipo_uso, $motivo_de_uso);
             
             if ($id_reserva) {
                 // Si hay matriculados adicionales en la solicitud
