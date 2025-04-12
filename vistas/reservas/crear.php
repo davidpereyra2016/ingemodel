@@ -46,6 +46,10 @@ if (isset($_SESSION['error'])) {
                                 <option value="Otro">Otro</option>
                             </select>
                         </div>
+                        <div class="form-group">
+                            <label for="motivo_de_uso">Motivo de uso:</label>
+                            <textarea class="form-control" id="motivo_de_uso" name="motivo_de_uso" rows="3" required></textarea>
+                        </div>
                         
                         <div class="form-group">
                             <label>¿Es una solicitud de grupo de matriculados?</label>
