@@ -36,7 +36,7 @@
         ?>
 
         <!-- Menu -->
-        <?php include __DIR__ . './partials/header.php'; ?>
+        <?php include_once 'partials/header.php'; ?>
 
     <?php endif; ?>
 
@@ -47,7 +47,7 @@
     </main>
 
     <!-- Footer -->
-    <?php include __DIR__ . './partials/footer.php'; ?>
+    <?php include_once 'partials/footer.php'; ?>
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <!-- Bootstrap Bundle JS (incluye Popper) -->

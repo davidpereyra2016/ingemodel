@@ -86,6 +86,17 @@ class ControladorReservas
                 }
             }
             
+            $archivo_municipal = null;
+            if (isset($_FILES['formulario_municipal']) && $_FILES['formulario_municipal']['error'] == 0) {
+                $archivo_temp = $_FILES['formulario_municipal']['tmp_name'];
+                $nombre_archivo = time() . '_' . $_FILES['formulario_municipal']['name'];
+                $ruta_destino = $dir_uploads . $nombre_archivo;
+                
+                if (move_uploaded_file($archivo_temp, $ruta_destino)) {
+                    $archivo_municipal = $nombre_archivo;
+                }
+            }
+            
             $archivo_comprobante = null;
             if (isset($_FILES['comprobante']) && $_FILES['comprobante']['error'] == 0) {
                 $archivo_temp = $_FILES['comprobante']['tmp_name'];
@@ -97,13 +108,31 @@ class ControladorReservas
                 }
             }
             
-            if ($this->modelo->subirArchivos($id_reserva, $archivo_formulario, $archivo_comprobante)) {
+            $archivo_comprobante_total = null;
+            if (isset($_FILES['comprobante_total']) && $_FILES['comprobante_total']['error'] == 0) {
+                $archivo_temp = $_FILES['comprobante_total']['tmp_name'];
+                $nombre_archivo = time() . '_' . $_FILES['comprobante_total']['name'];
+                $ruta_destino = $dir_uploads . $nombre_archivo;
+                
+                if (move_uploaded_file($archivo_temp, $ruta_destino)) {
+                    $archivo_comprobante_total = $nombre_archivo;
+                }
+            }
+            
+            if ($this->modelo->subirArchivos($id_reserva, $archivo_formulario, $archivo_municipal, $archivo_comprobante, $archivo_comprobante_total)) {
                 // Registrar pago de anticipo si se cargó comprobante
                 if ($archivo_comprobante) {
                     $this->modelo->registrarPago($id_reserva, 'anticipo');
                     
                     // Registrar en historial
                     $this->modelo->registrarHistorial($id_reserva, $_SESSION['id_usuario'], 'pago', null, 'anticipo', 'Pago de anticipo registrado');
+                }
+                
+                if ($archivo_comprobante_total) {
+                    $this->modelo->registrarPago($id_reserva, 'saldo_pagado');
+                    
+                    // Registrar en historial
+                    $this->modelo->registrarHistorial($id_reserva, $_SESSION['id_usuario'], 'pago', null, 'comprobante_total', 'Pago de comprobante total registrado');
                 }
                 
                 $_SESSION['mensaje'] = "Documentos subidos correctamente. Su solicitud será revisada por un administrador.";

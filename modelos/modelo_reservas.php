@@ -25,7 +25,8 @@ class ModeloReservas {
 
     // Obtener una reserva específica
     public function obtenerReserva($id) {
-        $consulta = $this->conexion->prepare("SELECT r.*, u.nombre, u.apellido, u.matricula, u.email, u.telefono 
+        $consulta = $this->conexion->prepare("SELECT r.*, u.nombre, u.apellido, u.matricula, u.email, u.telefono, 
+                                             r.archivo_formulario, r.archivo_municipal, r.archivo_comprobante, r.archivo_comprobante_total 
                                              FROM reservas r 
                                              INNER JOIN usuarios u ON r.id_usuario = u.id 
                                              WHERE r.id = :id");
@@ -91,14 +92,19 @@ class ModeloReservas {
     }
 
     // Subir archivos relacionados a la reserva
-    public function subirArchivos($id, $archivo_formulario = null, $archivo_comprobante = null) {
-        $consulta = $this->conexion->prepare("UPDATE reservas SET 
-                                             archivo_formulario = COALESCE(:archivo_formulario, archivo_formulario),
-                                             archivo_comprobante = COALESCE(:archivo_comprobante, archivo_comprobante) 
-                                             WHERE id = :id");
+    public function subirArchivos($id, $archivo_formulario = null, $archivo_comprobante = null, $archivo_municipal = null,$archivo_comprobante_total = null) {
+        $consulta = $this->conexion->prepare("
+            UPDATE reservas SET 
+            archivo_formulario = COALESCE(:archivo_formulario, archivo_formulario),
+            archivo_comprobante = COALESCE(:archivo_comprobante, archivo_comprobante),
+            archivo_municipal = COALESCE(:archivo_municipal, archivo_municipal),
+            archivo_comprobante_total = COALESCE(:archivo_comprobante_total, archivo_comprobante_total)
+            WHERE id = :id");
         $consulta->bindParam(':id', $id);
         $consulta->bindParam(':archivo_formulario', $archivo_formulario);
         $consulta->bindParam(':archivo_comprobante', $archivo_comprobante);
+        $consulta->bindParam(':archivo_municipal', $archivo_municipal);
+        $consulta->bindParam(':archivo_comprobante_total', $archivo_comprobante_total);
         return $consulta->execute();
     }
 
