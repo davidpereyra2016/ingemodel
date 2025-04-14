@@ -33,7 +33,7 @@
             <div class="card-img-overlay card-img-overlay-theme color-white d-flex flex-column align-items-center text-center mt-30">
                 <h2 class="card-title color-white mt-10 mb-3">Reserva de Salón de Eventos</h2>
                 <p class="card-subtitle color-white mb-3">Selecciona una fecha disponible para tu evento</p>
-                <button class="btn btn-lg btn-success-theme" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasRight" aria-controls="offcanvasRight">
+                <button class="btn btn-lg btn-success-theme" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasForm" aria-controls="offcanvasRight">
                     <i class="bi bi-calendar2-plus"></i>
                     <span class="ms-2">Reservar</span>
                 </button>
