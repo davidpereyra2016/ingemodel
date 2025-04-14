@@ -60,8 +60,14 @@ document.addEventListener('DOMContentLoaded', function () {
                 $('#eventModal').modal('show');
             },
             dateClick: function (info) {
-                // Redireccionar a la página de creación con la fecha seleccionada
-                window.location.href = 'index.php?controlador=reservas&accion=crear&fecha=' + info.dateStr;
+
+                const fecha = info.dateStr;
+
+                // Mostramos la fecha en el offcanvas
+                document.getElementById('fecha_evento').value = fecha;
+
+                // Abrir formulario de reserva en un offcanvas
+                $('#offcanvasForm').offcanvas('show');
             },
 
         })
@@ -119,7 +125,14 @@ document.addEventListener('DOMContentLoaded', function () {
             },
             dateClick: function (info) {
                 // Redireccionar a la página de creación con la fecha seleccionada
-                window.location.href = 'index.php?controlador=reservas&accion=crear&fecha=' + info.dateStr;
+                // window.location.href = 'index.php?controlador=reservas&accion=crear&fecha=' + info.dateStr;
+                const fecha = info.dateStr; // formato YYYY-MM-DD
+
+                // Mostramos la fecha en el offcanvas
+                document.getElementById('fecha_evento').value = fecha;
+                // Abrir formulario de reserva en un offcanvas
+                $('#offcanvasForm').offcanvas('show');
+
             }
         });
 

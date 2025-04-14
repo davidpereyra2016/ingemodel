@@ -11,7 +11,7 @@
                 <h2 class="card-title color-white b5 mt-10 mb-3">Reserva de Salón de Eventos</h2>
                 <p class="card-subtitle color-white mb-3">Selecciona una fecha disponible para tu evento</p>
                 <!-- <a href="index.php?controlador=reservas&accion=crear" class="btn btn-success btn-lg">Reservar</a> -->
-                <button class="btn btn-lg btn-success-theme" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasRight" aria-controls="offcanvasRight">
+                <button type="button" class="btn btn-lg btn-success-theme" data-bs-toggle="offcanvas" data-bs-target="#offcanvasForm" aria-controls="offcanvasRight">
                     <i class="bi bi-calendar2-plus"></i>
                     <span class="ms-2">Reservar</span>
                 </button>
@@ -52,9 +52,11 @@
     </div>
 </div>
 
+<?php include __DIR__ . './../reservas/formulario.php'; ?>
 
 
-<div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasRight" aria-labelledby="offcanvasRightLabel">
+
+<!-- <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasRight" aria-labelledby="offcanvasRightLabel">
   <div class="offcanvas-header">
     <h5 class="offcanvas-title" id="offcanvasRightLabel">Solicitud de Reserva del Salón</h5>
     <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
@@ -62,4 +64,4 @@
   <div class="offcanvas-body">
     
   </div>
-</div>
+</div> -->

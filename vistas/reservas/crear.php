@@ -18,12 +18,12 @@ if (isset($_SESSION['error'])) {
                         <div class="alert alert-info">
                             <p><strong>Importante:</strong> Complete este formulario inicial para solicitar la reserva del salón. Después de enviar este formulario, deberá cargar el formulario de solicitud completo y el comprobante de pago del anticipo.</p>
                         </div>
-                        
+
                         <div class="form-group">
                             <label for="fecha_evento">Fecha del Evento:</label>
                             <input type="date" class="form-control" id="fecha_evento" name="fecha_evento" required min="<?php echo date('Y-m-d'); ?>">
                         </div>
-                        
+
                         <div class="form-row">
                             <div class="form-group col-md-6">
                                 <label for="hora_inicio">Hora de Inicio:</label>
@@ -34,7 +34,7 @@ if (isset($_SESSION['error'])) {
                                 <input type="time" class="form-control" id="hora_fin" name="hora_fin" required>
                             </div>
                         </div>
-                        
+
                         <div class="form-group">
                             <label for="tipo_uso">Tipo de Uso:</label>
                             <select class="form-control" id="tipo_uso" name="tipo_uso" required>
@@ -46,7 +46,7 @@ if (isset($_SESSION['error'])) {
                                 <option value="Otro">Otro</option>
                             </select>
                         </div>
-                        
+
                         <div class="form-group">
                             <label>¿Es una solicitud de grupo de matriculados?</label>
                             <div class="form-check">
@@ -58,11 +58,11 @@ if (isset($_SESSION['error'])) {
                                 <label class="form-check-label" for="si_grupo">Sí, solicitud de grupo</label>
                             </div>
                         </div>
-                        
+
                         <div id="grupo_matriculados" style="display: none;">
                             <h4 class="mt-3">Otros Matriculados del Grupo</h4>
                             <p class="text-muted">Agregue al menos 4 matriculados adicionales (requisito para solicitudes grupales)</p>
-                            
+
                             <div id="matriculados_container">
                                 <!-- Aquí se agregarán los campos dinámicamente -->
                                 <div class="matriculado-row form-row">
@@ -106,10 +106,10 @@ if (isset($_SESSION['error'])) {
                                     </div>
                                 </div>
                             </div>
-                            
+
                             <button type="button" class="btn btn-sm btn-outline-primary mt-2" id="add_matriculado">+ Agregar otro matriculado</button>
                         </div>
-                        
+
                         <div class="alert alert-warning mt-4">
                             <p><strong>Por favor tenga en cuenta:</strong></p>
                             <ul>
@@ -119,7 +119,7 @@ if (isset($_SESSION['error'])) {
                                 <li>La solicitud quedará pendiente hasta que un administrador la apruebe.</li>
                             </ul>
                         </div>
-                        
+
                         <div class="form-group mt-4 text-center">
                             <a href="index.php?controlador=reservas&accion=listar" class="btn btn-secondary">Cancelar</a>
                             <button type="submit" class="btn btn-primary">Enviar Solicitud</button>
@@ -133,29 +133,29 @@ if (isset($_SESSION['error'])) {
 
 <!-- Script para manejar el formulario de grupo de matriculados -->
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Mostrar/Ocultar sección de grupo según selección
-    const grupoRadios = document.querySelectorAll('input[name="es_grupo"]');
-    const grupoSection = document.getElementById('grupo_matriculados');
-    
-    grupoRadios.forEach(radio => {
-        radio.addEventListener('change', function() {
-            if (this.value === '1') {
-                grupoSection.style.display = 'block';
-            } else {
-                grupoSection.style.display = 'none';
-            }
+    document.addEventListener('DOMContentLoaded', function() {
+        // Mostrar/Ocultar sección de grupo según selección
+        const grupoRadios = document.querySelectorAll('input[name="es_grupo"]');
+        const grupoSection = document.getElementById('grupo_matriculados');
+
+        grupoRadios.forEach(radio => {
+            radio.addEventListener('change', function() {
+                if (this.value === '1') {
+                    grupoSection.style.display = 'block';
+                } else {
+                    grupoSection.style.display = 'none';
+                }
+            });
         });
-    });
-    
-    // Agregar nuevo matriculado
-    const addButton = document.getElementById('add_matriculado');
-    const container = document.getElementById('matriculados_container');
-    
-    addButton.addEventListener('click', function() {
-        const row = document.createElement('div');
-        row.className = 'matriculado-row form-row';
-        row.innerHTML = `
+
+        // Agregar nuevo matriculado
+        const addButton = document.getElementById('add_matriculado');
+        const container = document.getElementById('matriculados_container');
+
+        addButton.addEventListener('click', function() {
+            const row = document.createElement('div');
+            row.className = 'matriculado-row form-row';
+            row.innerHTML = `
             <div class="form-group col-md-4">
                 <label>Matrícula:</label>
                 <input type="text" class="form-control" name="matriculas[]">
@@ -165,7 +165,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 <input type="text" class="form-control" name="nombres[]">
             </div>
         `;
-        container.appendChild(row);
+            container.appendChild(row);
+        });
     });
-});
 </script>

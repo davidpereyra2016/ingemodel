@@ -21,10 +21,14 @@ if (isset($_SESSION['error'])) {
                 <i class="bi bi-calendar2-event me-1"></i>
                 Mis Reservas
             </a>
-            <a href="index.php?controlador=reservas&accion=crear" class="btn btn-success-theme">
+            <!-- <a href="index.php?controlador=reservas&accion=crear" class="btn btn-success-theme">
                 <i class="bi bi-calendar2-plus me-1"></i>
                 Nueva Reserva
-            </a>
+            </a> -->
+            <button type="button" class="btn btn-success-theme" data-bs-toggle="offcanvas" data-bs-target="#offcanvasForm" aria-controls="offcanvasRight">
+                <i class="bi bi-calendar2-plus"></i>
+                <span class="ms-2">Nueva Reserva</span>
+            </button>
         </div>
     </div>
 
@@ -82,3 +86,6 @@ if (isset($_SESSION['error'])) {
         </div>
     </div>
 </div>
+
+<?php include __DIR__ . './formulario.php'; ?>
+<?php include __DIR__ . './formulario-documento.php'; ?>
