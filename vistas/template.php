@@ -40,7 +40,7 @@
 
     <?php endif; ?>
 
-    <main class="container-fluid mb-5" style="padding-inline: 0px;">
+    <main class="container-fluid mb-5 position-relative" style="padding-inline: 0px;">
         <div class="col-12">
             <?php include_once("ruteador.php"); ?>
         </div>
