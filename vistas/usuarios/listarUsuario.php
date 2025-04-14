@@ -16,12 +16,12 @@
 <?php endif; ?>
 
 <div class="container mt-4">
-    <div class="row mb-3">
+    <div class="row mb-3 mt-5 flex-row align-items-center justify-content-between">
         <div class="col-md-6">
             <h2>Gestión de Usuarios</h2>
         </div>
         <div class="col-md-6 text-end">
-            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addUserModal">
+            <button type="button" class="btn btn-success-theme" data-bs-toggle="modal" data-bs-target="#addUserModal">
                 <i class="fas fa-user-plus me-1"></i> Nuevo Usuario
             </button>
         </div>
@@ -59,23 +59,23 @@
                                     <td><?php echo $usuario['email']; ?></td>
                                     <td><?php echo $usuario['telefono']; ?></td>
                                     <td>
-                                        <span class="badge <?php echo ($usuario['rol'] == 'administrador') ? 'bg-danger' : 'bg-primary'; ?>">
+                                        <span class="badge rounded-pill <?php echo ($usuario['rol'] == 'administrador') ? 'bg-danger' : 'bg-primary'; ?>">
                                             <?php echo $usuario['rol']; ?>
                                         </span>
                                     </td>
                                     <td>
-                                        <span class="badge <?php echo ($usuario['estado'] == 'activo') ? 'bg-success' : 'bg-secondary'; ?>">
+                                        <span class="badge rounded-pill <?php echo ($usuario['estado'] == 'activo') ? 'bg-success' : 'bg-secondary'; ?>">
                                             <?php echo $usuario['estado']; ?>
                                         </span>
                                     </td>
                                     <td>
-                                        <button type="button" class="btn btn-sm btn-warning edit-user" 
+                                        <button type="button" class="btn btn-sm btn-success-theme edit-user" 
                                         data-bs-toggle="modal" data-bs-target="#editUserModal" 
                                         data-id="<?php echo $usuario['id']; ?>">
                                             <i class="fas fa-edit me-1"></i>
                                             Editar
                                         </button>
-                                        <button type="button" class="btn btn-sm btn-danger delete-user" 
+                                        <button type="button" class="btn btn-sm btn-warning delete-user" 
                                         data-id="<?php echo $usuario['id']; ?>">
                                             <i class="fas fa-trash me-1"></i>
                                             Eliminar
