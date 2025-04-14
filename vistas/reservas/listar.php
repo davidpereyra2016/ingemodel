@@ -16,12 +16,12 @@ if (isset($_SESSION['error'])) {
         <div class="col-md-8">
             <h2>Mis Reservas</h2>
         </div>
-        <div class="col-md-4 d-flex justify-content-end align-items-center gap-2">
-            <button type="button" class="btn btn-success-theme" data-bs-toggle="offcanvas" data-bs-target="#offcanvasForm" aria-controls="offcanvasRight">
+        <div class="col-md-4 d-flex justify-content-end align-items-center gap-2 header-page-responsive">
+            <button type="button" class="btn btn-theme btn-success-theme" data-bs-toggle="offcanvas" data-bs-target="#offcanvasForm" aria-controls="offcanvasRight">
                 <i class="bi bi-calendar2-plus"></i>
                 <span class="ms-2">Nueva Reserva</span>
             </button>
-            <a href="index.php?controlador=reservas&accion=calendario" class="btn btn-light">
+            <a href="index.php?controlador=reservas&accion=calendario" class="btn btn-theme btn-light">
                 <i class="bi bi-calendar2-event me-1"></i>
                 Ver Calendario
             </a>

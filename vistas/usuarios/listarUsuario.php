@@ -16,15 +16,13 @@
 <?php endif; ?>
 
 <div class="container mt-4">
-    <div class="row mb-3 mt-5 flex-row align-items-center justify-content-between">
-        <div class="col-md-6">
-            <h2>Gestión de Usuarios</h2>
-        </div>
-        <div class="col-md-6 text-end">
-            <button type="button" class="btn btn-success-theme" data-bs-toggle="modal" data-bs-target="#addUserModal">
-                <i class="fas fa-user-plus me-1"></i> Nuevo Usuario
-            </button>
-        </div>
+    <div class="mb-4 mt-5 d-flex align-items-center justify-content-between flex-wrap gap-2">
+
+        <h2 class="w-auto">Gestión de Usuarios</h2>
+        <button type="button" class="btn btn-theme btn-success-theme w-auto" data-bs-toggle="modal" data-bs-target="#addUserModal">
+            <i class="fas fa-user-plus me-1"></i> Nuevo Usuario
+        </button>
+
     </div>
 
     <div class="card">
@@ -69,14 +67,14 @@
                                         </span>
                                     </td>
                                     <td>
-                                        <button type="button" class="btn btn-sm btn-success-theme edit-user" 
-                                        data-bs-toggle="modal" data-bs-target="#editUserModal" 
-                                        data-id="<?php echo $usuario['id']; ?>">
+                                        <button type="button" class="btn btn-sm btn-success-theme edit-user"
+                                            data-bs-toggle="modal" data-bs-target="#editUserModal"
+                                            data-id="<?php echo $usuario['id']; ?>">
                                             <i class="fas fa-edit me-1"></i>
                                             Editar
                                         </button>
-                                        <button type="button" class="btn btn-sm btn-warning delete-user" 
-                                        data-id="<?php echo $usuario['id']; ?>">
+                                        <button type="button" class="btn btn-sm btn-warning delete-user"
+                                            data-id="<?php echo $usuario['id']; ?>">
                                             <i class="fas fa-trash me-1"></i>
                                             Eliminar
                                         </button>
@@ -180,46 +178,46 @@
             <div class="modal-body">
                 <form id="editUserForm" action="?controlador=usuarios&accion=editar" method="POST">
                     <input type="hidden" id="editUserId" name="id" value="<?php echo isset($_SESSION['temp_usuario']) ? $_SESSION['temp_usuario']['id'] : ''; ?>">
-                    
+
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label for="editMatricula" class="form-label">Matrícula</label>
-                            <input type="text" class="form-control" id="editMatricula" name="matricula" required 
+                            <input type="text" class="form-control" id="editMatricula" name="matricula" required
                                 value="<?php echo isset($_SESSION['temp_usuario']) ? $_SESSION['temp_usuario']['matricula'] : ''; ?>">
                         </div>
                         <div class="col-md-6 mb-3">
                             <label for="editNombre" class="form-label">Nombre</label>
-                            <input type="text" class="form-control" id="editNombre" name="nombre" required 
+                            <input type="text" class="form-control" id="editNombre" name="nombre" required
                                 value="<?php echo isset($_SESSION['temp_usuario']) ? $_SESSION['temp_usuario']['nombre'] : ''; ?>">
                         </div>
                     </div>
-                    
+
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label for="editApellido" class="form-label">Apellido</label>
-                            <input type="text" class="form-control" id="editApellido" name="apellido" required 
+                            <input type="text" class="form-control" id="editApellido" name="apellido" required
                                 value="<?php echo isset($_SESSION['temp_usuario']) ? $_SESSION['temp_usuario']['apellido'] : ''; ?>">
                         </div>
                         <div class="col-md-6 mb-3">
                             <label for="editEmail" class="form-label">Email</label>
-                            <input type="email" class="form-control" id="editEmail" name="email" required 
+                            <input type="email" class="form-control" id="editEmail" name="email" required
                                 value="<?php echo isset($_SESSION['temp_usuario']) ? $_SESSION['temp_usuario']['email'] : ''; ?>">
                         </div>
                     </div>
-                    
+
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label for="editTelefono" class="form-label">Teléfono</label>
-                            <input type="text" class="form-control" id="editTelefono" name="telefono" required 
+                            <input type="text" class="form-control" id="editTelefono" name="telefono" required
                                 value="<?php echo isset($_SESSION['temp_usuario']) ? $_SESSION['temp_usuario']['telefono'] : ''; ?>">
                         </div>
                         <div class="col-md-6 mb-3">
                             <label for="editDomicilio" class="form-label">Domicilio</label>
-                            <input type="text" class="form-control" id="editDomicilio" name="domicilio" required 
+                            <input type="text" class="form-control" id="editDomicilio" name="domicilio" required
                                 value="<?php echo isset($_SESSION['temp_usuario']) ? $_SESSION['temp_usuario']['domicilio'] : ''; ?>">
                         </div>
                     </div>
-                    
+
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label for="editPassword" class="form-label">Contraseña</label>
@@ -240,7 +238,7 @@
                             </select>
                         </div>
                     </div>
-                    
+
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label for="editEstado" class="form-label">Estado</label>
@@ -250,7 +248,7 @@
                             </select>
                         </div>
                     </div>
-                    
+
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
                         <button type="submit" class="btn btn-primary">Guardar cambios</button>
@@ -291,7 +289,7 @@
             button.addEventListener('click', function() {
                 const input = this.previousElementSibling;
                 const icon = this.querySelector('i');
-                
+
                 if (input.type === 'password') {
                     input.type = 'text';
                     icon.classList.remove('fa-eye');
@@ -303,35 +301,35 @@
                 }
             });
         });
-        
+
         // Configurar modal de edición
         const editUserButtons = document.querySelectorAll('.edit-user');
         editUserButtons.forEach(button => {
             button.addEventListener('click', function() {
                 const userId = this.getAttribute('data-id');
-                
+
                 // Realizar una solicitud AJAX para obtener los datos del usuario
                 const formData = new FormData();
                 formData.append('id', userId);
-                
+
                 fetch('?controlador=usuarios&accion=buscar', {
-                    method: 'POST',
-                    body: formData
-                })
-                .then(response => {
-                    // Redirigir para recargar la página con los datos temporales
-                    window.location.href = '?controlador=usuarios&accion=listar';
-                });
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => {
+                        // Redirigir para recargar la página con los datos temporales
+                        window.location.href = '?controlador=usuarios&accion=listar';
+                    });
             });
         });
-        
+
         // Configurar modal de eliminación
         const deleteUserButtons = document.querySelectorAll('.delete-user');
         deleteUserButtons.forEach(button => {
             button.addEventListener('click', function() {
                 const userId = this.getAttribute('data-id');
                 document.getElementById('deleteUserId').value = userId;
-                
+
                 // Mostrar modal de confirmación
                 const confirmDeleteModal = new bootstrap.Modal(document.getElementById('confirmDeleteModal'));
                 confirmDeleteModal.show();
