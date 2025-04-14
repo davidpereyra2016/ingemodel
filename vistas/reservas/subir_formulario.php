@@ -1,7 +1,7 @@
 <?php
 // Mostrar mensajes de error si existen
 if (isset($_SESSION['error'])) {
-    echo '<div class="alert alert-danger">' . $_SESSION['error'] . '</div>';
+    echo '<div class="alert alert-danger mt-4 container">' . $_SESSION['error'] . '</div>';
     unset($_SESSION['error']);
 }
 ?>
@@ -9,15 +9,15 @@ if (isset($_SESSION['error'])) {
 <div class="container">
     <div class="row mb-4">
         <div class="col-md-8 offset-md-2">
-            <div class="card">
-                <div class="card-header bg-primary text-white">
-                    <h3 class="mb-0">Subir Documentación de Reserva</h3>
+            <div class="card shadow-sm rounded mt-4">
+                <div class="card-header">
+                    <h3 class="mb-0 ">Subir Documentación de Reserva</h3>
                 </div>
                 <div class="card-body">
                     <div class="alert alert-info">
                         <p><strong>Importante:</strong> Para completar su solicitud, debe descargar el formulario, completarlo, firmarlo y subirlo nuevamente junto con el comprobante de pago del anticipo (50% del valor total).</p>
                     </div>
-                    
+
                     <div class="row mb-4">
                         <div class="col-12">
                             <div class="card">
@@ -34,7 +34,7 @@ if (isset($_SESSION['error'])) {
                             </div>
                         </div>
                     </div>
-                    
+
                     <div class="row mb-4">
                         <div class="col-12">
                             <div class="card">
@@ -43,12 +43,12 @@ if (isset($_SESSION['error'])) {
                                 </div>
                                 <div class="card-body">
                                     <p>Descargue el formulario de solicitud, complete todos los datos requeridos y fírmelo.</p>
-                                    <a href="assets/docs/FORMULARIO USO SALON Y REGLAMENTO  ENE MAR 25.pdf" class="btn btn-primary" target="_blank">Descargar Formulario</a>
+                                    <a href="assets/docs/FORMULARIO USO SALON Y REGLAMENTO  ENE MAR 25.pdf" class="btn btn-success-theme" target="_blank">Descargar Formulario</a>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    
+
                     <form action="index.php?controlador=reservas&accion=subirFormulario&id=<?php echo $reserva['id']; ?>" method="POST" enctype="multipart/form-data">
                         <div class="row mb-4">
                             <div class="col-12">
@@ -72,7 +72,7 @@ if (isset($_SESSION['error'])) {
                                 </div>
                             </div>
                         </div>
-                        
+
                         <div class="row mb-4">
                             <div class="col-12">
                                 <div class="card">
@@ -96,15 +96,14 @@ if (isset($_SESSION['error'])) {
                                 </div>
                             </div>
                         </div>
-                        
+
                         <div class="alert alert-warning">
                             <p><strong>Recuerde:</strong> Una vez que suba estos documentos, su solicitud será revisada por un administrador para su aprobación final.</p>
                         </div>
-                        
-                        <div class="form-group mt-4 text-center">
-                            <a href="index.php?controlador=reservas&accion=listar" class="btn btn-secondary">Volver</a>
-                            <button type="submit" class="btn btn-primary">Subir Documentos</button>
-                        </div>
+                </div>
+                <div class="card-footer d-flex justify-content-between">
+                    <button type="submit" class="btn btn-success-theme">Subir Documentos</button>
+                    <a href="index.php?controlador=reservas&accion=listar" class="btn btn-light">Volver</a>
                     </form>
                 </div>
             </div>
