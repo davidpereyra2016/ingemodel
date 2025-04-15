@@ -18,8 +18,10 @@ class ControladorReservas
         
         if ($rol == 'administrador') {
             $reservas = $this->modelo->obtenerReservas();
+            $tipo = 2;
         } else {
             $reservas = $this->modelo->obtenerReservasPorUsuario($id_usuario);
+            $tipo = 1;
         }
         
         include_once("vistas/reservas/listar.php");
