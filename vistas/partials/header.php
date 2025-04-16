@@ -40,9 +40,9 @@
         </li>
 
         <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle <?php echo $controlador == 'usuarios' && $accion == 'listar' ? 'active' : ''; ?>" role="button" data-bs-toggle="dropdown" aria-expanded="true">
-            <i class="fas fa-user-circle me-1"></i>
-            <?php echo $_SESSION['nombre'] . ' ' . $_SESSION['apellido']; ?>
+          <a class="nav-link dropdown-toggle <?php echo $controlador == 'configuracion' ? 'active' : ''; ?>" role="button" data-bs-toggle="dropdown" aria-expanded="true">
+            <i class="bi bi-gear-fill"></i>
+            Configuración
           </a>
           <ul class="dropdown-menu" data-bs-popper="static">
             <?php if (!$esIngeniero): ?>
@@ -52,7 +52,27 @@
                   <span class="ms-2">Gestión de Usuarios</span>
                 </a>
               </li>
+              <li>
+                <a class="dropdown-item" href="?controlador=configuracion&accion=listarDocumentos">
+                  <i class="bi bi-file-earmark-pdf"></i>
+                  <span class="ms-2">Gestión de Documentos</span>
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item" href="?controlador=configuracion&accion=listarAranceles">
+                  <i class="bi bi-cash-coin"></i>
+                  <span class="ms-2">Gestión de Aranceles</span>
+                </a>
+              </li>
             <?php endif; ?>
+          </ul>
+        </li>
+        <li class="nav-item dropdown">
+          <a class="nav-link dropdown-toggle <?php echo $controlador == 'usuarios' && $accion == 'logout' ? 'active' : ''; ?>" role="button" data-bs-toggle="dropdown" aria-expanded="true">
+            <i class="fas fa-user-circle me-1"></i>
+            <?php echo $_SESSION['nombre'] . ' ' . $_SESSION['apellido']; ?>
+          </a>
+          <ul class="dropdown-menu" data-bs-popper="static">
             <li>
               <a class="dropdown-item" href="?controlador=usuarios&accion=logout">
                 <i class="bi bi-box-arrow-right"></i>
