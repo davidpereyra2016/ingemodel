@@ -15,7 +15,7 @@ if (isset($_SESSION['error'])) {
                 </div>
                 <div class="card-body">
                     <div class="alert alert-info">
-                        <p><strong>Importante:</strong> Para completar su solicitud, debe descargar el formulario, completarlo, firmarlo y subirlo nuevamente junto con el comprobante de pago del anticipo (50% del valor total).</p>
+                        <p><strong>Importante:</strong> Para completar su solicitud, debe descargar el formulario, completarlo, firmarlo y subirlo nuevamente junto con el comprobante de pago del anticipo (50% del valor total) o 100% del valor total.</p>
                     </div>
 
                     <div class="row mb-4">
@@ -48,18 +48,35 @@ if (isset($_SESSION['error'])) {
                             </div>
                         </div>
                     </div>
+<<<<<<< HEAD
 
+=======
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header bg-light">
+                                    <h5 class="mb-0">2. Descargar Formulario Municipal</h5>
+                                </div>
+                                <div class="card-body">
+                                    <p>Descargue el formulario Municipal</p>
+                                    <a href="assets/docs/bromatologia_ejemplo.pdf" class="btn btn-primary" target="_blank">Descargar Formulario</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+>>>>>>> origin/develop-david
                     <form action="index.php?controlador=reservas&accion=subirFormulario&id=<?php echo $reserva['id']; ?>" method="POST" enctype="multipart/form-data">
                         <div class="row mb-4">
                             <div class="col-12">
                                 <div class="card">
                                     <div class="card-header bg-light">
-                                        <h5 class="mb-0">2. Subir Formulario Completado</h5>
+                                        <h5 class="mb-0">3. Subir Formulario Completado</h5>
                                     </div>
                                     <div class="card-body">
                                         <div class="form-group">
                                             <label for="formulario">Seleccione el formulario completado (PDF):</label>
-                                            <input type="file" class="form-control-file" id="formulario" name="formulario" accept=".pdf" <?php echo !$reserva['archivo_formulario'] ? 'required' : ''; ?>>
+                                            <input type="file" class="form-control-file" id="formulario" name="formulario" accept=".pdf" <?php echo !$reserva['archivo_formulario'] ? : ''; ?>>
                                             <?php if ($reserva['archivo_formulario']): ?>
                                                 <div class="mt-2">
                                                     <small class="text-success">Ya ha subido un formulario. Si sube otro, reemplazará al anterior.</small>
@@ -72,18 +89,44 @@ if (isset($_SESSION['error'])) {
                                 </div>
                             </div>
                         </div>
+<<<<<<< HEAD
 
+=======
                         <div class="row mb-4">
                             <div class="col-12">
                                 <div class="card">
                                     <div class="card-header bg-light">
-                                        <h5 class="mb-0">3. Subir Comprobante de Pago</h5>
+                                        <h5 class="mb-0">4. Subir Formulario Municipal</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="form-group">
+                                            <label for="formulario_municipal">Seleccione el formulario municipal completado (PDF):</label>
+                                            <input type="file" class="form-control-file" id="formulario_municipal" name="formulario_municipal" accept=".pdf" <?php echo !$reserva['archivo_municipal'] ? : ''; ?>>
+                                            <?php if ($reserva['archivo_municipal']): ?>
+                                                <div class="mt-2">
+                                                    <small class="text-success">Ya ha subido un formulario. Si sube otro, reemplazará al anterior.</small>
+                                                    <br>
+                                                    <a href="assets/uploads/<?php echo $reserva['archivo_municipal']; ?>" target="_blank">Ver formulario actual</a>
+                                                </div>
+                                            <?php endif; ?>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+>>>>>>> origin/develop-david
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <div class="card">
+                                    <div class="card-header bg-light">
+                                        <h5 class="mb-0">5. Subir Comprobante de Pago</h5>
                                     </div>
                                     <div class="card-body">
                                         <p>Suba el comprobante de pago del anticipo (50% del valor total).</p>
                                         <div class="form-group">
                                             <label for="comprobante">Seleccione el comprobante de pago (PDF, JPG, PNG):</label>
-                                            <input type="file" class="form-control-file" id="comprobante" name="comprobante" accept=".pdf,.jpg,.jpeg,.png" <?php echo !$reserva['archivo_comprobante'] ? 'required' : ''; ?>>
+                                            <input type="file" class="form-control-file" id="comprobante" name="comprobante" accept=".pdf,.jpg,.jpeg,.png" <?php echo !$reserva['archivo_comprobante'] ? : ''; ?>>
                                             <?php if ($reserva['archivo_comprobante']): ?>
                                                 <div class="mt-2">
                                                     <small class="text-success">Ya ha subido un comprobante. Si sube otro, reemplazará al anterior.</small>
@@ -96,7 +139,34 @@ if (isset($_SESSION['error'])) {
                                 </div>
                             </div>
                         </div>
+<<<<<<< HEAD
 
+=======
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <div class="card">
+                                    <div class="card-header bg-light">
+                                        <h5 class="mb-0">6. Subir Comprobante de Pago (50% del valor total o 100% del valor total)</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <p>Suba el comprobante de pago del anticipo (50% del valor total o 100% del valor total).</p>
+                                        <div class="form-group">
+                                            <label for="comprobante_total">Seleccione el comprobante de pago (PDF, JPG, PNG):</label>
+                                            <input type="file" class="form-control-file" id="comprobante_total" name="comprobante_total" accept=".pdf,.jpg,.jpeg,.png" <?php echo !$reserva['archivo_comprobante_total'] ? : ''; ?>>
+                                            <?php if ($reserva['archivo_comprobante_total']): ?>
+                                                <div class="mt-2">
+                                                    <small class="text-success">Ya ha subido un comprobante. Si sube otro, reemplazará al anterior.</small>
+                                                    <br>
+                                                    <a href="assets/uploads/<?php echo $reserva['archivo_comprobante_total']; ?>" target="_blank">Ver comprobante actual</a>
+                                                </div>
+                                            <?php endif; ?>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+>>>>>>> origin/develop-david
                         <div class="alert alert-warning">
                             <p><strong>Recuerde:</strong> Una vez que suba estos documentos, su solicitud será revisada por un administrador para su aprobación final.</p>
                         </div>

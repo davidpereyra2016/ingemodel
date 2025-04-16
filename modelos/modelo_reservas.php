@@ -25,7 +25,8 @@ class ModeloReservas {
 
     // Obtener una reserva específica
     public function obtenerReserva($id) {
-        $consulta = $this->conexion->prepare("SELECT r.*, u.nombre, u.apellido, u.matricula, u.email, u.telefono 
+        $consulta = $this->conexion->prepare("SELECT r.*, u.nombre, u.apellido, u.matricula, u.email, u.telefono, 
+                                             r.archivo_formulario, r.archivo_municipal, r.archivo_comprobante, r.archivo_comprobante_total 
                                              FROM reservas r 
                                              INNER JOIN usuarios u ON r.id_usuario = u.id 
                                              WHERE r.id = :id");
@@ -35,7 +36,7 @@ class ModeloReservas {
     }
 
     // Crear una nueva reserva
-    public function crearReserva($id_usuario, $fecha_evento, $hora_inicio, $hora_fin, $tipo_uso) {
+    public function crearReserva($id_usuario, $fecha_evento, $hora_inicio, $hora_fin, $tipo_uso, $motivo_de_uso) {
         // Verificar si ya existe una reserva para esa fecha
         $consulta = $this->conexion->prepare("SELECT COUNT(*) as total FROM reservas 
                                              WHERE fecha_evento = :fecha_evento 
@@ -67,14 +68,15 @@ class ModeloReservas {
         $monto = ($hora_fin <= $hora_comparacion) ? $config_arancel['monto_antes_22'] : $config_arancel['monto_despues_22'];
         
         // Crear la reserva
-        $consulta = $this->conexion->prepare("INSERT INTO reservas (id_usuario, fecha_evento, hora_inicio, hora_fin, tipo_uso, monto) 
-                                             VALUES (:id_usuario, :fecha_evento, :hora_inicio, :hora_fin, :tipo_uso, :monto)");
+        $consulta = $this->conexion->prepare("INSERT INTO reservas (id_usuario, fecha_evento, hora_inicio, hora_fin, tipo_uso, monto, motivo_de_uso) 
+                                             VALUES (:id_usuario, :fecha_evento, :hora_inicio, :hora_fin, :tipo_uso, :monto, :motivo_de_uso)");
         $consulta->bindParam(':id_usuario', $id_usuario);
         $consulta->bindParam(':fecha_evento', $fecha_evento);
         $consulta->bindParam(':hora_inicio', $hora_inicio);
         $consulta->bindParam(':hora_fin', $hora_fin);
         $consulta->bindParam(':tipo_uso', $tipo_uso);
         $consulta->bindParam(':monto', $monto);
+        $consulta->bindParam(':motivo_de_uso', $motivo_de_uso);
         $consulta->execute();
         
         return $this->conexion->lastInsertId();
@@ -90,14 +92,19 @@ class ModeloReservas {
     }
 
     // Subir archivos relacionados a la reserva
-    public function subirArchivos($id, $archivo_formulario = null, $archivo_comprobante = null) {
-        $consulta = $this->conexion->prepare("UPDATE reservas SET 
-                                             archivo_formulario = COALESCE(:archivo_formulario, archivo_formulario),
-                                             archivo_comprobante = COALESCE(:archivo_comprobante, archivo_comprobante) 
-                                             WHERE id = :id");
+    public function subirArchivos($id, $archivo_formulario = null, $archivo_comprobante = null, $archivo_municipal = null,$archivo_comprobante_total = null) {
+        $consulta = $this->conexion->prepare("
+            UPDATE reservas SET 
+            archivo_formulario = COALESCE(:archivo_formulario, archivo_formulario),
+            archivo_comprobante = COALESCE(:archivo_comprobante, archivo_comprobante),
+            archivo_municipal = COALESCE(:archivo_municipal, archivo_municipal),
+            archivo_comprobante_total = COALESCE(:archivo_comprobante_total, archivo_comprobante_total)
+            WHERE id = :id");
         $consulta->bindParam(':id', $id);
         $consulta->bindParam(':archivo_formulario', $archivo_formulario);
         $consulta->bindParam(':archivo_comprobante', $archivo_comprobante);
+        $consulta->bindParam(':archivo_municipal', $archivo_municipal);
+        $consulta->bindParam(':archivo_comprobante_total', $archivo_comprobante_total);
         return $consulta->execute();
     }
 

@@ -40,12 +40,14 @@ try {
 }
 
 // Fix the paths to the PHPMailer files
+// 
 $base_path = realpath(__DIR__ . '/../../');
 require_once($base_path . "/utils/lib/phpMailer/PHPMailer.php");
 require_once($base_path . "/utils/lib/phpMailer/SMTP.php"); 
 require_once($base_path . "/utils/lib/phpMailer/Exception.php");
 
-// Verify that we have the reservation data
+
+//verificar que los datos de la reserva esten disponibles
 if (!isset($reserva) || !is_array($reserva)) {
     die("Error: No se recibieron los datos de la reserva.");
 }

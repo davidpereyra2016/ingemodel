@@ -100,6 +100,21 @@ if (isset($_SESSION['error'])) {
                                         </div>
                                     </div>
                                 </div>
+                                <div class="col-md-6">
+                                    <div class="card mb-3">
+                                        <div class="card-header bg-light">Formulario de Solicitud Municipal</div>
+                                        <div class="card-body">
+                                            <?php if ($reserva['archivo_municipal']): ?>
+                                                <a href="assets/uploads/<?php echo $reserva['archivo_municipal']; ?>" target="_blank" class="btn btn-sm btn-info">
+                                                    <i class="fas fa-file-pdf"></i> Ver Formulario
+                                                </a>
+                                            <?php else: ?>
+                                                <p class="text-muted">No se ha subido el formulario</p>
+                                            <?php endif; ?>
+                                        </div>
+                                    </div>
+                                </div>
+
                                 
                                 <div class="col-md-6">
                                     <div class="card mb-3">
@@ -107,6 +122,20 @@ if (isset($_SESSION['error'])) {
                                         <div class="card-body">
                                             <?php if ($reserva['archivo_comprobante']): ?>
                                                 <a href="assets/uploads/<?php echo $reserva['archivo_comprobante']; ?>" target="_blank" class="btn btn-sm btn-info">
+                                                    <i class="fas fa-file-invoice-dollar"></i> Ver Comprobante
+                                                </a>
+                                            <?php else: ?>
+                                                <p class="text-muted">No se ha subido el comprobante</p>
+                                            <?php endif; ?>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card mb-3">
+                                        <div class="card-header bg-light">Comprobante de Pago Total</div>
+                                        <div class="card-body">
+                                            <?php if ($reserva['archivo_comprobante_total']): ?>
+                                                <a href="assets/uploads/<?php echo $reserva['archivo_comprobante_total']; ?>" target="_blank" class="btn btn-sm btn-info">
                                                     <i class="fas fa-file-invoice-dollar"></i> Ver Comprobante
                                                 </a>
                                             <?php else: ?>
