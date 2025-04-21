@@ -16,6 +16,13 @@ class ModeloNotificaciones {
         return $consulta->fetchAll(PDO::FETCH_ASSOC);
     }
 
+    // Obtener ultimas cinco notificaciones
+    public function obtenerNotificacionesRecientes() {
+        $conexion = BD::crearInstancia();
+        $consulta = $conexion->query("SELECT * FROM notificaciones ORDER BY id DESC LIMIT 5");
+        return $consulta->fetchAll(PDO::FETCH_ASSOC);
+    }
+
     // Obtener notificaciones por ID Reservas
     public static function obtenerNotificacionesPorIdReserva($id_reserva) {
         $conexion = BD::crearInstancia();

@@ -27,7 +27,7 @@ class ControladorNotificaciones
 
     public function listaPreviaNotificaciones()
     {
-        $notificaciones = $this->modelo->obtenerNotificaciones();
+        $notificaciones = $this->modelo->obtenerNotificacionesRecientes();
 
         if (count($notificaciones) > 0) {
             return $notificaciones;
@@ -62,8 +62,14 @@ class ControladorNotificaciones
 
     public function marcarLeido() {
         // Marcar la notificacion como leida
-        $id = $_POST['id'];
+        $id = $_POST['idNotificacion'];
         $this->modelo->actualizarEstadoNotificacion($id, 1);
+        $notificaciones = $this->modelo->obtenerNotificaciones();
+    }
+
+    public function eliminarNotificacion() {
+        $id = $_POST['idNotificacion'];
+        $this->modelo->eliminarNotificacion($id);
         $notificaciones = $this->modelo->obtenerNotificaciones();
     }
 }

@@ -4,9 +4,6 @@ include_once("controladores/controlador_notificaciones.php");
 $objControladorNotificaciones = new ControladorNotificaciones();
 $notificaciones = $objControladorNotificaciones->listaPreviaNotificaciones();
 
-// Mostrar los ultimos 5 mensajes de notificaciones
-$notificaciones = array_slice($notificaciones, -5, 5, true);
-
 // Contar la cantidad de notificaciones no leídas
 $countNotificaciones = 0;
 foreach ($notificaciones as $notificacion) {
@@ -88,7 +85,7 @@ foreach ($notificaciones as $notificacion) {
           </ul>
         </li>
         <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle <?php echo $controlador == 'usuarios' && $accion == 'logout' ? 'active' : ''; ?>" role="button" data-bs-toggle="dropdown" aria-expanded="true">
+          <a class="nav-link text-uppercase dropdown-toggle <?php echo $controlador == 'usuarios' && $accion == 'logout' ? 'active' : ''; ?>" role="button" data-bs-toggle="dropdown" aria-expanded="true">
             <i class="fas fa-user-circle me-1"></i>
             <?php echo $_SESSION['nombre'] . ' ' . $_SESSION['apellido']; ?>
           </a>

@@ -10,13 +10,13 @@
         </div>
     <?php else: ?>
         <?php foreach ($notificaciones as $notificacion): ?>
-            <?php 
-                // Variables de Información
-                $id = $notificacion['id'];
-                $id_reserva = $notificacion['id_reserva'];
-                $mensaje = $notificacion['mensaje'];
-                $leido = $notificacion['leido'];
-                $fecha = $notificacion['fecha'];
+            <?php
+            // Variables de Información
+            $id = $notificacion['id'];
+            $id_reserva = $notificacion['id_reserva'];
+            $mensaje = $notificacion['mensaje'];
+            $leido = $notificacion['leido'];
+            $fecha = $notificacion['fecha'];
             ?>
             <div class="alert alert-success mb-4 d-flex justify-content-between align-items-center" role="alert">
                 <div>
@@ -25,7 +25,7 @@
                     <span>Reserva ID: <?= $id_reserva ?></span><br>
                     <span>Mensaje: <?= $mensaje ?></span><br>
                     <span>
-                        Estado: <?=($leido == 0) ? 'Nuevo' : 'Leído'; ?>
+                        Estado: <?= ($leido == 0) ? 'Nuevo' : 'Leído'; ?>
                     </span><br>
                 </div>
 
@@ -35,19 +35,17 @@
                         <span class="ms-2">Ver Reserva</span>
                     </a>
                     <?php if ($leido == 0): ?>
-                        <form action="index.php?controlador=notificaciones&accion=marcarLeido&id=<?=$id?>" method="POST" class="d-inline">
-                            <input type="hidden" name="idNotificacion" value="<?=$id?>">
-                            <button type="submit" class="btn btn-success btn-sm float-end" id="btn-leido" data-id="<?=$id?>">
-                                <i class="fas fa-check"></i>
-                                <span class="ms-2">Marcar como leído</span>
-                            </button>
-                        </form>
+
+                        <button class="btn btn-success btn-sm float-end btn-leido" id="btn-leido" data-id="<?= $id ?>">
+                            <i class="fas fa-check"></i>
+                            <span class="ms-2">Marcar como leído</span>
+                        </button>
+
                     <?php endif; ?>
-                    <a href="index.php?controlador=notificaciones&accion=eliminar&id=<?=$id?>"
-                        class="btn btn-danger btn-sm float-end">
+                    <button class="btn btn-danger btn-sm float-end btn-eliminar" id="btn-eliminar" data-id="<?= $id ?>">
                         <i class="fas fa-trash"></i>
                         <span class="ms-2">Eliminar</span>
-                    </a>
+                    </button>
                 </div>
             </div>
         <?php endforeach; ?>
@@ -56,12 +54,22 @@
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
-  $('#btn-leido').click(function() {
-    var id = $(this).data('id');
-    $.post(`index.php?controlador=notificaciones&accion=marcarLeido&id=${id}`, function(response) {
-      location.reload(); // Recargar la página para mostrar el estado actualizado
-      console.log(id);
-    //   window.location.href = 'index.php?controlador=notificaciones&accion=listar';
-    })
-  });
+    $('.btn-leido').click(function() {
+        var idNotificacion = $(this).data('id');
+        $.post('index.php?controlador=notificaciones&accion=marcarLeido', {
+            idNotificacion: idNotificacion
+        }, function(respuesta) {
+            location.reload(); // Recargar la página para ver los cambios
+        });
+
+    });
+
+    $('.btn-eliminar').click(function() {
+        var idNotificacion = $(this).data('id');
+        $.post('index.php?controlador=notificaciones&accion=eliminarNotificacion', {
+            idNotificacion: idNotificacion
+        }, function(respuesta) {
+            location.reload(); // Recargar la página para ver los cambios
+        });
+    });
 </script>
