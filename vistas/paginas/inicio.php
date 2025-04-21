@@ -52,7 +52,7 @@
     </div>
 </div>
 
-<?php include __DIR__ . './../reservas/formulario.php'; ?>
+<!-- <?php include __DIR__ . './../reservas/formulario.php'; ?> -->
 
 
 
