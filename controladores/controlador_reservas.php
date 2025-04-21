@@ -36,9 +36,15 @@ class ControladorReservas
             $tipo_uso = $_POST['tipo_uso'];
             $motivo_de_uso = $_POST['motivo_de_uso'];
             
-            
+            // 1. Llamar al modelo y capturar el resultado
             $id_reserva = $this->modelo->crearReserva($id_usuario, $fecha_evento, $hora_inicio, $hora_fin, $tipo_uso, $motivo_de_uso);
-            
+            // 2. Verificar si hay error primero
+            if (isset($id_reserva['error'])) {
+                $_SESSION['error'] = $id_reserva['error'];
+                header('Location: index.php?controlador=reservas&accion=crear');
+                exit;
+            }
+            // 3. Si no hay error, obtener el ID de la reserva    
             if ($id_reserva) {
                 // Si hay matriculados adicionales en la solicitud
                 if (!empty($_POST['matriculas']) && is_array($_POST['matriculas'])) {

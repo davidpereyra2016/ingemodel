@@ -37,6 +37,22 @@ class ModeloReservas {
 
     // Crear una nueva reserva
     public function crearReserva($id_usuario, $fecha_evento, $hora_inicio, $hora_fin, $tipo_uso, $motivo_de_uso) {
+
+        // Verificar si la fecha es fin de semana (6=sábado, 7=domingo)
+        $fecha_dia = date('N', strtotime($fecha_evento));
+        if ($fecha_dia >= 6) {
+            $consulta_limite = $this->conexion->prepare("SELECT COUNT(*) as total FROM reservas 
+                                                        WHERE id_usuario = :id_usuario 
+                                                        AND DAYOFWEEK(fecha_evento) IN (6,7) 
+                                                        AND estado IN ('pendiente', 'aprobada')");
+            $consulta_limite->bindParam(':id_usuario', $id_usuario);
+            $consulta_limite->execute();
+            $limite = $consulta_limite->fetch(PDO::FETCH_ASSOC);
+            if ($limite['total'] >= 3) {
+                return ['error' => 'Límite alcanzado: Máximo 3 reservas en fines de semana.'];
+            }
+        }
+
         // Verificar si ya existe una reserva para esa fecha
         $consulta = $this->conexion->prepare("SELECT COUNT(*) as total FROM reservas 
                                              WHERE fecha_evento = :fecha_evento 
