@@ -223,4 +223,11 @@ footer {
         justify-content: start !important;
         margin-top: 1rem !important;
     }
+
+    #contenedor-notificaciones>div.alert {
+        flex-direction: column !important;
+        gap: 1rem !important;
+        align-items: start !important;
+    }
+
 }

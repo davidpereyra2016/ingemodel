@@ -1,18 +1,3 @@
-<?php
-
-include_once("controladores/controlador_notificaciones.php");
-$objControladorNotificaciones = new ControladorNotificaciones();
-$notificaciones = $objControladorNotificaciones->listaPreviaNotificaciones();
-
-// Contar la cantidad de notificaciones no leídas
-$countNotificaciones = 0;
-foreach ($notificaciones as $notificacion) {
-  if ($notificacion['leido'] == 0) {
-    $countNotificaciones++;
-  }
-}
-?>
-
 <nav class="navbar navbar-expand-lg navbar-dark bg-success-2" style="z-index: 9;">
   <div class="container flex justify-content-between">
 
@@ -51,10 +36,10 @@ foreach ($notificaciones as $notificacion) {
             <li><a class="dropdown-item" href="?controlador=reservas&accion=listar&tipo=2">Gestionar Reservas</a></li>
           </ul>
         </li>
-        <li class="nav-item py-2 py-lg-1 col-12 col-lg-auto">
+        <!-- <li class="nav-item py-2 py-lg-1 col-12 col-lg-auto">
           <div class="vr d-none d-lg-flex h-100 mx-lg-2 text-white"></div>
           <hr class="d-lg-none my-2 text-white-50">
-        </li>
+        </li> -->
 
         <li class="nav-item dropdown text-uppercase">
           <a class="nav-link dropdown-toggle <?php echo $controlador == 'configuracion' ? 'active' : ''; ?>" role="button" data-bs-toggle="dropdown" aria-expanded="true">
@@ -100,47 +85,21 @@ foreach ($notificaciones as $notificacion) {
         </li>
 
         <!-- Notificaciones dropdown -->
+        <?php if (!$esIngeniero): ?>
         <li class="nav-item dropdown">
-          <a class="nav-link dropdown-toggle <?php echo $controlador == 'notificaciones' && $accion == 'listar' ? 'active' : ''; ?>" role="button" data-bs-toggle="dropdown" aria-expanded="true">
+          <a 
+            class="nav-link dropdown-toggle <?php echo $controlador == 'notificaciones' && $accion == 'listar' ? 'active' : ''; ?>"
+             role="button" data-bs-toggle="dropdown" aria-expanded="true" id="notificaciones-header-link">
             <i class="fas fa-bell"></i>
             <span class="ms-2 text-uppercase">Notificaciones</span>
-            <?php if ($countNotificaciones > 0): ?>
-              <span class="badge bg-danger rounded-pill"><?= $countNotificaciones ?></span>
-            <?php endif; ?>
           </a>
-          <ul class="dropdown-menu pb-0" data-bs-popper="static">
-            <?php if ($notificaciones): ?>
-              <?php foreach ($notificaciones as $notificacion): ?>
-                <li>
-                  <a class="dropdown-item border-bottom d-flex align-items-center gap-2" href="?controlador=reservas&accion=ver&id=<?= $notificacion['id_reserva']; ?>">
-                    <i class="bi bi-eye"></i>
-                    <span class="ms-2"><?php
-                                        // Transformar la fecha a un formato legible ej: 18 de abril
-                                        $fecha = new DateTime($notificacion['fecha']);
-                                        // setlocale(LC_TIME, 'es_ES.UTF-8', 'Spanish_Spain.1252', 'Spanish_Spain', 'Spanish');
-                                        $fecha->setTimezone(new DateTimeZone('America/Argentina/Buenos_Aires'));
-                                        // Establecer la localización a español
-                                        setlocale(LC_TIME, 'es_ES.UTF-8');
-                                        // echo $fecha->format('d \d\e F'); // Formato: 18 de abril
-
-                                        // concatenar el mensaje y fecha
-                                        echo $notificacion['mensaje'] . ' <br> ' . $fecha->format('d \d\e F');
-                                        ?>
-                    </span>
-                    <span class="badge <?php echo $notificacion['leido'] == 0 ? 'bg-success' : 'bg-secondary'; ?> rounded-pill">
-                      <?= $notificacion['leido'] == 0 ? 'Nuevo' : 'Leído' ?>
-                    </span>
-                  </a>
-                </li>
-              <?php endforeach; ?>
-            <?php else: ?>
-              <li>
-                <a class="dropdown-item border-bottom" href="">
-                  <i class="bi bi-x-circle-fill"></i>
-                  No hay notificaciones
-                </a>
-              </li>
-            <?php endif; ?>
+          <ul class="dropdown-menu pb-0" data-bs-popper="static" id="notificaciones-header">
+            <li>
+              <a class="dropdown-item border-bottom" href="">
+                <i class="bi bi-x-circle-fill"></i>
+                No hay notificaciones
+              </a>
+            </li>
             <li>
               <a class="dropdown-item border-bottom bg-success-2 text-white" style="border-radius: 0 0 6px 6px;" href="?controlador=notificaciones&accion=listar">
                 <i class="bi bi-bell-fill"></i>
@@ -149,6 +108,7 @@ foreach ($notificaciones as $notificacion) {
             </li>
           </ul>
         </li>
+        <?php endif; ?>
         <!-- Fin Notificaciones dropdown -->
 
       </ul>

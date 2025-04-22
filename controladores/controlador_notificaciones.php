@@ -16,60 +16,60 @@ class ControladorNotificaciones
 
     public function listar()
     {
-        try {
-            $notificaciones = $this->modelo->obtenerNotificaciones();
-        } catch (Exception $e) {
-            echo "Error al obtener las notificaciones: " . $e->getMessage();
-        }
 
-        include_once("vistas/notificaciones/listar.php");
+        $notificaciones = $this->modelo->obtenerNotificaciones();
+        require "vistas/notificaciones/listar.php";
+
+
+        // include_once("vistas/notificaciones/listar.php");
     }
 
     public function listaPreviaNotificaciones()
     {
+        ob_clean();
         $notificaciones = $this->modelo->obtenerNotificacionesRecientes();
 
         if (count($notificaciones) > 0) {
-            return $notificaciones;
+            echo json_encode($notificaciones);
         } else {
-            return []; // Retorna un array vacío si no hay notificaciones
+            echo []; // Retorna un array vacío si no hay notificaciones
         }
-        
+
+        exit;
     }
 
-    public function obtenerNotificacionesPorIdReserva($id_reserva)
+
+    public function marcarLeido()
     {
-        $notificaciones = $this->modelo->obtenerNotificacionesPorIdReserva($id_reserva);
-        include_once("vistas/notificaciones/listar.php");
-    }
-
-    public function obtenerNotificacionesPorIdUsuario($id_usuario)
-    {
-        $notificaciones = $this->modelo->obtenerNotificacionesPorIdUsuario($id_usuario);
-        include_once("vistas/notificaciones/listar.php");
-    }
-
-    public function actualizarEstadoNotificacion($id, $estado)
-    {
-        $this->modelo->actualizarEstadoNotificacion($id, $estado);
-        $notificaciones = $this->modelo->obtenerNotificaciones();
-
-        // Recargar la pagina para mostrar las notificaciones actualizadas
-        header("Location: index.php?controlador=notificaciones&accion=listar");
-
-        include_once("vistas/notificaciones/listar.php");
-    }
-
-    public function marcarLeido() {
-        // Marcar la notificacion como leida
-        $id = $_POST['idNotificacion'];
+        ob_clean();
+        header('Content-Type: application/json');
+        $id = $_POST['id'];
         $this->modelo->actualizarEstadoNotificacion($id, 1);
-        $notificaciones = $this->modelo->obtenerNotificaciones();
+        echo json_encode(['success' => true]);
+        exit;
     }
 
-    public function eliminarNotificacion() {
-        $id = $_POST['idNotificacion'];
+    public function eliminarNotificacion()
+    {
+        ob_clean();
+        header('Content-Type: application/json');
+        $id = $_POST['id'];
         $this->modelo->eliminarNotificacion($id);
+        echo json_encode(['success' => true]);
+        exit;
+    }
+
+    public function obtenerAjax()
+    {
+        ob_clean();
+        header('Content-Type: application/json');
+
         $notificaciones = $this->modelo->obtenerNotificaciones();
+        if (count($notificaciones) > 0) {
+            echo json_encode($notificaciones);
+        } else {
+            echo json_encode([]);
+        }
+        exit;
     }
 }
