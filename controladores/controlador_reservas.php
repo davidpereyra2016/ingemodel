@@ -75,6 +75,25 @@ class ControladorReservas
         $id_reserva = $_GET['id'];
         $reserva = $this->modelo->obtenerReserva($id_reserva);
         
+        // Cargar los documentos para descargar según su tipo
+        include_once("modelos/modelo_configuracion.php");
+        $modeloConfig = new ModeloConfiguracion();
+        $documentos = $modeloConfig->obtenerDocumentos();
+        
+        // Separar documentos por tipo
+        $formularios = [];
+        $formularios_municipales = [];
+        
+        foreach ($documentos as $doc) {
+            if ($doc['activo']) {
+                if ($doc['tipo'] === 'solicitud') {
+                    $formularios[] = $doc;
+                } elseif ($doc['tipo'] === 'municipal') {
+                    $formularios_municipales[] = $doc;
+                }
+            }
+        }
+        
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $dir_uploads = "assets/uploads/";
             
@@ -127,7 +146,7 @@ class ControladorReservas
                 }
             }
             
-            if ($this->modelo->subirArchivos($id_reserva, $archivo_formulario, $archivo_municipal, $archivo_comprobante, $archivo_comprobante_total)) {
+            if ($this->modelo->subirArchivos($id_reserva, $archivo_formulario, $archivo_comprobante, $archivo_municipal, $archivo_comprobante_total)) {
                 // Registrar pago de anticipo si se cargó comprobante
                 if ($archivo_comprobante) {
                     $this->modelo->registrarPago($id_reserva, 'anticipo');

@@ -35,37 +35,46 @@ if (isset($_SESSION['error'])) {
                         </div>
                     </div>
 
-                    <div class="row mb-4">
-                        <div class="col-12">
-                            <div class="card">
-                                <div class="card-header bg-light">
-                                    <h5 class="mb-0">1. Descargar Formulario</h5>
-                                </div>
-                                <div class="card-body">
-                                    <p>Descargue el formulario de solicitud, complete todos los datos requeridos y fírmelo.</p>
-                                    <a href="assets/docs/FORMULARIO USO SALON Y REGLAMENTO  ENE MAR 25.pdf" class="btn btn-success-theme" target="_blank">Descargar Formulario</a>
+                    <?php if (!empty($formularios)): ?>
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <div class="card">
+                                    <div class="card-header bg-light">
+                                        <h5 class="mb-0">1. Descargar Formulario de Solicitud</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <p>Descargue el formulario de solicitud, complete todos los datos requeridos y fírmelo.</p>
+                                        <?php foreach ($formularios as $form): ?>
+                                            <a href="assets/docs/<?php echo $form['archivo']; ?>" class="btn btn-success-theme mb-2" target="_blank">
+                                                Descargar <?php echo htmlspecialchars($form['nombre']); ?>
+                                            </a><br>
+                                        <?php endforeach; ?>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-<<<<<<< HEAD
+                    <?php endif; ?>
 
-=======
-                    <div class="row mb-4">
-                        <div class="col-12">
-                            <div class="card">
-                                <div class="card-header bg-light">
-                                    <h5 class="mb-0">2. Descargar Formulario Municipal</h5>
-                                </div>
-                                <div class="card-body">
-                                    <p>Descargue el formulario Municipal</p>
-                                    <a href="assets/docs/bromatologia_ejemplo.pdf" class="btn btn-primary" target="_blank">Descargar Formulario</a>
+                    <?php if (!empty($formularios_municipales)): ?>
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <div class="card">
+                                    <div class="card-header bg-light">
+                                        <h5 class="mb-0">2. Descargar Formulario Municipal</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <p>Descargue el formulario Municipal</p>
+                                        <?php foreach ($formularios_municipales as $form): ?>
+                                            <a href="assets/docs/<?php echo $form['archivo']; ?>" class="btn btn-primary mb-2" target="_blank">
+                                                Descargar <?php echo htmlspecialchars($form['nombre']); ?>
+                                            </a><br>
+                                        <?php endforeach; ?>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    
->>>>>>> origin/develop-david
+                    <?php endif; ?>
+
                     <form action="index.php?controlador=reservas&accion=subirFormulario&id=<?php echo $reserva['id']; ?>" method="POST" enctype="multipart/form-data">
                         <div class="row mb-4">
                             <div class="col-12">
@@ -76,7 +85,7 @@ if (isset($_SESSION['error'])) {
                                     <div class="card-body">
                                         <div class="form-group">
                                             <label for="formulario">Seleccione el formulario completado (PDF):</label>
-                                            <input type="file" class="form-control-file" id="formulario" name="formulario" accept=".pdf" <?php echo !$reserva['archivo_formulario'] ? : ''; ?>>
+                                            <input type="file" class="form-control-file" id="formulario" name="formulario" accept=".pdf" <?php echo !$reserva['archivo_formulario'] ?: ''; ?>>
                                             <?php if ($reserva['archivo_formulario']): ?>
                                                 <div class="mt-2">
                                                     <small class="text-success">Ya ha subido un formulario. Si sube otro, reemplazará al anterior.</small>
@@ -89,9 +98,7 @@ if (isset($_SESSION['error'])) {
                                 </div>
                             </div>
                         </div>
-<<<<<<< HEAD
 
-=======
                         <div class="row mb-4">
                             <div class="col-12">
                                 <div class="card">
@@ -101,7 +108,7 @@ if (isset($_SESSION['error'])) {
                                     <div class="card-body">
                                         <div class="form-group">
                                             <label for="formulario_municipal">Seleccione el formulario municipal completado (PDF):</label>
-                                            <input type="file" class="form-control-file" id="formulario_municipal" name="formulario_municipal" accept=".pdf" <?php echo !$reserva['archivo_municipal'] ? : ''; ?>>
+                                            <input type="file" class="form-control-file" id="formulario_municipal" name="formulario_municipal" accept=".pdf" <?php echo !$reserva['archivo_municipal'] ?: ''; ?>>
                                             <?php if ($reserva['archivo_municipal']): ?>
                                                 <div class="mt-2">
                                                     <small class="text-success">Ya ha subido un formulario. Si sube otro, reemplazará al anterior.</small>
@@ -114,8 +121,7 @@ if (isset($_SESSION['error'])) {
                                 </div>
                             </div>
                         </div>
-                        
->>>>>>> origin/develop-david
+
                         <div class="row mb-4">
                             <div class="col-12">
                                 <div class="card">
@@ -126,7 +132,7 @@ if (isset($_SESSION['error'])) {
                                         <p>Suba el comprobante de pago del anticipo (50% del valor total).</p>
                                         <div class="form-group">
                                             <label for="comprobante">Seleccione el comprobante de pago (PDF, JPG, PNG):</label>
-                                            <input type="file" class="form-control-file" id="comprobante" name="comprobante" accept=".pdf,.jpg,.jpeg,.png" <?php echo !$reserva['archivo_comprobante'] ? : ''; ?>>
+                                            <input type="file" class="form-control-file" id="comprobante" name="comprobante" accept=".pdf,.jpg,.jpeg,.png" <?php echo !$reserva['archivo_comprobante'] ?: ''; ?>>
                                             <?php if ($reserva['archivo_comprobante']): ?>
                                                 <div class="mt-2">
                                                     <small class="text-success">Ya ha subido un comprobante. Si sube otro, reemplazará al anterior.</small>
@@ -139,9 +145,6 @@ if (isset($_SESSION['error'])) {
                                 </div>
                             </div>
                         </div>
-<<<<<<< HEAD
-
-=======
                         <div class="row mb-4">
                             <div class="col-12">
                                 <div class="card">
@@ -152,7 +155,7 @@ if (isset($_SESSION['error'])) {
                                         <p>Suba el comprobante de pago del anticipo (50% del valor total o 100% del valor total).</p>
                                         <div class="form-group">
                                             <label for="comprobante_total">Seleccione el comprobante de pago (PDF, JPG, PNG):</label>
-                                            <input type="file" class="form-control-file" id="comprobante_total" name="comprobante_total" accept=".pdf,.jpg,.jpeg,.png" <?php echo !$reserva['archivo_comprobante_total'] ? : ''; ?>>
+                                            <input type="file" class="form-control-file" id="comprobante_total" name="comprobante_total" accept=".pdf,.jpg,.jpeg,.png" <?php echo !$reserva['archivo_comprobante_total'] ?: ''; ?>>
                                             <?php if ($reserva['archivo_comprobante_total']): ?>
                                                 <div class="mt-2">
                                                     <small class="text-success">Ya ha subido un comprobante. Si sube otro, reemplazará al anterior.</small>
@@ -165,8 +168,7 @@ if (isset($_SESSION['error'])) {
                                 </div>
                             </div>
                         </div>
-                        
->>>>>>> origin/develop-david
+
                         <div class="alert alert-warning">
                             <p><strong>Recuerde:</strong> Una vez que suba estos documentos, su solicitud será revisada por un administrador para su aprobación final.</p>
                         </div>

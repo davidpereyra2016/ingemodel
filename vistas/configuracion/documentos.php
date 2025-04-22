@@ -36,6 +36,8 @@ if (isset($_SESSION['error'])) {
                         <th>Nombre</th>
                         <th>Descripción</th>
                         <th>Archivo</th>
+<th>Tipo</th>
+<th>Tipo</th>
                         <th>Fecha de Creación</th>
                         <th>Acciones</th>
                     </tr>
@@ -50,6 +52,9 @@ if (isset($_SESSION['error'])) {
                                 <a href="assets/docs/<?php echo $documento['archivo']; ?>" target="_blank">
                                     <?php echo $documento['archivo']; ?>
                                 </a>
+                            </td>
+                            <td>
+                                <?php echo ($documento['tipo'] == 'solicitud') ? 'Formulario de Solicitud' : (($documento['tipo'] == 'municipal') ? 'Formulario Municipal' : 'Otro'); ?>
                             </td>
                             <td><?php echo date('d/m/Y H:i', strtotime($documento['fecha_creacion'])); ?></td>
                             <td>

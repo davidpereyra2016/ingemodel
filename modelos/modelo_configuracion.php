@@ -25,32 +25,32 @@ class ModeloConfiguracion {
     }
 
     // Crear un nuevo documento
-    public function crearDocumento($nombre, $descripcion, $archivo) {
-        $consulta = $this->conexion->prepare("INSERT INTO documentos (nombre, descripcion, archivo, fecha_creacion, activo) 
-                    VALUES (:nombre, :descripcion, :archivo, NOW(), 1)");
+    public function crearDocumento($nombre, $descripcion, $archivo, $tipo) {
+        $consulta = $this->conexion->prepare("INSERT INTO documentos (nombre, descripcion, archivo, tipo, fecha_creacion, activo) 
+                    VALUES (:nombre, :descripcion, :archivo, :tipo, NOW(), 1)");
         $consulta->bindParam(':nombre', $nombre, PDO::PARAM_STR);
         $consulta->bindParam(':descripcion', $descripcion, PDO::PARAM_STR);
         $consulta->bindParam(':archivo', $archivo, PDO::PARAM_STR);
+        $consulta->bindParam(':tipo', $tipo, PDO::PARAM_STR);
         return $consulta->execute();
     }
 
     // Actualizar un documento existente
-    public function actualizarDocumento($id, $nombre, $descripcion, $archivo = null) {
+    public function actualizarDocumento($id, $nombre, $descripcion, $tipo, $archivo = null) {
         // Si se proporciona un nuevo archivo, actualizar también el archivo
         if ($archivo) {
-            $consulta = $this->conexion->prepare("UPDATE documentos SET nombre = :nombre, descripcion = :descripcion, 
+            $consulta = $this->conexion->prepare("UPDATE documentos SET nombre = :nombre, descripcion = :descripcion, tipo = :tipo, 
                      archivo = :archivo, fecha_actualizacion = NOW() 
                      WHERE id = :id");
             $consulta->bindParam(':archivo', $archivo, PDO::PARAM_STR);
         } else {
-            $consulta = $this->conexion->prepare("UPDATE documentos SET nombre = :nombre, descripcion = :descripcion, 
+            $consulta = $this->conexion->prepare("UPDATE documentos SET nombre = :nombre, descripcion = :descripcion, tipo = :tipo, 
                      fecha_actualizacion = NOW() WHERE id = :id");
         }
-        
         $consulta->bindParam(':nombre', $nombre, PDO::PARAM_STR);
         $consulta->bindParam(':descripcion', $descripcion, PDO::PARAM_STR);
+        $consulta->bindParam(':tipo', $tipo, PDO::PARAM_STR);
         $consulta->bindParam(':id', $id, PDO::PARAM_INT);
-        
         return $consulta->execute();
     }
 
