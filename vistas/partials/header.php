@@ -25,7 +25,6 @@ foreach ($notificaciones as $notificacion) {
       <span class="navbar-toggler-icon"></span>
     </button>
 
-
     <div class="collapse navbar-collapse ms-auto" id="navbarNavDropdown" style="flex-grow: 0;">
       <ul class="navbar-nav">
         <li class="nav-item">
@@ -79,6 +78,12 @@ foreach ($notificaciones as $notificacion) {
                 <a class="dropdown-item" href="?controlador=configuracion&accion=listarAranceles">
                   <i class="bi bi-cash-coin"></i>
                   <span class="ms-2">Gestión de Aranceles</span>
+                </a>
+              </li>
+              <li>
+                <a class="dropdown-item" href="?controlador=configuracion&accion=listarReportes">
+                  <i class="bi bi-cash-coin"></i>
+                  <span class="ms-2">Gestión de Reportes</span>
                 </a>
               </li>
             <?php endif; ?>
