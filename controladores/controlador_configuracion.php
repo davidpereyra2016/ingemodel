@@ -67,7 +67,8 @@ class ControladorConfiguracion {
                 if ($this->modelo->crearDocumento(
                     $_POST['nombre'],
                     $_POST['descripcion'],
-                    $nombre_archivo
+                    $nombre_archivo,
+                    $_POST['tipo']
                 )) {
                     $_SESSION['mensaje'] = "Documento creado con éxito";
                     header('Location: index.php?controlador=configuracion&accion=listarDocumentos');
@@ -147,6 +148,7 @@ class ControladorConfiguracion {
                 $id,
                 $_POST['nombre'],
                 $_POST['descripcion'],
+                $_POST['tipo'],
                 $nombre_archivo
             )) {
                 $_SESSION['mensaje'] = "Documento actualizado con éxito";

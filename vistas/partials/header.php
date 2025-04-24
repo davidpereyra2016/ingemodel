@@ -10,7 +10,6 @@
       <span class="navbar-toggler-icon"></span>
     </button>
 
-
     <div class="collapse navbar-collapse ms-auto" id="navbarNavDropdown" style="flex-grow: 0;">
       <ul class="navbar-nav">
         <li class="nav-item">
@@ -73,10 +72,15 @@
                   <span class="ms-2">Gestión de Aranceles</span>
                 </a>
               </li>
-            </ul>
-          </li>
-        <?php endif; ?>
-
+              <li>
+                <a class="dropdown-item" href="?controlador=reportes&accion=listar">
+                  <i class="bi bi-cash-coin"></i>
+                  <span class="ms-2">Gestión de Reportes</span>
+                </a>
+              </li>
+            <?php endif; ?>
+          </ul>
+        </li>
         <li class="nav-item dropdown">
           <a class="nav-link text-uppercase dropdown-toggle <?php echo $controlador == 'usuarios' && $accion == 'logout' ? 'active' : ''; ?>" role="button" data-bs-toggle="dropdown" aria-expanded="true">
             <i class="fas fa-user-circle me-1"></i>
