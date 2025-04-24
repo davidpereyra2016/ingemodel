@@ -190,6 +190,7 @@ class ControladorReservas
     }
     
     public function obtenerEventos() {
+        ob_clean();
         header('Content-Type: application/json');
         echo json_encode($this->modelo->obtenerEventosCalendario());
         exit();
