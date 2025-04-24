@@ -196,9 +196,20 @@ class ControladorReservas
     }
     
     public function obtenerEventos() {
+        ob_clean();
         header('Content-Type: application/json');
         echo json_encode($this->modelo->obtenerEventosCalendario());
         exit();
+    }
+
+    public function buscarFechaEvento() {
+        ob_clean();
+        if (isset($_GET['fecha_evento']) && $_GET['fecha_evento'] != '') {
+            $fecha_evento = $_GET['fecha_evento'];
+            $eventos = $this->modelo->buscarFechaEvento($fecha_evento);
+            echo json_encode($eventos);
+            exit();
+        }
     }
     
     public function generarPDF() {

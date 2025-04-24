@@ -179,4 +179,12 @@ class ModeloReservas {
         $consulta->execute();
         return $consulta->fetchAll(PDO::FETCH_ASSOC);
     }
+
+    // Buscar fecha_evento si existe
+    public function buscarFechaEvento($fecha_evento) {
+        $consulta = $this->conexion->prepare("SELECT * FROM reservas WHERE fecha_evento = :fecha_evento");
+        $consulta->bindParam(':fecha_evento', $fecha_evento);
+        $consulta->execute();
+        return $consulta->fetch(PDO::FETCH_ASSOC);
+    }
 }

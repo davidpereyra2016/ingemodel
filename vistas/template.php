@@ -16,7 +16,6 @@
 
     <!-- FullCalendar JS -->
     <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet" />
-    <!-- <script src='https://cdn.jsdelivr.net/npm/fullcalendar/index.global.min.js'></script> -->
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/locales/es.global.min.js"></script>
 
@@ -37,6 +36,7 @@
 
         <!-- Menu -->
         <?php include_once 'partials/header.php'; ?>
+        
 
     <?php endif; ?>
 
@@ -46,8 +46,10 @@
         </div>
     </main>
 
+    <?php include_once 'partials/toast.html'; ?>
     <!-- Footer -->
     <?php include_once 'partials/footer.php'; ?>
+
 
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <!-- Bootstrap Bundle JS (incluye Popper) -->
@@ -57,7 +59,10 @@
     <!-- Select2 -->
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <script src='./utils/js/fullcalendar.js'></script>
+    <script src="./utils/js/notificaciones.js"></script>
 
     <script>
         $(document).ready(function() {

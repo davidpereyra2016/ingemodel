@@ -128,6 +128,20 @@ document.addEventListener('DOMContentLoaded', function () {
                 // window.location.href = 'index.php?controlador=reservas&accion=crear&fecha=' + info.dateStr;
                 const fecha = info.dateStr; // formato YYYY-MM-DD
 
+                // condicio si la fecha seleccionada es menor a la fecha actual
+                // if (fecha < getCurrentDate()) {
+                //     alert('La fecha seleccionada es menor a la fecha actual.');
+                //     return;
+                // }
+
+                // console.log(isDateReserved(fecha));
+
+                // Condicion si echa ya tiene una reserva tirar un alert
+                // if (isDateReserved(fecha)) {
+                //     alert('La fecha seleccionada ya tiene una reserva.');
+                //     return;
+                // }
+
                 // Mostramos la fecha en el offcanvas
                 document.getElementById('fecha_evento').value = fecha;
                 // Abrir formulario de reserva en un offcanvas
@@ -138,5 +152,23 @@ document.addEventListener('DOMContentLoaded', function () {
 
         calendarSalon.render();
 
+    }
+
+
+    // Funcion para obtener todas las reservas y verifar si la fecha ya tiene una reserva
+    function isDateReserved(date) {
+       $.ajax({
+            url: 'index.php?controlador=reservas&accion=buscarFechaEvento',
+            data: { fecha_evento: date },
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                if (data.length > 0) {
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+        });
     }
 })
