@@ -81,7 +81,7 @@ foreach ($notificaciones as $notificacion) {
                 </a>
               </li>
               <li>
-                <a class="dropdown-item" href="?controlador=configuracion&accion=listarReportes">
+                <a class="dropdown-item" href="?controlador=reportes&accion=listar">
                   <i class="bi bi-cash-coin"></i>
                   <span class="ms-2">Gestión de Reportes</span>
                 </a>
