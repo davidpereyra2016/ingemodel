@@ -52,6 +52,47 @@ class ModeloReservas {
                 return ['error' => 'Límite alcanzado: Máximo 3 reservas en fines de semana.'];
             }
         }
+        
+        // Verificar que los horarios estén dentro de los rangos permitidos: 11:00-16:00, 17:00-21:00, 22:00-05:00
+        $rangos_permitidos = [
+            ['inicio' => '11:00', 'fin' => '16:00'],
+            ['inicio' => '17:00', 'fin' => '21:00'],
+            ['inicio' => '22:00', 'fin' => '05:00']
+        ];
+        
+        $horario_valido = false;
+        $mensaje_error = 'Horario no válido. Debe estar dentro de alguno de estos rangos: 11:00-16:00, 17:00-21:00 o 22:00-05:00.';
+        
+        foreach ($rangos_permitidos as $rango) {
+            // Convertir a timestamp para facilitar la comparación
+            $inicio_rango = strtotime($rango['inicio']);
+            $fin_rango = strtotime($rango['fin']);
+            $hora_inicio_ts = strtotime($hora_inicio);
+            $hora_fin_ts = strtotime($hora_fin);
+            
+            // Caso especial para el rango que cruza medianoche (22:00-05:00)
+            if ($rango['inicio'] == '22:00' && $rango['fin'] == '05:00') {
+                // Si la hora de inicio es después de las 22:00 o antes de las 05:00
+                if (($hora_inicio_ts >= $inicio_rango || $hora_inicio_ts <= $fin_rango) &&
+                    ($hora_fin_ts >= $inicio_rango || $hora_fin_ts <= $fin_rango)) {
+                    $horario_valido = true;
+                    break;
+                }
+            } else {
+                // Para los otros rangos, validación normal
+                if ($hora_inicio_ts >= $inicio_rango && 
+                    $hora_inicio_ts < $fin_rango && 
+                    $hora_fin_ts > $inicio_rango && 
+                    $hora_fin_ts <= $fin_rango) {
+                    $horario_valido = true;
+                    break;
+                }
+            }
+        }
+        
+        if (!$horario_valido) {
+            return ['error' => $mensaje_error];
+        }
 
         // Verificar si ya existe una reserva para esa fecha
         $consulta = $this->conexion->prepare("SELECT COUNT(*) as total FROM reservas 

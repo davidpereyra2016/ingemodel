@@ -33,6 +33,16 @@ if (isset($_SESSION['error'])) {
                                 <label for="hora_fin">Hora de Finalización:</label>
                                 <input type="time" class="form-control" id="hora_fin" name="hora_fin" required>
                             </div>
+                            <div class="col-md-12">
+                                <div class="alert alert-info mt-2">
+                                    <small><strong>Importante:</strong> Los horarios deben estar dentro de alguno de estos rangos:</small>
+                                    <ul class="mb-0 small">
+                                        <li>Mañana/Tarde: 11:00 a 16:00</li>
+                                        <li>Tarde/Noche: 17:00 a 21:00</li>
+                                        <li>Noche/Madrugada: 22:00 a 05:00</li>
+                                    </ul>
+                                </div>
+                            </div>
                         </div>
 
                         <div class="form-group">
@@ -139,6 +149,17 @@ if (isset($_SESSION['error'])) {
 <!-- Script para manejar el formulario de grupo de matriculados -->
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        // Validación básica para horarios
+        const horaInicioInput = document.getElementById('hora_inicio');
+        const horaFinInput = document.getElementById('hora_fin');
+        
+        // Definir los rangos permitidos
+        const rangosPermitidos = [
+            { inicio: '11:00', fin: '16:00' },
+            { inicio: '17:00', fin: '21:00' },
+            { inicio: '22:00', fin: '05:00' }
+        ];
+        
         // Mostrar/Ocultar sección de grupo según selección
         const grupoRadios = document.querySelectorAll('input[name="es_grupo"]');
         const grupoSection = document.getElementById('grupo_matriculados');
