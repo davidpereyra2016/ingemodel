@@ -36,8 +36,15 @@ class ControladorReservas
             $tipo_uso = $_POST['tipo_uso'];
             $motivo_de_uso = $_POST['motivo_de_uso'];
             
+            // Generar código único y fecha de vencimiento
+            $codigo_unico = 'RES-' . strtoupper(bin2hex(random_bytes(4)));
+            $fecha_vencimiento = date('Y-m-d H:i:s', strtotime('+48 hours'));
+            
+            // Guardar código en sesión para debug
+            $_SESSION['ultimo_codigo_reserva'] = $codigo_unico;
+            
             // 1. Llamar al modelo y capturar el resultado
-            $id_reserva = $this->modelo->crearReserva($id_usuario, $fecha_evento, $hora_inicio, $hora_fin, $tipo_uso, $motivo_de_uso);
+            $id_reserva = $this->modelo->crearReserva($id_usuario, $fecha_evento, $hora_inicio, $hora_fin, $tipo_uso, $motivo_de_uso, $codigo_unico, $fecha_vencimiento);
             // 2. Verificar si hay error primero
             if (isset($id_reserva['error'])) {
                 $_SESSION['error'] = $id_reserva['error'];
@@ -59,11 +66,14 @@ class ControladorReservas
                 // Registrar en historial
                 $this->modelo->registrarHistorial($id_reserva, $id_usuario, 'creación', null, 'pendiente', 'Solicitud de reserva creada');
                 
-                // Redireccionar a subir formulario
-                header("Location: index.php?controlador=reservas&accion=subirFormulario&id=".$id_reserva);
+                // Redireccionar a subir formulario, pasando solo el código único
+                // Asegurar que la URL está bien formada
+                $_SESSION['debug_info'] = "Redirigiendo a código: " . $codigo_unico;
+                $redirect_url = "index.php?controlador=reservas&accion=subirFormulario&codigo=" . $codigo_unico;
+                header("Location: " . $redirect_url);
                 exit();
             } else {
-                $_SESSION['error'] = "No se pudo crear la reserva. El horario ya está ocupado.";
+                $_SESSION['error'] = "No se pudo crear la reserva. El horario ya está ocupado o has alcanzado el límite de reservas.";
                 include_once("vistas/reservas/crear.php");
             }
         } else {
@@ -72,8 +82,139 @@ class ControladorReservas
     }
     
     public function subirFormulario() {
-        $id_reserva = $_GET['id'];
-        $reserva = $this->modelo->obtenerReserva($id_reserva);
+        // Verificar si el usuario está logueado
+        if (!isset($_SESSION['id_usuario'])) {
+            header('Location: index.php?controlador=usuarios&accion=login');
+            exit();
+        }
+
+        // --- INICIO CAMBIOS ---
+        if (!isset($_GET['codigo'])) {
+            $_SESSION['error'] = 'No se proporcionó el código de reserva.';
+            header('Location: index.php?controlador=reservas&accion=listar');
+            exit();
+        }
+
+        $codigo_unico = $_GET['codigo'];
+        
+        // Debug info para capturar el código recibido
+        $_SESSION['debug_codigo_recibido'] = $codigo_unico;
+
+        // Verificar y potencialmente cancelar la reserva si ha expirado ANTES de mostrar el formulario
+        $this->modelo->verificarYCancelarReservaExpirada($codigo_unico);
+
+        // Obtener la reserva por código único
+        $reserva = $this->modelo->obtenerReservaPorCodigo($codigo_unico);
+
+        if (!$reserva) {
+            $_SESSION['error'] = 'Reserva no encontrada o código inválido.';
+            header('Location: index.php?controlador=reservas&accion=listar');
+            exit();
+        }
+        // --- FIN CAMBIOS ---
+
+        // Verificar si la reserva pertenece al usuario actual o si es admin
+        if ($reserva['id_usuario'] != $_SESSION['id_usuario'] && $_SESSION['rol'] != 'administrador') {
+            $_SESSION['error'] = 'No tiene permiso para ver esta reserva.';
+            header('Location: index.php?controlador=reservas&accion=listar');
+            exit();
+        }
+
+        // Manejo de la subida de archivos si es POST
+        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            // --- INICIO CAMBIOS POST ---
+            // Re-verificar expiración justo antes de procesar la subida
+            $this->modelo->verificarYCancelarReservaExpirada($codigo_unico);
+            $reservaActualizada = $this->modelo->obtenerReservaPorCodigo($codigo_unico); // Obtener estado más reciente
+
+            // Si la reserva fue cancelada mientras el usuario tenía el formulario abierto
+            if ($reservaActualizada['estado'] === 'cancelada' || $reservaActualizada['estado'] === 'rechazada' || $reservaActualizada['estado'] === 'baja') {
+                $_SESSION['error'] = 'No se pueden subir archivos. La reserva ha sido cancelada o rechazada.';
+                header('Location: index.php?controlador=reservas&accion=subirFormulario&codigo=' . $codigo_unico);
+                exit();
+            }
+            // Si la reserva ya fue aprobada, tampoco permitir cambios (quizás opcional)
+            if ($reservaActualizada['estado'] === 'aprobada') {
+                $_SESSION['error'] = 'No se pueden modificar archivos de una reserva ya aprobada.';
+                header('Location: index.php?controlador=reservas&accion=subirFormulario&codigo=' . $codigo_unico);
+                exit();
+            }
+            // --- FIN CAMBIOS POST ---
+
+            $target_dir = "assets/uploads/";
+            
+            // Asegurarse de que el directorio existe
+            if (!file_exists($target_dir)) {
+                mkdir($target_dir, 0777, true);
+            }
+            
+            $archivo_formulario = null;
+            if (isset($_FILES['formulario']) && $_FILES['formulario']['error'] == 0) {
+                $archivo_temp = $_FILES['formulario']['tmp_name'];
+                $nombre_archivo = time() . '_' . $_FILES['formulario']['name'];
+                $ruta_destino = $target_dir . $nombre_archivo;
+                
+                if (move_uploaded_file($archivo_temp, $ruta_destino)) {
+                    $archivo_formulario = $nombre_archivo;
+                }
+            }
+            
+            $archivo_municipal = null;
+            if (isset($_FILES['formulario_municipal']) && $_FILES['formulario_municipal']['error'] == 0) {
+                $archivo_temp = $_FILES['formulario_municipal']['tmp_name'];
+                $nombre_archivo = time() . '_' . $_FILES['formulario_municipal']['name'];
+                $ruta_destino = $target_dir . $nombre_archivo;
+                
+                if (move_uploaded_file($archivo_temp, $ruta_destino)) {
+                    $archivo_municipal = $nombre_archivo;
+                }
+            }
+            
+            $archivo_comprobante = null;
+            if (isset($_FILES['comprobante']) && $_FILES['comprobante']['error'] == 0) {
+                $archivo_temp = $_FILES['comprobante']['tmp_name'];
+                $nombre_archivo = time() . '_' . $_FILES['comprobante']['name'];
+                $ruta_destino = $target_dir . $nombre_archivo;
+                
+                if (move_uploaded_file($archivo_temp, $ruta_destino)) {
+                    $archivo_comprobante = $nombre_archivo;
+                }
+            }
+            
+            $archivo_comprobante_total = null;
+            if (isset($_FILES['comprobante_total']) && $_FILES['comprobante_total']['error'] == 0) {
+                $archivo_temp = $_FILES['comprobante_total']['tmp_name'];
+                $nombre_archivo = time() . '_' . $_FILES['comprobante_total']['name'];
+                $ruta_destino = $target_dir . $nombre_archivo;
+                
+                if (move_uploaded_file($archivo_temp, $ruta_destino)) {
+                    $archivo_comprobante_total = $nombre_archivo;
+                }
+            }
+            
+            if ($this->modelo->subirArchivos($reserva['id'], $archivo_formulario, $archivo_comprobante, $archivo_municipal, $archivo_comprobante_total)) {
+                // Registrar pago de anticipo si se cargó comprobante
+                if ($archivo_comprobante) {
+                    $this->modelo->registrarPago($reserva['id'], 'anticipo');
+                    
+                    // Registrar en historial
+                    $this->modelo->registrarHistorial($reserva['id'], $_SESSION['id_usuario'], 'pago', null, 'anticipo', 'Pago de anticipo registrado');
+                }
+                
+                if ($archivo_comprobante_total) {
+                    $this->modelo->registrarPago($reserva['id'], 'saldo_pagado');
+                    
+                    // Registrar en historial
+                    $this->modelo->registrarHistorial($reserva['id'], $_SESSION['id_usuario'], 'pago', null, 'comprobante_total', 'Pago de comprobante total registrado');
+                }
+                
+                $_SESSION['mensaje'] = "Documentos subidos correctamente. Su solicitud será revisada por un administrador.";
+                header("Location: index.php?controlador=reservas&accion=listar");
+                exit();
+            } else {
+                $_SESSION['error'] = "Error al subir los archivos.";
+            }
+        }
         
         // Cargar los documentos para descargar según su tipo
         include_once("modelos/modelo_configuracion.php");
@@ -94,82 +235,11 @@ class ControladorReservas
             }
         }
         
-        if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            $dir_uploads = "assets/uploads/";
-            
-            // Asegurarse de que el directorio existe
-            if (!file_exists($dir_uploads)) {
-                mkdir($dir_uploads, 0777, true);
-            }
-            
-            $archivo_formulario = null;
-            if (isset($_FILES['formulario']) && $_FILES['formulario']['error'] == 0) {
-                $archivo_temp = $_FILES['formulario']['tmp_name'];
-                $nombre_archivo = time() . '_' . $_FILES['formulario']['name'];
-                $ruta_destino = $dir_uploads . $nombre_archivo;
-                
-                if (move_uploaded_file($archivo_temp, $ruta_destino)) {
-                    $archivo_formulario = $nombre_archivo;
-                }
-            }
-            
-            $archivo_municipal = null;
-            if (isset($_FILES['formulario_municipal']) && $_FILES['formulario_municipal']['error'] == 0) {
-                $archivo_temp = $_FILES['formulario_municipal']['tmp_name'];
-                $nombre_archivo = time() . '_' . $_FILES['formulario_municipal']['name'];
-                $ruta_destino = $dir_uploads . $nombre_archivo;
-                
-                if (move_uploaded_file($archivo_temp, $ruta_destino)) {
-                    $archivo_municipal = $nombre_archivo;
-                }
-            }
-            
-            $archivo_comprobante = null;
-            if (isset($_FILES['comprobante']) && $_FILES['comprobante']['error'] == 0) {
-                $archivo_temp = $_FILES['comprobante']['tmp_name'];
-                $nombre_archivo = time() . '_' . $_FILES['comprobante']['name'];
-                $ruta_destino = $dir_uploads . $nombre_archivo;
-                
-                if (move_uploaded_file($archivo_temp, $ruta_destino)) {
-                    $archivo_comprobante = $nombre_archivo;
-                }
-            }
-            
-            $archivo_comprobante_total = null;
-            if (isset($_FILES['comprobante_total']) && $_FILES['comprobante_total']['error'] == 0) {
-                $archivo_temp = $_FILES['comprobante_total']['tmp_name'];
-                $nombre_archivo = time() . '_' . $_FILES['comprobante_total']['name'];
-                $ruta_destino = $dir_uploads . $nombre_archivo;
-                
-                if (move_uploaded_file($archivo_temp, $ruta_destino)) {
-                    $archivo_comprobante_total = $nombre_archivo;
-                }
-            }
-            
-            if ($this->modelo->subirArchivos($id_reserva, $archivo_formulario, $archivo_comprobante, $archivo_municipal, $archivo_comprobante_total)) {
-                // Registrar pago de anticipo si se cargó comprobante
-                if ($archivo_comprobante) {
-                    $this->modelo->registrarPago($id_reserva, 'anticipo');
-                    
-                    // Registrar en historial
-                    $this->modelo->registrarHistorial($id_reserva, $_SESSION['id_usuario'], 'pago', null, 'anticipo', 'Pago de anticipo registrado');
-                }
-                
-                if ($archivo_comprobante_total) {
-                    $this->modelo->registrarPago($id_reserva, 'saldo_pagado');
-                    
-                    // Registrar en historial
-                    $this->modelo->registrarHistorial($id_reserva, $_SESSION['id_usuario'], 'pago', null, 'comprobante_total', 'Pago de comprobante total registrado');
-                }
-                
-                $_SESSION['mensaje'] = "Documentos subidos correctamente. Su solicitud será revisada por un administrador.";
-                header("Location: index.php?controlador=reservas&accion=listar");
-                exit();
-            } else {
-                $_SESSION['error'] = "Error al subir los archivos.";
-            }
-        }
+        // IMPORTANTE: Pasar explícitamente el código único a la vista como variable global
+        // para que esté disponible en el formulario y el script JavaScript
+        global $codigo_unico; // Intentar pasar como variable global
         
+        // Incluir la vista con el código único
         include_once("vistas/reservas/subir_formulario.php");
     }
     
@@ -184,6 +254,43 @@ class ControladorReservas
         }
         
         include_once("vistas/reservas/ver.php");
+    }
+    
+    // Endpoint para verificar el estado de la reserva vía AJAX
+    public function verificarEstado() {
+        header('Content-Type: application/json'); // Asegurar que la respuesta sea JSON
+
+        if (!isset($_GET['codigo'])) {
+            echo json_encode(['estado' => 'error', 'mensaje' => 'Código no proporcionado']);
+            exit();
+        }
+
+        $codigo_unico = $_GET['codigo'];
+
+        // Llamar a la función que verifica y cancela si es necesario
+        // Ahora esta función devuelve información sobre el resultado
+        $resultado_verificacion = $this->modelo->verificarYCancelarReservaExpirada($codigo_unico);
+
+        // Obtener el estado actualizado de la reserva
+        $reserva = $this->modelo->obtenerReservaPorCodigo($codigo_unico);
+
+        if ($reserva) {
+            // Determinar si tiene comprobantes de pago
+            $tiene_pago = !empty($reserva['archivo_comprobante']) || !empty($reserva['archivo_comprobante_total']);
+            
+            echo json_encode([
+                'estado' => $reserva['estado'],
+                'fecha_vencimiento' => $reserva['fecha_vencimiento'],
+                'motivo_rechazo' => $reserva['motivo_rechazo'], // Incluir motivo si existe
+                'tiene_pago' => $tiene_pago, // Indicar si tiene algún comprobante de pago
+                'comprobante_50' => !empty($reserva['archivo_comprobante']),
+                'comprobante_100' => !empty($reserva['archivo_comprobante_total']),
+                'mensaje_verificacion' => isset($resultado_verificacion['motivo']) ? $resultado_verificacion['motivo'] : null
+            ]);
+        } else {
+            echo json_encode(['estado' => 'no_encontrada', 'mensaje' => 'Reserva no encontrada']);
+        }
+        exit(); // Terminar ejecución después de enviar JSON
     }
     
     public function aprobarRechazar() {

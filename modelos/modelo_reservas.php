@@ -26,7 +26,8 @@ class ModeloReservas {
     // Obtener una reserva específica
     public function obtenerReserva($id) {
         $consulta = $this->conexion->prepare("SELECT r.*, u.nombre, u.apellido, u.matricula, u.email, u.telefono, 
-                                             r.archivo_formulario, r.archivo_municipal, r.archivo_comprobante, r.archivo_comprobante_total 
+                                             r.archivo_formulario, r.archivo_municipal, r.archivo_comprobante, r.archivo_comprobante_total,
+                                             r.codigo_unico 
                                              FROM reservas r 
                                              INNER JOIN usuarios u ON r.id_usuario = u.id 
                                              WHERE r.id = :id");
@@ -35,8 +36,20 @@ class ModeloReservas {
         return $consulta->fetch(PDO::FETCH_ASSOC);
     }
 
+    // Obtener una reserva específica por Código Único
+    public function obtenerReservaPorCodigo($codigoUnico) {
+        $consulta = $this->conexion->prepare("SELECT r.*, u.nombre, u.apellido, u.matricula, u.email, u.telefono, 
+                                             r.archivo_formulario, r.archivo_municipal, r.archivo_comprobante, r.archivo_comprobante_total 
+                                             FROM reservas r 
+                                             INNER JOIN usuarios u ON r.id_usuario = u.id 
+                                             WHERE r.codigo_unico = :codigo_unico");
+        $consulta->bindParam(':codigo_unico', $codigoUnico);
+        $consulta->execute();
+        return $consulta->fetch(PDO::FETCH_ASSOC);
+    }
+
     // Crear una nueva reserva
-    public function crearReserva($id_usuario, $fecha_evento, $hora_inicio, $hora_fin, $tipo_uso, $motivo_de_uso) {
+    public function crearReserva($id_usuario, $fecha_evento, $hora_inicio, $hora_fin, $tipo_uso, $motivo_de_uso, $codigo_unico, $fecha_vencimiento) {
 
         // Verificar si la fecha es fin de semana (6=sábado, 7=domingo)
         $fecha_dia = date('N', strtotime($fecha_evento));
@@ -125,8 +138,8 @@ class ModeloReservas {
         $monto = ($hora_fin <= $hora_comparacion) ? $config_arancel['monto_antes_22'] : $config_arancel['monto_despues_22'];
         
         // Crear la reserva
-        $consulta = $this->conexion->prepare("INSERT INTO reservas (id_usuario, fecha_evento, hora_inicio, hora_fin, tipo_uso, monto, motivo_de_uso) 
-                                             VALUES (:id_usuario, :fecha_evento, :hora_inicio, :hora_fin, :tipo_uso, :monto, :motivo_de_uso)");
+        $consulta = $this->conexion->prepare("INSERT INTO reservas (id_usuario, fecha_evento, hora_inicio, hora_fin, tipo_uso, monto, motivo_de_uso, codigo_unico, fecha_vencimiento, estado) 
+                                             VALUES (:id_usuario, :fecha_evento, :hora_inicio, :hora_fin, :tipo_uso, :monto, :motivo_de_uso, :codigo_unico, :fecha_vencimiento, 'pendiente')");
         $consulta->bindParam(':id_usuario', $id_usuario);
         $consulta->bindParam(':fecha_evento', $fecha_evento);
         $consulta->bindParam(':hora_inicio', $hora_inicio);
@@ -134,6 +147,8 @@ class ModeloReservas {
         $consulta->bindParam(':tipo_uso', $tipo_uso);
         $consulta->bindParam(':monto', $monto);
         $consulta->bindParam(':motivo_de_uso', $motivo_de_uso);
+        $consulta->bindParam(':codigo_unico', $codigo_unico);
+        $consulta->bindParam(':fecha_vencimiento', $fecha_vencimiento);
         $consulta->execute();
         
         return $this->conexion->lastInsertId();
@@ -146,6 +161,46 @@ class ModeloReservas {
         $consulta->bindParam(':estado', $estado);
         $consulta->bindParam(':motivo', $motivo);
         return $consulta->execute();
+    }
+
+    // Actualizar estado de reserva por Código Único
+    public function actualizarEstadoPorCodigo($codigo_unico, $estado, $motivo = null) {
+        $consulta = $this->conexion->prepare("UPDATE reservas SET estado = :estado, motivo_rechazo = :motivo WHERE codigo_unico = :codigo_unico");
+        $consulta->bindParam(':codigo_unico', $codigo_unico);
+        $consulta->bindParam(':estado', $estado);
+        $consulta->bindParam(':motivo', $motivo);
+        return $consulta->execute();
+    }
+
+    // Verificar si la reserva ha expirado y cancelarla si es necesario
+    public function verificarYCancelarReservaExpirada($codigoUnico) {
+        $reserva = $this->obtenerReservaPorCodigo($codigoUnico);
+        
+        // Solo proceder si la reserva existe y está pendiente
+        if ($reserva && $reserva['estado'] === 'pendiente') {
+            $fechaVencimiento = strtotime($reserva['fecha_vencimiento']);
+            $ahora = time();
+            
+            // Verificar si el tiempo ha expirado
+            if ($fechaVencimiento < $ahora) {
+                // Verificar si ya se subió algún comprobante de pago (50% o 100%)
+                $tienePagoRegistrado = !empty($reserva['archivo_comprobante']) || !empty($reserva['archivo_comprobante_total']);
+                
+                // Solo cancelar si NO hay ningún comprobante de pago subido
+                if (!$tienePagoRegistrado) {
+                    // Marcar como cancelada
+                    $this->actualizarEstadoPorCodigo($codigoUnico, 'cancelada', 'Expiró el tiempo para completar el pago.');
+                    // Registro en historial
+                    $this->registrarHistorial($reserva['id'], $reserva['id_usuario'], 'cancelacion_auto', 'pendiente', 'cancelada', 'Reserva cancelada automáticamente por expiración sin comprobante de pago.');
+                    return ['estado' => 'cancelada', 'motivo' => 'Expiró el tiempo para completar el pago.'];
+                } else {
+                    // El tiempo expiró pero hay un comprobante de pago, no cancelar
+                    return ['estado' => 'pendiente', 'motivo' => 'Tiempo expirado pero se detectó un pago registrado.'];
+                }
+            }
+        }
+        // Si no expiró, devolver el estado actual
+        return $reserva ? ['estado' => $reserva['estado']] : ['estado' => 'no_encontrada'];
     }
 
     // Subir archivos relacionados a la reserva
@@ -195,6 +250,7 @@ class ModeloReservas {
                                            END as color
                                            FROM reservas 
                                            WHERE fecha_evento >= CURDATE()
+                                           AND estado NOT IN ('cancelada', 'baja', 'rechazada') -- Ajustado para no mostrar canceladas, bajas o rechazadas en calendario
                                            ORDER BY fecha_evento");
         return $consulta->fetchAll(PDO::FETCH_ASSOC);
     }

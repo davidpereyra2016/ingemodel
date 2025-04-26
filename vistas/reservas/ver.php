@@ -8,6 +8,7 @@ if (isset($_SESSION['error'])) {
     echo '<div class="alert alert-danger">' . $_SESSION['error'] . '</div>';
     unset($_SESSION['error']);
 }
+
 ?>
 
 <div class="container">
@@ -193,7 +194,7 @@ if (isset($_SESSION['error'])) {
                         <?php if (($reserva['estado'] == 'pendiente' || $reserva['estado'] == 'aprobada') && 
                                  (!$reserva['archivo_formulario'] || !$reserva['archivo_comprobante'] || 
                                   !$reserva['archivo_municipal'] || !$reserva['archivo_comprobante_total'])): ?>
-                            <a href="index.php?controlador=reservas&accion=subirFormulario&id=<?php echo $reserva['id']; ?>" class="btn btn-warning">
+                            <a href="index.php?controlador=reservas&accion=subirFormulario&codigo=<?php echo $reserva['codigo_unico']; ?>" class="btn btn-warning">
                                 <i class="fas fa-upload"></i> Subir Archivos
                             </a>
                         <?php endif; ?>
