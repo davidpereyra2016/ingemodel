@@ -25,27 +25,23 @@
             <li><a class="dropdown-item" href="?controlador=reservas&accion=listar" disabled> <i class="bi bi-calendar-event-fill me-2"></i>Cancha</a></li>
           </ul>
         </li>
-        
+
         <?php if (!$esIngeniero): ?>
-        <li class="nav-item dropdown text-uppercase">
-          <a class="nav-link dropdown-toggle text-uppercase <?php echo $controlador == 'reservas' && ($accion == 'listar' || $accion == 'listar&tipo=2') ? 'active' : ''; ?>" role="button" data-bs-toggle="dropdown" aria-expanded="true">
-            Gestión
-          </a>
-          <ul class="dropdown-menu" data-bs-popper="static">
-            <li><a class="dropdown-item" href="?controlador=reservas&accion=listar&tipo=1"><i class="bi bi-calendar2-event me-2"></i> Mis Reservas</a></li>
-            <li><a class="dropdown-item" href="?controlador=reservas&accion=listar&tipo=2"> <i class="bi bi-calendar-range-fill me-2"></i> Gestionar Reservas</a></li>
-          </ul>
-        </li>
+          <li class="nav-item dropdown text-uppercase">
+            <a class="nav-link dropdown-toggle text-uppercase <?php echo $controlador == 'reservas' && ($accion == 'listar' || $accion == 'listar&tipo=2') ? 'active' : ''; ?>" role="button" data-bs-toggle="dropdown" aria-expanded="true">
+              Gestión
+            </a>
+            <ul class="dropdown-menu" data-bs-popper="static">
+              <li><a class="dropdown-item" href="?controlador=reservas&accion=listar&tipo=1"><i class="bi bi-calendar2-event me-2"></i> Mis Reservas</a></li>
+              <li><a class="dropdown-item" href="?controlador=reservas&accion=listar&tipo=2"> <i class="bi bi-calendar-range-fill me-2"></i> Gestionar Reservas</a></li>
+            </ul>
+          </li>
         <?php else: ?>
           <li class="nav-item">
             <a class="nav-link text-uppercase <?php echo $controlador == 'reservas' && $accion == 'listar' ? 'active' : ''; ?>"
               aria-current="page" href="?controlador=reservas&accion=listar"><i class="bi bi-calendar2-event me-2"></i>Mis Reservas</a>
-          </li>         
+          </li>
         <?php endif; ?>
-        <!-- <li class="nav-item py-2 py-lg-1 col-12 col-lg-auto">
-          <div class="vr d-none d-lg-flex h-100 mx-lg-2 text-white"></div>
-          <hr class="d-lg-none my-2 text-white-50">
-        </li> -->
 
         <?php if (!$esIngeniero): ?>
           <li class="nav-item dropdown text-uppercase">
@@ -78,9 +74,9 @@
                   <span class="ms-2">Gestión de Reportes</span>
                 </a>
               </li>
-            <?php endif; ?>
-          </ul>
-        </li>
+            </ul>
+          </li>
+        <?php endif; ?>
         <li class="nav-item dropdown">
           <a class="nav-link text-uppercase dropdown-toggle <?php echo $controlador == 'usuarios' && $accion == 'logout' ? 'active' : ''; ?>" role="button" data-bs-toggle="dropdown" aria-expanded="true">
             <i class="fas fa-user-circle me-1"></i>
