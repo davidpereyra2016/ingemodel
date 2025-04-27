@@ -8,6 +8,8 @@ if (isset($_SESSION['error'])) {
     echo '<div class="alert alert-danger">' . $_SESSION['error'] . '</div>';
     unset($_SESSION['error']);
 }
+$idUsuario = (int)$_SESSION['id_usuario'];
+$isAdmin = $_SESSION['rol'] !== 'ingeniero' ? true : false; // Verifica si el usuario es admin
 ?>
 
 <div class="container">
@@ -36,25 +38,31 @@ if (isset($_SESSION['error'])) {
         <div class="col-md-12">
             <div class="card">
                 <div class="card-body">
-                    <div class="alert alert-success">
-                        <p><strong>Leyenda:</strong></p>
+                    <div class="alert alert-light mb-4" role="alert">
+                        <p class="mb-2"><strong >Instrucciones:</strong> Haga clic en una fecha para reservar o ver detalles de una reserva existente.</p> 
                         <div class="d-flex flex-wrap">
                             <div class="d-flex align-items-center me-3">
-                                <span class="dot bg-danger"></span>
-                                <span class="ms-2">Reservado</span>
+                                <span class="dot" style="color: #28a745;">
+                                    <i class="bi bi-calendar-fill"></i>
+                                </span>
+                                <span class="ms-2">Aprobada</span>
                             </div>
                             <div class="d-flex align-items-center me-3">
-                                <span class="dot bg-success"></span>
-                                <span class="ms-2">Disponible</span>
+                                <span class="dot" style="color: #ffc107;">
+                                    <i class="bi bi-calendar-fill"></i>
+                                </span>
+                                <span class="ms-2">Pendiente</span>
                             </div>
                             <div class="d-flex align-items-center me-3">
-                                <span class="dot bg-warning"></span>
-                                <span class="ms-2">En Espera</span>
+                                <span class="dot" style="color: #dc3545;">
+                                    <i class="bi bi-calendar-fill"></i>
+                                </span>
+                                <span class="ms-2">Rechazada</span>
                             </div>
                         </div>
                     </div>
 
-                    <div id="calendarSalon"></div>
+                    <div id="calendar" data-name="salon" data-idUsuario="<?php echo $idUsuario; ?>" data-isAdmin="<?php echo $isAdmin; ?>"></div>
                 </div>
             </div>
         </div>
@@ -62,14 +70,12 @@ if (isset($_SESSION['error'])) {
 </div>
 
 <!-- Modal para mostrar detalles de una reserva -->
-<div class="modal fade" id="eventModal" tabindex="-1" role="dialog" aria-labelledby="eventModalLabel" aria-hidden="true">
+<div class="modal fade" id="eventModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="eventModalLabel">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
-            <div class="modal-header">
+            <div class="modal-header bg-success-2 text-white">
                 <h5 class="modal-title" id="eventModalLabel">Detalles de la Reserva</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
                 <div id="eventDetails">
@@ -79,9 +85,8 @@ if (isset($_SESSION['error'])) {
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cerrar</button>
-                <a href="#" class="btn btn-primary" id="viewDetailBtn">Ver Detalles</a>
-                <a href="index.php?controlador=reservas&accion=crear" class="btn btn-success">Nueva Reserva</a>
+                <a href="#" class="btn btn-light" id="viewDetailBtn">Ver Detalles</a>
+                <a href="index.php?controlador=reservas&accion=crear" class="btn btn-success-theme">Nueva Reserva</a>
             </div>
         </div>
     </div>

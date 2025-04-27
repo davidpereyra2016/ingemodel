@@ -22,7 +22,6 @@ class ModeloReservas {
         $consulta->execute();
         return $consulta->fetchAll(PDO::FETCH_ASSOC);
     }
-
     // Obtener una reserva específica
     public function obtenerReserva($id) {
         $consulta = $this->conexion->prepare("SELECT r.*, u.nombre, u.apellido, u.matricula, u.email, u.telefono, 
@@ -186,7 +185,7 @@ class ModeloReservas {
     // Obtener eventos para el calendario
     public function obtenerEventosCalendario() {
         $consulta = $this->conexion->query("SELECT id, fecha_evento as start, 
-                                           CONCAT(tipo_uso, ' (', hora_inicio, ' - ', hora_fin, ')') as title, 
+                                           CONCAT(tipo_uso, ' (', hora_inicio, ' - ', hora_fin, ')') as title, id_usuario, estado,
                                            CASE 
                                                 WHEN estado = 'aprobada' THEN '#28a745' 
                                                 WHEN estado = 'pendiente' THEN '#ffc107'

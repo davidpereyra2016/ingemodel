@@ -48,11 +48,12 @@
             <i class="bi bi-calendar2-event me-1"></i>
             Calendario de Disponibilidad
         </h2>
-        <div id="calendarInicio"></div>
+
+        <div id="calendar" data-name="inicio" data-idUsuario="<?php echo $idUsuario; ?>" data-isAdmin=""></div>
     </div>
 </div>
 
-<!-- <?php include __DIR__ . './../reservas/formulario.php'; ?> -->
+<?php include __DIR__ . './../reservas/formulario.php'; ?>
 
 
 
