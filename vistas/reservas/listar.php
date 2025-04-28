@@ -117,7 +117,3 @@ if (isset($_SESSION['error'])) {
 
     <?php endif; ?>
 </div>
-
-<!-- Offcanvas para el formulario de reserva -->
-<?php include __DIR__ . './formulario.php'; ?>
-<?php include __DIR__ . './formulario-documento.php'; ?>

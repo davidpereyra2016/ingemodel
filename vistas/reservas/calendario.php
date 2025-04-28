@@ -91,6 +91,3 @@ $isAdmin = $_SESSION['rol'] !== 'ingeniero' ? true : false; // Verifica si el us
         </div>
     </div>
 </div>
-
-<?php include __DIR__ . './formulario.php'; ?>
-<?php include __DIR__ . './formulario-documento.php'; ?>
