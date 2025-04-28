@@ -18,7 +18,7 @@
     <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.css" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/locales/es.global.min.js"></script>
-
+    
     <link href='https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css' rel='stylesheet'>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -58,33 +58,12 @@
     <script src="https://cdn.datatables.net/v/dt/dt-2.2.2/datatables.min.js"></script>
     <!-- Select2 -->
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
-
+    <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script src='./utils/js/fullcalendar.js'></script>
     <script src="./utils/js/notificaciones.js"></script>
-
-    <script>
-        $(document).ready(function() {
-            $('.js-example-basic-single').select2({
-                theme: "classic"
-            });
-
-            $('#myTable').DataTable({
-                language: {
-                    url: 'https://cdn.datatables.net/plug-ins/1.10.21/i18n/Spanish.json'
-                },
-                columnDefs: [{
-                    targets: '_all',
-                    defaultContent: '-'
-                }], // Placeholder para todas las columnas
-                responsive: true, // Para tablas adaptables
-                order: [
-                    [0, 'desc']
-                ] // Ordenar por la primera columna (ID)
-            });
-        });
-    </script>
+    <script src="./utils/js/dataTable.js"></script>
 
 </body>
 

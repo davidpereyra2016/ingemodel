@@ -23,14 +23,14 @@ $isAdmin = $_SESSION['rol'] !== 'ingeniero' ? true : false; // Verifica si el us
                 <i class="bi bi-calendar2-event me-1"></i>
                 Mis Reservas
             </a>
-            <!-- <a href="index.php?controlador=reservas&accion=crear" class="btn btn-success-theme">
+            <a href="index.php?controlador=reservas&accion=crear" class="btn btn-success-theme">
                 <i class="bi bi-calendar2-plus me-1"></i>
                 Nueva Reserva
-            </a> -->
-            <button type="button" class="btn btn-success-theme" data-bs-toggle="offcanvas" data-bs-target="#offcanvasForm" aria-controls="offcanvasRight">
+            </a>
+            <!-- <button type="button" class="btn btn-success-theme" data-bs-toggle="offcanvas" data-bs-target="#offcanvasForm" aria-controls="offcanvasRight">
                 <i class="bi bi-calendar2-plus"></i>
                 <span class="ms-2">Nueva Reserva</span>
-            </button>
+            </button> -->
         </div>
     </div>
 
