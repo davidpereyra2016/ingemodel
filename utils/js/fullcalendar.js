@@ -102,7 +102,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     }
 
                     // Mostramos la fecha en el offcanvas
-                    document.getElementById('fecha_evento').value = fechaSeleccionada;
+                    //document.getElementById('fecha_evento').value = fechaSeleccionada;
                     // Abrir formulario de reserva en un offcanvas
                     // $('#offcanvasForm').offcanvas('show');
                     // Redireccionar a la página de creación con la fecha seleccionada
