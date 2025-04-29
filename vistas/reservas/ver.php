@@ -93,6 +93,12 @@
                                 </li>
                             </ul>
 
+                            <?php if ($reserva['estado'] == 'cancelada'): ?>
+                                <div class="alert alert-danger mt-3">
+                                    <strong>Motivo de la cancelación:</strong><br>
+                                    <p>La cancelación se dio por superar el plazo de 48 Horas para presentar la documentación del pago de la reserva.</p>
+                                </div>
+                            <?php endif; ?>
                             <?php if ($reserva['estado'] == 'rechazada' && !empty($reserva['motivo_rechazo'])): ?>
                                 <div class="alert alert-danger mt-3">
                                     <strong>Motivo del rechazo:</strong><br>

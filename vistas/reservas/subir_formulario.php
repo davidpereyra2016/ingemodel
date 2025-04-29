@@ -72,7 +72,7 @@ if (isset($_SESSION['error'])) {
                             </div>
                         </div>
                     </div>
-                    <!-- FIN: Bloque de Estado y Contador -->
+                    
 
                     <?php if (!empty($formularios)): ?>
                         <div class="row mb-4">
@@ -113,22 +113,21 @@ if (isset($_SESSION['error'])) {
                             </div>
                         </div>
                     <?php endif; ?>
-
+                    <!-- fin descargar formularios -->
                     <?php
                     // Determinar si los campos deben estar deshabilitados
-                    $camposDeshabilitados = !in_array($reserva['estado'], ['pendiente', 'en_revision']); // Permitir subida si está pendiente o en revisión
+                    // Permitimos subir archivos si está pendiente, en revisión, aprobada o confirmada
+                    $camposDeshabilitados = !in_array($reserva['estado'], ['pendiente', 'en_revision', 'aprobada', 'confirmada']);
                     $motivoDeshabilitado = '';
+                    
                     if ($camposDeshabilitados) {
+                        // Solo mostrar mensaje de error para estados que realmente impiden subir archivos
                         switch ($reserva['estado']) {
                             case 'cancelada':
                                 $motivoDeshabilitado = 'La reserva ha sido cancelada' . ($reserva['motivo_rechazo'] ? ': ' . htmlspecialchars($reserva['motivo_rechazo']) : '.');
                                 break;
                             case 'rechazada':
                                 $motivoDeshabilitado = 'La reserva ha sido rechazada' . ($reserva['motivo_rechazo'] ? ': ' . htmlspecialchars($reserva['motivo_rechazo']) : '.');
-                                break;
-                            case 'aprobada':
-                            case 'confirmada':
-                                $motivoDeshabilitado = 'La reserva ya ha sido ' . $reserva['estado'] . '.';
                                 break;
                             case 'baja':
                                 $motivoDeshabilitado = 'La reserva ha sido dada de baja.';
@@ -137,6 +136,9 @@ if (isset($_SESSION['error'])) {
                                 $motivoDeshabilitado = 'La reserva no se puede modificar en este estado.';
                         }
                         echo '<div class="alert alert-danger">' . $motivoDeshabilitado . ' No se pueden subir más archivos.</div>';
+                    } elseif ($reserva['estado'] === 'aprobada' || $reserva['estado'] === 'confirmada') {
+                        // Mostrar mensaje informativo para estados aprobados
+                        echo '<div class="alert alert-success">Reserva ' . $reserva['estado'] . '. Puede continuar subiendo los archivos faltantes (comprobantes de pago o formularios adicionales).</div>';
                     }
                     ?>
 
@@ -164,6 +166,7 @@ if (isset($_SESSION['error'])) {
                             </div>
                         </div>
 
+                        <!-- Subir formulario municipal -->
                         <div class="row mb-4">
                             <div class="col-12">
                                 <div class="card">
@@ -186,7 +189,7 @@ if (isset($_SESSION['error'])) {
                                 </div>
                             </div>
                         </div>
-
+                        <!-- subir comprobante de pago 50% -->
                         <div class="row mb-4">
                             <div class="col-12">
                                 <div class="card">
@@ -210,7 +213,7 @@ if (isset($_SESSION['error'])) {
                                 </div>
                             </div>
                         </div>
-
+                        <!-- subir comprobante de pago 100% -->
                         <div class="row mb-4">
                             <div class="col-12">
                                 <div class="card">
@@ -234,7 +237,8 @@ if (isset($_SESSION['error'])) {
                                 </div>
                             </div>
                         </div>
-
+                        <!-- fin subir comprobante de pago 100% -->
+                        <!-- alerta de recordatorio -->
                         <div class="alert alert-warning">
                             <p><strong>Recuerde:</strong> Una vez que suba estos documentos, su solicitud será revisada por un administrador para su aprobación final.</p>
                         </div>
@@ -327,15 +331,26 @@ document.addEventListener('DOMContentLoaded', function() {
         countdownElement.innerHTML = `${dias}d ${horas}h ${minutos}m ${segundos}s`;
     }
 
-    function deshabilitarFormulario(mensaje) {
-        inputs.forEach(input => input.disabled = true);
-        submitButton.disabled = true;
-        contadorContainer.style.display = 'none'; // Ocultar contador
-        mensajeEstadoElement.textContent = mensaje;
-        mensajeEstadoElement.className = 'alert alert-danger'; // Clase base + clase específica
-        mensajeEstadoElement.style.display = 'block';
-        if (intervalId) clearInterval(intervalId);
-        if (checkIntervalId) clearInterval(checkIntervalId); // Detener chequeos
+    function deshabilitarFormulario(mensaje, estado) {
+        // Si el estado es aprobada o confirmada, mostramos el mensaje pero NO deshabilitamos los campos
+        if (estado === 'aprobada' || estado === 'confirmada') {
+            contadorContainer.style.display = 'none'; // Ocultar contador
+            mensajeEstadoElement.textContent = mensaje;
+            mensajeEstadoElement.className = 'alert alert-success'; // Cambiamos a clase success
+            mensajeEstadoElement.style.display = 'block';
+            if (intervalId) clearInterval(intervalId);
+            if (checkIntervalId) clearInterval(checkIntervalId); // Detener chequeos
+        } else {
+            // Para estados cancelada, rechazada o baja, deshabilitamos todo
+            inputs.forEach(input => input.disabled = true);
+            submitButton.disabled = true;
+            contadorContainer.style.display = 'none'; // Ocultar contador
+            mensajeEstadoElement.textContent = mensaje;
+            mensajeEstadoElement.className = 'alert alert-danger'; // Clase base + clase específica
+            mensajeEstadoElement.style.display = 'block';
+            if (intervalId) clearInterval(intervalId);
+            if (checkIntervalId) clearInterval(checkIntervalId); // Detener chequeos
+        }
     }
 
     function actualizarEstadoUI(estado, motivo) {
@@ -362,11 +377,11 @@ document.addEventListener('DOMContentLoaded', function() {
             } else if (estado === 'baja') {
                 mensaje = 'Reserva dada de baja.';
             } else if (estado === 'aprobada' || estado === 'confirmada') {
-                mensaje = 'Reserva ' + estado + '.';
+                mensaje = 'Reserva ' + estado + '. Puede continuar subiendo los archivos faltantes (comprobantes de pago o formularios adicionales).';
             } else {
                 mensaje = 'No se pudo verificar el estado o la reserva no existe.';
             }
-            deshabilitarFormulario(mensaje);
+            deshabilitarFormulario(mensaje, estado);
         } else {
             // Si vuelve a pendiente o en revisión (poco probable pero posible), rehabilitar
             // (Considerar si esto es deseado)

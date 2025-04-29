@@ -143,9 +143,41 @@
                             </ul>
                         </div>
 
+                        <!-- Términos y Condiciones -->
+                        <div class="form-group mt-4">
+                            <div class="card border-primary">
+                                <div class="card-header bg-primary text-white">
+                                    <h5 class="mb-0">Términos y Condiciones</h5>
+                                </div>
+                                <div class="card-body">
+                                    <?php if (!empty($formularios_condiciones)): ?>
+                                        <p>Por favor, lea detenidamente los términos y condiciones antes de continuar:</p>
+                                        <div class="mb-3">
+                                            <?php foreach ($formularios_condiciones as $form): ?>
+                                                <a href="assets/docs/<?php echo $form['archivo']; ?>" class="btn btn-outline-primary mb-2" target="_blank">
+                                                    <i class="fas fa-file-pdf"></i> Ver <?php echo htmlspecialchars($form['nombre']); ?>
+                                                </a><br>
+                                            <?php endforeach; ?>
+                                        </div>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="acepta_terminos" id="acepta_terminos" required>
+                                            <label class="form-check-label" for="acepta_terminos">
+                                                <strong>He leído y acepto los términos y condiciones para la reserva del salón.</strong>
+                                            </label>
+                                            <div class="invalid-feedback">
+                                                Debe aceptar los términos y condiciones para continuar.
+                                            </div>
+                                        </div>
+                                    <?php else: ?>
+                                        <div class="alert alert-info">No hay términos y condiciones disponibles en este momento.</div>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="form-group mt-4 border-top pt-3 d-flex justify-content-between align-items-center">
                             <a href="index.php?controlador=reservas&accion=listar" class="btn btn-light">Cancelar</a>
-                            <button type="submit" class="btn btn-success-theme">Enviar Solicitud</button>
+                            <button type="submit" id="btn-enviar" class="btn btn-success-theme">Enviar Solicitud</button>
                         </div>
 
                     </form>
@@ -155,12 +187,15 @@
     </div>
 </div>
 
-<!-- Script para manejar el formulario de grupo de matriculados -->
+<!-- Script para manejar el formulario de grupo de matriculados y validar términos -->
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         // Validación básica para horarios
         const horaInicioInput = document.getElementById('hora_inicio');
         const horaFinInput = document.getElementById('hora_fin');
+        const formulario = document.querySelector('form');
+        const aceptaTerminos = document.getElementById('acepta_terminos');
+        const btnEnviar = document.getElementById('btn-enviar');
 
         // Definir los rangos permitidos
         const rangosPermitidos = [{
@@ -209,6 +244,40 @@
             </div>
         `;
             container.appendChild(row);
+        });
+        
+        // Validar términos y condiciones
+        formulario.addEventListener('submit', function(e) {
+            // Verificar que los términos y condiciones estén aceptados
+            if (!aceptaTerminos.checked) {
+                e.preventDefault(); // Detener el envío del formulario
+                
+                // Mostrar mensaje de error
+                aceptaTerminos.classList.add('is-invalid');
+                
+                // Hacer scroll al checkbox de términos
+                aceptaTerminos.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                
+                // Destacar la sección con un efecto visual
+                const termsCard = aceptaTerminos.closest('.card');
+                termsCard.classList.add('border-danger');
+                setTimeout(function() {
+                    termsCard.classList.remove('border-danger');
+                }, 2000);
+                
+                return false;
+            } else {
+                aceptaTerminos.classList.remove('is-invalid');
+                return true;
+            }
+        });
+        
+        // Quitar mensaje de error cuando el usuario marca el checkbox
+        aceptaTerminos.addEventListener('change', function() {
+            if (this.checked) {
+                this.classList.remove('is-invalid');
+                this.closest('.card').classList.remove('border-danger');
+            }
         });
 
         // Seleccionar si existe en la url fecha de reserva

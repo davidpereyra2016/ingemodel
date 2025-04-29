@@ -16,11 +16,21 @@ class ControladorReservas
         $id_usuario = isset($_SESSION['id_usuario']) ? $_SESSION['id_usuario'] : null;
         $rol = isset($_SESSION['rol']) ? $_SESSION['rol'] : null;
         
+        // Obtener el tipo de listado de la URL (1 = Mis Reservas, 2 = Gestionar Reservas)
+        $tipo = isset($_GET['tipo']) ? $_GET['tipo'] : 1;
+        
         if ($rol == 'administrador') {
-            $reservas = $this->modelo->obtenerReservas();
-            $tipo = 2;
+            if ($tipo == 1) {
+                // Si el admin está viendo "Mis Reservas", solo muestra sus propias reservas
+                $reservas = $this->modelo->obtenerReservasPorUsuario($id_usuario);
+            } else {
+                // Si el admin está gestionando todas las reservas (tipo=2)
+                $reservas = $this->modelo->obtenerReservas();
+            }
         } else {
+            // Usuarios normales solo pueden ver sus propias reservas
             $reservas = $this->modelo->obtenerReservasPorUsuario($id_usuario);
+            // Forzar tipo 1 para usuarios normales
             $tipo = 1;
         }
         
@@ -28,6 +38,22 @@ class ControladorReservas
     }
     
     public function crear() {
+        // Cargar los documentos para descargar según su tipo
+        include_once("modelos/modelo_configuracion.php");
+        $modeloConfig = new ModeloConfiguracion();
+        $documentos = $modeloConfig->obtenerDocumentos();
+        
+        // Separar documentos por tipo
+        $formularios_condiciones = [];
+        
+        foreach ($documentos as $doc) {
+            if ($doc['activo']) {
+                if($doc['tipo'] === 'condiciones') {
+                    $formularios_condiciones[] = $doc;
+                }
+            }
+        }
+        
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $id_usuario = $_SESSION['id_usuario'];
             $fecha_evento = $_POST['fecha_evento'];
@@ -75,6 +101,7 @@ class ControladorReservas
             } else {
                 $_SESSION['error'] = "No se pudo crear la reserva. El horario ya está ocupado o has alcanzado el límite de reservas.";
                 include_once("vistas/reservas/crear.php");
+                exit();
             }
         } else {
             include_once("vistas/reservas/crear.php");
@@ -133,12 +160,9 @@ class ControladorReservas
                 header('Location: index.php?controlador=reservas&accion=subirFormulario&codigo=' . $codigo_unico);
                 exit();
             }
-            // Si la reserva ya fue aprobada, tampoco permitir cambios (quizás opcional)
-            if ($reservaActualizada['estado'] === 'aprobada') {
-                $_SESSION['error'] = 'No se pueden modificar archivos de una reserva ya aprobada.';
-                header('Location: index.php?controlador=reservas&accion=subirFormulario&codigo=' . $codigo_unico);
-                exit();
-            }
+            // Permitimos subir archivos incluso si la reserva está aprobada
+            // Los usuarios pueden necesitar subir comprobantes de pago total o formularios adicionales
+            // después de que la reserva haya sido aprobada
             // --- FIN CAMBIOS POST ---
 
             $target_dir = "assets/uploads/";

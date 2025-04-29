@@ -59,7 +59,7 @@ if (isset($_SESSION['error'])) {
                                     </a>
                                 </td>
                                 <td>
-                                    <?php echo ($documento['tipo'] == 'solicitud') ? 'Formulario de Solicitud' : (($documento['tipo'] == 'municipal') ? 'Formulario Municipal' : 'Otro'); ?>
+                                    <?php echo ($documento['tipo'] == 'solicitud') ? 'Formulario de Solicitud' : (($documento['tipo'] == 'municipal') ? 'Formulario Municipal' : (($documento['tipo'] == 'condiciones') ? 'Términos y Condiciones' : 'Otro')); ?>
                                 </td>
                                 <td><?php echo date('d/m/Y H:i', strtotime($documento['fecha_creacion'])); ?></td>
                                 <td>
