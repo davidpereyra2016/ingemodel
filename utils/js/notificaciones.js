@@ -54,7 +54,7 @@ $(document).ready(function () {
 
                         html += `
                                 <div class=" d-flex gap-2 flex-wrap">
-                                    <button type="button" class="btn btn-primary btn-sm btn-theme btn-ver" id="btn-ver" data-id="${notificacion.id}">
+                                    <button type="button" class="btn btn-primary btn-sm btn-theme btn-ver" id="btn-ver" data-id="${notificacion.id_reserva}">
                                         <i class="fas fa-eye"></i>
                                         <span class="ms-2">Ver Reserva</span>
                                     </button>
@@ -105,7 +105,7 @@ $(document).ready(function () {
                         }
 
                         html += `<li>
-                                    <button type="button" class="dropdown-item border-bottom d-flex align-items-center gap-2 btn-ver" id="btn-ver" data-id="${notificacion.id}">
+                                    <button type="button" class="dropdown-item border-bottom d-flex align-items-center gap-2 btn-ver" id="btn-ver" data-id="${notificacion.id_reserva}">
                                         <i class="bi bi-eye"></i>
                                         <span class="ms-2">
                                             ${notificacion.mensaje}
