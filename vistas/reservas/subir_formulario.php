@@ -72,7 +72,7 @@ if (isset($_SESSION['error'])) {
                             </div>
                         </div>
                     </div>
-                    <!-- FIN: Bloque de Estado y Contador -->
+                    
 
                     <?php if (!empty($formularios)): ?>
                         <div class="row mb-4">
@@ -113,7 +113,7 @@ if (isset($_SESSION['error'])) {
                             </div>
                         </div>
                     <?php endif; ?>
-
+                    <!-- fin descargar formularios -->
                     <?php
                     // Determinar si los campos deben estar deshabilitados
                     // Permitimos subir archivos si está pendiente, en revisión, aprobada o confirmada

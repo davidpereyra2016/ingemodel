@@ -127,10 +127,10 @@ if (isset($_SESSION['error'])) {
         </div>
     <?php endif; ?>
 </div>
-
-<!-- Offcanvas para el formulario de reserva -->
-<?php include __DIR__ . './formulario.php'; ?>
-<?php include __DIR__ . './formulario-documento.php'; ?>
+<!-- 
+Offcanvas para el formulario de reserva
+<?php include '../formulario.php'; ?>
+<?php include '../formulario-documento.php'; ?> -->
 
 <!-- Script para los contadores -->
 <script>

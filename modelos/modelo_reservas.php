@@ -17,7 +17,10 @@ class ModeloReservas {
 
     // Obtener reservas de un usuario específico
     public function obtenerReservasPorUsuario($id_usuario) {
-        $consulta = $this->conexion->prepare("SELECT * FROM reservas WHERE id_usuario = :id_usuario ORDER BY fecha_evento DESC");
+        $consulta = $this->conexion->prepare("SELECT r.*, u.nombre, u.apellido, u.matricula FROM reservas r 
+        INNER JOIN usuarios u ON r.id_usuario = u.id 
+        WHERE id_usuario = :id_usuario 
+        ORDER BY r.fecha_evento DESC");
         $consulta->bindParam(':id_usuario', $id_usuario);
         $consulta->execute();
         return $consulta->fetchAll(PDO::FETCH_ASSOC);
