@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             // Verificamos si el elemento existe antes de inicializar el calendario
             if (!calendarEl) {
-                console.error('El elemento con id "calendar" no existe en el DOM.');
+                // console.error('El elemento con id "calendar" no existe en el DOM.');
                 return;
             }
 

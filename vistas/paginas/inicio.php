@@ -10,7 +10,7 @@
             <div class="card-img-overlay card-img-overlay-theme color-white d-flex flex-column align-items-center text-center mt-30">
                 <h2 class="card-title color-white b5 mt-10 mb-3">Reserva de Salón de Eventos</h2>
                 <p class="card-subtitle color-white mb-3">Selecciona una fecha disponible para tu evento</p>
-                <a href="index.php?controlador=reservas&accion=crear" class="btn btn-success btn-lg">
+                <a href="index.php?controlador=reservas&accion=crear" class="btn btn-success-theme btn-lg">
                     <i class="bi bi-calendar2-plus"></i>
                     Reservar
                 </a>
@@ -40,7 +40,7 @@
                     <i class="bi bi-calendar2-plus"></i>
                     <span class="ms-2">Reservar</span>
                 </button> -->
-                <a href="index.php?controlador=reservas&accion=crear" class="btn btn-success btn-lg">
+                <a href="index.php?controlador=reservas&accion=crear" class="btn btn-success-theme btn-lg">
                     <i class="bi bi-calendar2-plus"></i>
                     Reservar
                 </a>

@@ -15,13 +15,19 @@ if (isset($_SESSION['error'])) {
     <div class="row mt-5 mb-5 flex-row align-items-center justify-content-between">
         <div class="col-md-8">
             <h2>Mis Reservas</h2>
+            <p class="text-muted">Visualiza y gestiona tus reservas</p>
         </div>
-        <div class="col-md-4 d-flex justify-content-end align-items-center gap-2 header-page-responsive">
-            <a href="index.php?controlador=reservas&accion=crear" class="btn btn-primary">Nueva Reserva</a>
-            <a href="index.php?controlador=reservas&accion=calendario" class="btn btn-info">Ver Calendario</a>
+        <div class="col-md-4 d-flex justify-content-end align-items-center gap-2">
+            <a href="index.php?controlador=reservas&accion=calendario" class="btn btn-light">
+                <i class="bi bi-calendar2-event me-1"></i>
+                Calendario
+            </a>
+            <a href="index.php?controlador=reservas&accion=crear" class="btn btn-success-theme">
+                <i class="bi bi-calendar2-plus me-1"></i>
+                Nueva Reserva
+            </a>
         </div>
     </div>
-
 
     <?php if (empty($reservas)): ?>
         <div class="alert alert-success">
