@@ -133,12 +133,9 @@ class ControladorReservas
                 header('Location: index.php?controlador=reservas&accion=subirFormulario&codigo=' . $codigo_unico);
                 exit();
             }
-            // Si la reserva ya fue aprobada, tampoco permitir cambios (quizás opcional)
-            if ($reservaActualizada['estado'] === 'aprobada') {
-                $_SESSION['error'] = 'No se pueden modificar archivos de una reserva ya aprobada.';
-                header('Location: index.php?controlador=reservas&accion=subirFormulario&codigo=' . $codigo_unico);
-                exit();
-            }
+            // Permitimos subir archivos incluso si la reserva está aprobada
+            // Los usuarios pueden necesitar subir comprobantes de pago total o formularios adicionales
+            // después de que la reserva haya sido aprobada
             // --- FIN CAMBIOS POST ---
 
             $target_dir = "assets/uploads/";
