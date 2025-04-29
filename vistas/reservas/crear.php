@@ -1,52 +1,56 @@
-<?php
-// Mostrar mensajes de error si existen
-if (isset($_SESSION['error'])) {
-    echo '<div class="alert alert-danger">' . $_SESSION['error'] . '</div>';
-    unset($_SESSION['error']);
-}
-?>
+<?php if (isset($_SESSION['error'])): ?>
+    <div class="container row mb-4 mt-4 mx-auto" id="alertError">
+        <div class="alert alert-danger alert-dismissible col-md-8 offset-md-2 fade show d-flex align-items-center" role="alert">
+            <p class="mb-0"> <?php echo $_SESSION['error']; ?>
+                <?php unset($_SESSION['error']); ?>
+            </p>
+            <button type="button" class="btn-close top-2" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    </div>
+<?php endif; ?>
 
 <div class="container">
-    <div class="row mb-4">
+    <div class="row mb-4 mt-4">
         <div class="col-md-8 offset-md-2">
             <div class="card">
-                <div class="card-header bg-primary text-white">
-                    <h3 class="mb-0">Solicitud de Reserva del Salón</h3>
+                <div class="card-header bg-light">
+                    <h3 class="mb-0 card-title color-success">Solicitud de Reserva del Salón</h3>
                 </div>
                 <div class="card-body">
                     <form action="index.php?controlador=reservas&accion=crear" method="POST">
-                        <div class="alert alert-info">
-                            <p><strong>Importante:</strong> Complete este formulario inicial para solicitar la reserva del salón. Después de enviar este formulario, deberá cargar el formulario de solicitud completo y el comprobante de pago del anticipo.</p>
+                        <div class="alert alert-success">
+                            <p>
+                                <strong>Importante:</strong> Complete este formulario inicial para solicitar la reserva del salón.
+                                Después de enviar este formulario, deberá cargar el formulario de solicitud completo y el comprobante de pago del anticipo.
+                            </p>
                         </div>
 
-                        <div class="form-group">
-                            <label for="fecha_evento">Fecha del Evento:</label>
-                            <input type="date" class="form-control" id="fecha_evento" name="fecha_evento" required min="<?php echo date('Y-m-d'); ?>">
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group col-md-6">
-                                <label for="hora_inicio">Hora de Inicio:</label>
+                        <div class="form-group row mb-4">
+                            <div class="col-md-4">
+                                <label for="fecha_evento mb-2">Fecha del Evento:</label>
+                                <input type="date" class="form-control" id="fecha_evento" name="fecha_evento" required min="<?php echo date('Y-m-d'); ?>">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="hora_inicio mb-2">Hora de Inicio:</label>
                                 <input type="time" class="form-control" id="hora_inicio" name="hora_inicio" required>
                             </div>
-                            <div class="form-group col-md-6">
-                                <label for="hora_fin">Hora de Finalización:</label>
+                            <div class="col-md-4">
+                                <label for="hora_fin mb-2">Hora de Finalización:</label>
                                 <input type="time" class="form-control" id="hora_fin" name="hora_fin" required>
-                            </div>
-                            <div class="col-md-12">
-                                <div class="alert alert-info mt-2">
-                                    <small><strong>Importante:</strong> Los horarios deben estar dentro de alguno de estos rangos:</small>
-                                    <ul class="mb-0 small">
-                                        <li>Mañana/Tarde: 11:00 a 16:00</li>
-                                        <li>Tarde/Noche: 17:00 a 21:00</li>
-                                        <li>Noche/Madrugada: 22:00 a 05:00</li>
-                                    </ul>
-                                </div>
                             </div>
                         </div>
 
-                        <div class="form-group">
-                            <label for="tipo_uso">Tipo de Uso:</label>
+                        <div class="alert alert-success mt-2">
+                            <small><strong>Importante:</strong> Los horarios deben estar dentro de alguno de estos rangos:</small>
+                            <ul class="mb-0 small">
+                                <li><strong>Mañana/Tarde:</strong> 11:00 a 16:00</li>
+                                <li><strong>Tarde/Noche:</strong> 17:00 a 21:00</li>
+                                <li> <strong>Noche/Madrugada:</strong> 22:00 a 05:00</li>
+                            </ul>
+                        </div>
+
+                        <div class="form-group mb-4">
+                            <label for="tipo_uso mb-2">Tipo de Uso:</label>
                             <select class="form-control" id="tipo_uso" name="tipo_uso" required>
                                 <option value="">Seleccione una opción</option>
                                 <option value="Evento personal">Evento personal</option>
@@ -57,13 +61,13 @@ if (isset($_SESSION['error'])) {
                             </select>
                         </div>
 
-                        <div class="form-group">
-                            <label for="motivo_de_uso">Motivo de uso:</label>
+                        <div class="form-group mb-4">
+                            <label for="motivo_de_uso" class="mb-2">Motivo de uso:</label>
                             <textarea class="form-control" id="motivo_de_uso" name="motivo_de_uso" rows="3" required></textarea>
                         </div>
-                        
-                        <div class="form-group">
-                            <label>¿Es una solicitud de grupo de matriculados?</label>
+
+                        <div class="form-group mb-4">
+                            <label for="es_grupo mb-2">¿Es una solicitud de grupo de matriculados?</label>
                             <div class="form-check">
                                 <input class="form-check-input" type="radio" name="es_grupo" id="no_grupo" value="0" checked>
                                 <label class="form-check-label" for="no_grupo">No, solicitud individual</label>
@@ -77,52 +81,56 @@ if (isset($_SESSION['error'])) {
                         <div id="grupo_matriculados" style="display: none;">
                             <h4 class="mt-3">Otros Matriculados del Grupo</h4>
                             <p class="text-muted">Agregue al menos 4 matriculados adicionales (requisito para solicitudes grupales)</p>
-
-                            <div id="matriculados_container">
-                                <!-- Aquí se agregarán los campos dinámicamente -->
-                                <div class="matriculado-row form-row">
-                                    <div class="form-group col-md-4">
-                                        <label>Matrícula:</label>
-                                        <input type="text" class="form-control" name="matriculas[]">
+                            <div class="border p-3 mb-4">
+                                <div id="matriculados_container">
+                                    <!-- Aquí se agregarán los campos dinámicamente -->
+                                    <div class="matriculado-row form-group row mb-3">
+                                        <div class="col-md-8">
+                                            <label class="mb-2">Nombre Completo:</label>
+                                            <input type="text" class="form-control" name="nombres[]">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="mb-2">Matrícula:</label>
+                                            <input type="text" class="form-control" name="matriculas[]">
+                                        </div>
                                     </div>
-                                    <div class="form-group col-md-8">
-                                        <label>Nombre Completo:</label>
-                                        <input type="text" class="form-control" name="nombres[]">
+                                    <div class="matriculado-row form-group row mb-3">
+                                        <div class="col-md-8">
+                                            <label class="mb-2">Nombre Completo:</label>
+                                            <input type="text" class="form-control" name="nombres[]">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="mb-2">Matrícula:</label>
+                                            <input type="text" class="form-control" name="matriculas[]">
+                                        </div>
+                                    </div>
+                                    <div class="matriculado-row form-group row mb-3">
+                                        <div class="col-md-8">
+                                            <label class="mb-2">Nombre Completo:</label>
+                                            <input type="text" class="form-control" name="nombres[]">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="mb-2">Matrícula:</label>
+                                            <input type="text" class="form-control" name="matriculas[]">
+                                        </div>
+                                    </div>
+                                    <div class="matriculado-row form-group row mb-3">
+                                        <div class="col-md-8">
+                                            <label class="mb-2">Nombre Completo:</label>
+                                            <input type="text" class="form-control" name="nombres[]">
+                                        </div>
+                                        <div class="col-md-4">
+                                            <label class="mb-2">Matrícula:</label>
+                                            <input type="text" class="form-control" name="matriculas[]">
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="matriculado-row form-row">
-                                    <div class="form-group col-md-4">
-                                        <label>Matrícula:</label>
-                                        <input type="text" class="form-control" name="matriculas[]">
-                                    </div>
-                                    <div class="form-group col-md-8">
-                                        <label>Nombre Completo:</label>
-                                        <input type="text" class="form-control" name="nombres[]">
-                                    </div>
-                                </div>
-                                <div class="matriculado-row form-row">
-                                    <div class="form-group col-md-4">
-                                        <label>Matrícula:</label>
-                                        <input type="text" class="form-control" name="matriculas[]">
-                                    </div>
-                                    <div class="form-group col-md-8">
-                                        <label>Nombre Completo:</label>
-                                        <input type="text" class="form-control" name="nombres[]">
-                                    </div>
-                                </div>
-                                <div class="matriculado-row form-row">
-                                    <div class="form-group col-md-4">
-                                        <label>Matrícula:</label>
-                                        <input type="text" class="form-control" name="matriculas[]">
-                                    </div>
-                                    <div class="form-group col-md-8">
-                                        <label>Nombre Completo:</label>
-                                        <input type="text" class="form-control" name="nombres[]">
-                                    </div>
-                                </div>
+                                <button type="button" class="btn btn-sm btn-outline-success" id="add_matriculado">
+                                    <i class="fas fa-plus"></i>
+                                    Agregar otro matriculado
+                                </button>
                             </div>
 
-                            <button type="button" class="btn btn-sm btn-outline-primary mt-2" id="add_matriculado">+ Agregar otro matriculado</button>
                         </div>
 
                         <div class="alert alert-warning mt-4">
@@ -135,10 +143,11 @@ if (isset($_SESSION['error'])) {
                             </ul>
                         </div>
 
-                        <div class="form-group mt-4 text-center">
-                            <a href="index.php?controlador=reservas&accion=listar" class="btn btn-secondary">Cancelar</a>
-                            <button type="submit" class="btn btn-primary">Enviar Solicitud</button>
+                        <div class="form-group mt-4 border-top pt-3 d-flex justify-content-between align-items-center">
+                            <a href="index.php?controlador=reservas&accion=listar" class="btn btn-light">Cancelar</a>
+                            <button type="submit" class="btn btn-success-theme">Enviar Solicitud</button>
                         </div>
+
                     </form>
                 </div>
             </div>
@@ -152,14 +161,22 @@ if (isset($_SESSION['error'])) {
         // Validación básica para horarios
         const horaInicioInput = document.getElementById('hora_inicio');
         const horaFinInput = document.getElementById('hora_fin');
-        
+
         // Definir los rangos permitidos
-        const rangosPermitidos = [
-            { inicio: '11:00', fin: '16:00' },
-            { inicio: '17:00', fin: '21:00' },
-            { inicio: '22:00', fin: '05:00' }
+        const rangosPermitidos = [{
+                inicio: '11:00',
+                fin: '16:00'
+            },
+            {
+                inicio: '17:00',
+                fin: '21:00'
+            },
+            {
+                inicio: '22:00',
+                fin: '05:00'
+            }
         ];
-        
+
         // Mostrar/Ocultar sección de grupo según selección
         const grupoRadios = document.querySelectorAll('input[name="es_grupo"]');
         const grupoSection = document.getElementById('grupo_matriculados');
@@ -180,18 +197,34 @@ if (isset($_SESSION['error'])) {
 
         addButton.addEventListener('click', function() {
             const row = document.createElement('div');
-            row.className = 'matriculado-row form-row';
+            row.className = 'matriculado-row form-row mb-3 row';
             row.innerHTML = `
-            <div class="form-group col-md-4">
-                <label>Matrícula:</label>
-                <input type="text" class="form-control" name="matriculas[]">
-            </div>
-            <div class="form-group col-md-8">
+            <div class="col-md-8">
                 <label>Nombre Completo:</label>
                 <input type="text" class="form-control" name="nombres[]">
+            </div>
+            <div class="col-md-4">
+                <label>Matrícula:</label>
+                <input type="text" class="form-control" name="matriculas[]">
             </div>
         `;
             container.appendChild(row);
         });
+
+        // Seleccionar si existe en la url fecha de reserva
+        const urlParams = new URLSearchParams(window.location.search);
+        const fechaReserva = urlParams.get('fecha');
+        if (fechaReserva) {
+            const fechaInput = document.getElementById('fecha_evento');
+            fechaInput.value = fechaReserva;
+        }
+
+        // Desaparecer el alerta de error después de 10 segundos si existe
+        const alertError = document.getElementById('alertError');
+        if (alertError) {
+            setTimeout(() => {
+                alertError.style.display = 'none';
+            }, 10000);
+        }
     });
 </script>
