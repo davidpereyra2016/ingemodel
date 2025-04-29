@@ -53,6 +53,7 @@ if (isset($_SESSION['error'])) {
                                 <option value="">Seleccione...</option>
                                 <option value="solicitud" <?php echo (isset($documento) && $documento['tipo'] == 'solicitud') ? 'selected' : ''; ?>>Formulario de Solicitud</option>
                                 <option value="municipal" <?php echo (isset($documento) && $documento['tipo'] == 'municipal') ? 'selected' : ''; ?>>Formulario Municipal</option>
+                                <option value="condiciones" <?php echo (isset($documento) && $documento['tipo'] == 'condiciones') ? 'selected' : ''; ?>>Términos y Condiciones</option>
                             </select>
                         </div>
                         <div class="form-group mt-4">

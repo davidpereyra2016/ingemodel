@@ -166,6 +166,7 @@ if (isset($_SESSION['error'])) {
                             </div>
                         </div>
 
+                        <!-- Subir formulario municipal -->
                         <div class="row mb-4">
                             <div class="col-12">
                                 <div class="card">
@@ -188,7 +189,7 @@ if (isset($_SESSION['error'])) {
                                 </div>
                             </div>
                         </div>
-
+                        <!-- subir comprobante de pago 50% -->
                         <div class="row mb-4">
                             <div class="col-12">
                                 <div class="card">
@@ -212,7 +213,7 @@ if (isset($_SESSION['error'])) {
                                 </div>
                             </div>
                         </div>
-
+                        <!-- subir comprobante de pago 100% -->
                         <div class="row mb-4">
                             <div class="col-12">
                                 <div class="card">
@@ -236,7 +237,8 @@ if (isset($_SESSION['error'])) {
                                 </div>
                             </div>
                         </div>
-
+                        <!-- fin subir comprobante de pago 100% -->
+                        <!-- alerta de recordatorio -->
                         <div class="alert alert-warning">
                             <p><strong>Recuerde:</strong> Una vez que suba estos documentos, su solicitud será revisada por un administrador para su aprobación final.</p>
                         </div>
