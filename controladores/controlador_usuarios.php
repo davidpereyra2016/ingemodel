@@ -187,32 +187,43 @@ class ControladorUsuarios
 
     public function buscar()
     {
+        // Limpiar cualquier salida previa en el buffer
+        ob_clean();
+        
+        // Asegurar que siempre respondamos con JSON para solicitudes AJAX
+        header('Content-Type: application/json');
+        
         if (session_status() == PHP_SESSION_NONE) {
             session_start();
         }
         
         // Verificar si el usuario es administrador
         if (!isset($_SESSION['rol']) || $_SESSION['rol'] !== 'administrador') {
-            header('Location: index.php?controlador=paginas&accion=inicio');
+            echo json_encode(['success' => false, 'message' => 'No tiene permisos para realizar esta acción']);
             exit;
         }
         
         if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['id'])) {
             $id = filter_var($_POST['id'], FILTER_SANITIZE_NUMBER_INT);
-            $modelo = new ModeloUsuarios();
-            $usuario = $modelo->buscar($id);
+            
+            try {
+                $modelo = new ModeloUsuarios();
+                $usuario = $modelo->buscar($id);
 
-            if ($usuario) {
-                // Cargar los datos en el modal
-                $_SESSION['temp_usuario'] = $usuario;
-                header('Location: index.php?controlador=usuarios&accion=listar');
-            } else {
-                $_SESSION['error'] = "Usuario no encontrado";
-                header('Location: index.php?controlador=usuarios&accion=listar');
+                if ($usuario) {
+                    echo json_encode(['success' => true, 'data' => $usuario]);
+                    exit;
+                } else {
+                    echo json_encode(['success' => false, 'message' => 'Usuario no encontrado']);
+                    exit;
+                }
+            } catch (Exception $e) {
+                echo json_encode(['success' => false, 'message' => 'Error: ' . $e->getMessage()]);
+                exit;
             }
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Solicitud inválida']);
             exit;
         }
-        header('Location: index.php?controlador=usuarios&accion=listar');
-        exit;
     }
 } 

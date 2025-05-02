@@ -145,6 +145,7 @@
                                 <option value="">Seleccionar Rol</option>
                                 <option value="administrador">Administrador</option>
                                 <option value="ingeniero">Ingeniero</option>
+                                <option value="encargado">Encargado</option>
                             </select>
                         </div>
                     </div>
@@ -177,44 +178,38 @@
             </div>
             <div class="modal-body">
                 <form id="editUserForm" action="?controlador=usuarios&accion=editar" method="POST">
-                    <input type="hidden" id="editUserId" name="id" value="<?php echo isset($_SESSION['temp_usuario']) ? $_SESSION['temp_usuario']['id'] : ''; ?>">
+                    <input type="hidden" id="editUserId" name="id" value="">
 
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label for="editMatricula" class="form-label">Matrícula</label>
-                            <input type="text" class="form-control" id="editMatricula" name="matricula" required
-                                value="<?php echo isset($_SESSION['temp_usuario']) ? $_SESSION['temp_usuario']['matricula'] : ''; ?>">
+                            <input type="text" class="form-control" id="editMatricula" name="matricula" required value="">
                         </div>
                         <div class="col-md-6 mb-3">
                             <label for="editNombre" class="form-label">Nombre</label>
-                            <input type="text" class="form-control" id="editNombre" name="nombre" required
-                                value="<?php echo isset($_SESSION['temp_usuario']) ? $_SESSION['temp_usuario']['nombre'] : ''; ?>">
+                            <input type="text" class="form-control" id="editNombre" name="nombre" required value="">
                         </div>
                     </div>
 
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label for="editApellido" class="form-label">Apellido</label>
-                            <input type="text" class="form-control" id="editApellido" name="apellido" required
-                                value="<?php echo isset($_SESSION['temp_usuario']) ? $_SESSION['temp_usuario']['apellido'] : ''; ?>">
+                            <input type="text" class="form-control" id="editApellido" name="apellido" required value="">
                         </div>
                         <div class="col-md-6 mb-3">
                             <label for="editEmail" class="form-label">Email</label>
-                            <input type="email" class="form-control" id="editEmail" name="email" required
-                                value="<?php echo isset($_SESSION['temp_usuario']) ? $_SESSION['temp_usuario']['email'] : ''; ?>">
+                            <input type="email" class="form-control" id="editEmail" name="email" required value="">
                         </div>
                     </div>
 
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label for="editTelefono" class="form-label">Teléfono</label>
-                            <input type="text" class="form-control" id="editTelefono" name="telefono" required
-                                value="<?php echo isset($_SESSION['temp_usuario']) ? $_SESSION['temp_usuario']['telefono'] : ''; ?>">
+                            <input type="text" class="form-control" id="editTelefono" name="telefono" required value="">
                         </div>
                         <div class="col-md-6 mb-3">
                             <label for="editDomicilio" class="form-label">Domicilio</label>
-                            <input type="text" class="form-control" id="editDomicilio" name="domicilio" required
-                                value="<?php echo isset($_SESSION['temp_usuario']) ? $_SESSION['temp_usuario']['domicilio'] : ''; ?>">
+                            <input type="text" class="form-control" id="editDomicilio" name="domicilio" required value="">
                         </div>
                     </div>
 
@@ -233,8 +228,9 @@
                             <label for="editRol" class="form-label">Rol</label>
                             <select class="form-select" id="editRol" name="rol" required>
                                 <option value="">Seleccionar Rol</option>
-                                <option value="administrador" <?php echo (isset($_SESSION['temp_usuario']) && $_SESSION['temp_usuario']['rol'] == 'administrador') ? 'selected' : ''; ?>>Administrador</option>
-                                <option value="ingeniero" <?php echo (isset($_SESSION['temp_usuario']) && $_SESSION['temp_usuario']['rol'] == 'ingeniero') ? 'selected' : ''; ?>>Ingeniero</option>
+                                <option value="administrador">Administrador</option>
+                                <option value="ingeniero">Ingeniero</option>
+                                <option value="encargado">Encargado</option>
                             </select>
                         </div>
                     </div>
@@ -243,8 +239,8 @@
                         <div class="col-md-6 mb-3">
                             <label for="editEstado" class="form-label">Estado</label>
                             <select class="form-select" id="editEstado" name="estado" required>
-                                <option value="activo" <?php echo (isset($_SESSION['temp_usuario']) && $_SESSION['temp_usuario']['estado'] == 'activo') ? 'selected' : ''; ?>>Activo</option>
-                                <option value="inactivo" <?php echo (isset($_SESSION['temp_usuario']) && $_SESSION['temp_usuario']['estado'] == 'inactivo') ? 'selected' : ''; ?>>Inactivo</option>
+                                <option value="activo">Activo</option>
+                                <option value="inactivo">Inactivo</option>
                             </select>
                         </div>
                     </div>
@@ -283,6 +279,14 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        // Limpiar cualquier backdrop modal que pueda haber quedado de una sesión anterior
+        document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
+            backdrop.remove();
+        });
+        document.body.classList.remove('modal-open');
+        document.body.style.overflow = '';
+        document.body.style.paddingRight = '';
+        
         // Mostrar/ocultar contraseña
         const togglePasswordButtons = document.querySelectorAll('.toggle-password');
         togglePasswordButtons.forEach(button => {
@@ -307,6 +311,7 @@
         editUserButtons.forEach(button => {
             button.addEventListener('click', function() {
                 const userId = this.getAttribute('data-id');
+                document.getElementById('editUserId').value = userId;
 
                 // Realizar una solicitud AJAX para obtener los datos del usuario
                 const formData = new FormData();
@@ -314,11 +319,81 @@
 
                 fetch('?controlador=usuarios&accion=buscar', {
                         method: 'POST',
-                        body: formData
+                        body: formData,
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest' // Indicar que es una solicitud AJAX
+                        }
                     })
                     .then(response => {
-                        // Redirigir para recargar la página con los datos temporales
-                        window.location.href = '?controlador=usuarios&accion=listar';
+                        // Verificar que la respuesta sea correcta
+                        if (!response.ok) {
+                            throw new Error('Error en la respuesta del servidor: ' + response.status);
+                        }
+                        // Verificar que la respuesta sea JSON
+                        const contentType = response.headers.get('content-type');
+                        if (!contentType || !contentType.includes('application/json')) {
+                            throw new Error('La respuesta no es de tipo JSON: ' + contentType);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.success) {
+                            // Llenar el formulario con los datos del usuario
+                            const usuario = data.data;
+                            document.getElementById('editMatricula').value = usuario.matricula || '';
+                            document.getElementById('editNombre').value = usuario.nombre || '';
+                            document.getElementById('editApellido').value = usuario.apellido || '';
+                            document.getElementById('editEmail').value = usuario.email || '';
+                            document.getElementById('editTelefono').value = usuario.telefono || '';
+                            document.getElementById('editDomicilio').value = usuario.domicilio || '';
+                            document.getElementById('editPassword').value = '';
+                            
+                            // Seleccionar el rol correcto
+                            const rolSelect = document.getElementById('editRol');
+                            for (let i = 0; i < rolSelect.options.length; i++) {
+                                if (rolSelect.options[i].value === usuario.rol) {
+                                    rolSelect.options[i].selected = true;
+                                    break;
+                                }
+                            }
+                            
+                            // Seleccionar el estado correcto
+                            const estadoSelect = document.getElementById('editEstado');
+                            for (let i = 0; i < estadoSelect.options.length; i++) {
+                                if (estadoSelect.options[i].value === usuario.estado) {
+                                    estadoSelect.options[i].selected = true;
+                                    break;
+                                }
+                            }
+                            
+                            // Mostrar el modal
+                            const editModalElement = document.getElementById('editUserModal');
+                            const editModal = new bootstrap.Modal(editModalElement);
+                            
+                            // Asegurarse de que el backdrop se elimine cuando el modal se cierre
+                            editModalElement.addEventListener('hidden.bs.modal', function () {
+                                document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
+                                    backdrop.remove();
+                                });
+                                document.body.classList.remove('modal-open');
+                                document.body.style.overflow = '';
+                                document.body.style.paddingRight = '';
+                            });
+                            
+                            editModal.show();
+                        } else {
+                            // Verificar si es necesario redirigir (usuario no autenticado)
+                            if (data.redirect) {
+                                window.location.href = data.redirect;
+                                return;
+                            }
+                            // Mostrar mensaje de error
+                            alert('Error: ' + data.message);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error detallado:', error);
+                        alert('Error al cargar los datos del usuario: ' + error.message);
                     });
             });
         });
@@ -331,7 +406,19 @@
                 document.getElementById('deleteUserId').value = userId;
 
                 // Mostrar modal de confirmación
-                const confirmDeleteModal = new bootstrap.Modal(document.getElementById('confirmDeleteModal'));
+                const confirmDeleteModalElement = document.getElementById('confirmDeleteModal');
+                const confirmDeleteModal = new bootstrap.Modal(confirmDeleteModalElement);
+                
+                // Asegurarse de que el backdrop se elimine cuando el modal se cierre
+                confirmDeleteModalElement.addEventListener('hidden.bs.modal', function () {
+                    document.querySelectorAll('.modal-backdrop').forEach(backdrop => {
+                        backdrop.remove();
+                    });
+                    document.body.classList.remove('modal-open');
+                    document.body.style.overflow = '';
+                    document.body.style.paddingRight = '';
+                });
+                
                 confirmDeleteModal.show();
             });
         });
