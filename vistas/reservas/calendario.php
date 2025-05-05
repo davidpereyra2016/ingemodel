@@ -9,7 +9,9 @@ if (isset($_SESSION['error'])) {
     unset($_SESSION['error']);
 }
 $idUsuario = (int)$_SESSION['id_usuario'];
-$isAdmin = $_SESSION['rol'] !== 'ingeniero' ? true : false; // Verifica si el usuario es admin
+$rol = $_SESSION['rol'];
+$isAdmin = $rol !== 'ingeniero' ? true : false; // Verifica si el usuario es admin
+$isEncargado = $rol === 'encargado'; // Verifica si el usuario es encargado
 ?>
 
 <div class="container">
@@ -19,6 +21,7 @@ $isAdmin = $_SESSION['rol'] !== 'ingeniero' ? true : false; // Verifica si el us
             <p class="text-muted">Seleccione una fecha para ver la disponibilidad y reservar el salón.</p>
         </div>
         <div class="col-md-4 d-flex justify-content-end align-items-center gap-2">
+            <?php if(!$isEncargado): ?>
             <a href="index.php?controlador=reservas&accion=listar" class="btn btn-light">
                 <i class="bi bi-calendar2-event me-1"></i>
                 Mis Reservas
@@ -27,6 +30,7 @@ $isAdmin = $_SESSION['rol'] !== 'ingeniero' ? true : false; // Verifica si el us
                 <i class="bi bi-calendar2-plus me-1"></i>
                 Nueva Reserva
             </a>
+            <?php endif; ?>
             <!-- <button type="button" class="btn btn-success-theme" data-bs-toggle="offcanvas" data-bs-target="#offcanvasForm" aria-controls="offcanvasRight">
                 <i class="bi bi-calendar2-plus"></i>
                 <span class="ms-2">Nueva Reserva</span>
@@ -62,7 +66,7 @@ $isAdmin = $_SESSION['rol'] !== 'ingeniero' ? true : false; // Verifica si el us
                         </div>
                     </div>
 
-                    <div id="calendar" data-name="salon" data-idUsuario="<?php echo $idUsuario; ?>" data-isAdmin="<?php echo $isAdmin; ?>"></div>
+                    <div id="calendar" data-name="salon" data-idUsuario="<?php echo $idUsuario; ?>" data-isAdmin="<?php echo $isAdmin; ?>" data-isEncargado="<?php echo $isEncargado ? '1' : '0'; ?>"></div>
                 </div>
             </div>
         </div>
@@ -82,11 +86,17 @@ $isAdmin = $_SESSION['rol'] !== 'ingeniero' ? true : false; // Verifica si el us
                     <p><strong>Fecha:</strong> <span id="eventDate"></span></p>
                     <p><strong>Tipo de Uso:</strong> <span id="eventType"></span></p>
                     <p><strong>Estado:</strong> <span id="eventStatus"></span></p>
+                    <p><strong>Nombre:</strong> <span id="eventNombre"></span></p>
+                    <p><strong>telefono:</strong> <span id="eventTelefono"></span></p>
+                    <p><strong>Correo:</strong> <span id="eventCorreo"></span></p>
                 </div>
             </div>
             <div class="modal-footer">
+                <?php if(!$isEncargado): ?>
                 <a href="#" class="btn btn-light" id="viewDetailBtn">Ver Detalles</a>
+                
                 <a href="index.php?controlador=reservas&accion=crear" class="btn btn-success-theme">Nueva Reserva</a>
+                <?php endif; ?>
             </div>
         </div>
     </div>
