@@ -242,18 +242,28 @@ class ModeloReservas {
 
     // Obtener eventos para el calendario
     public function obtenerEventosCalendario() {
-        $consulta = $this->conexion->query("SELECT id, fecha_evento as start, 
-                                           CONCAT(tipo_uso, ' (', hora_inicio, ' - ', hora_fin, ')') as title, id_usuario, estado,
+        $consulta = $this->conexion->query("SELECT r.id, r.fecha_evento as start, 
+                                           CONCAT(r.tipo_uso, ' (', r.hora_inicio, ' - ', r.hora_fin, ')') as title, 
+                                           r.id_usuario, r.estado,
+                                           u.nombre, u.apellido, u.telefono, u.email as correo,
+                                           CONCAT(u.nombre, ' ', u.apellido) as nombre_completo,
                                            CASE 
-                                                WHEN estado = 'aprobada' THEN '#28a745' 
-                                                WHEN estado = 'pendiente' THEN '#ffc107'
-                                                WHEN estado = 'rechazada' THEN '#dc3545'
+                                                WHEN r.estado = 'aprobada' THEN '#28a745' 
+                                                WHEN r.estado = 'pendiente' THEN '#ffc107'
+                                                WHEN r.estado = 'rechazada' THEN '#dc3545'
                                                 ELSE '#6c757d'
-                                           END as color
-                                           FROM reservas 
-                                           WHERE fecha_evento >= CURDATE()
-                                           AND estado NOT IN ('cancelada', 'baja', 'rechazada') -- Ajustado para no mostrar canceladas, bajas o rechazadas en calendario
-                                           ORDER BY fecha_evento");
+                                           END as backgroundColor,
+                                           CASE 
+                                                WHEN r.estado = 'aprobada' THEN '#28a745' 
+                                                WHEN r.estado = 'pendiente' THEN '#ffc107'
+                                                WHEN r.estado = 'rechazada' THEN '#dc3545'
+                                                ELSE '#6c757d'
+                                           END as borderColor
+                                           FROM reservas r
+                                           INNER JOIN usuarios u ON r.id_usuario = u.id
+                                           WHERE r.fecha_evento >= CURDATE()
+                                           AND r.estado NOT IN ('cancelada', 'baja', 'rechazada') -- Ajustado para no mostrar canceladas, bajas o rechazadas en calendario
+                                           ORDER BY r.fecha_evento");
         return $consulta->fetchAll(PDO::FETCH_ASSOC);
     }
 
