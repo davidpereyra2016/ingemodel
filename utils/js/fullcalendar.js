@@ -13,11 +13,19 @@ document.addEventListener('DOMContentLoaded', function () {
                 return;
             }
 
+            // Verificar si el usuario es encargado
+            const isEncargado = calendarEl.dataset.isencargado == 1;
+            
+            // Filtrar eventos para el encargado (solo ver aprobados)
+            if (isEncargado) {
+                eventos = eventos.filter(e => e.estado === 'aprobada');
+            }
+            
             eventos = eventos.map(e => {
-
-                const idUsuario = calendarEl.dataset.idusuario; 
-
-                if (e.id_usuario == idUsuario || calendarEl.dataset.isadmin == 1) {
+                const idUsuario = calendarEl.dataset.idusuario;
+                
+                // Si es el creador de la reserva, o es admin, o es encargado (con reservas aprobadas)
+                if (e.id_usuario == idUsuario || calendarEl.dataset.isadmin == 1 || isEncargado) {
                     return {
                         ...e,
                         title: e.title,
@@ -33,7 +41,6 @@ document.addEventListener('DOMContentLoaded', function () {
                         borderColor: '#d1d1d1',
                         textColor: '#000',
                     };
-
                 }
             });
 
@@ -83,6 +90,11 @@ document.addEventListener('DOMContentLoaded', function () {
                     return true;
                 },
                 select: function (info) {
+                    // Verificar si el usuario es encargado - no permitir selección
+                    if (calendarEl.dataset.isencargado == 1) {
+                        return false;
+                    }
+                    
                     const fechaActual = new Date().toISOString().split('T')[0]; // formato YYYY-MM-DD
                     let fechaSeleccionada = info.startStr; // formato YYYY-MM-DD
 
@@ -111,20 +123,23 @@ document.addEventListener('DOMContentLoaded', function () {
                 },
                 eventClick: function (info) {
                     // Mostrar modal con detalles del evento
-                    // Si es su propio evento o si administrador
+                    // Si es su propio evento o si administrador o si es encargado (pero solo para reservas aprobadas)
                     let idEventoUsuario = info.event.extendedProps.id_usuario; // Obtener el id_usuario del evento
                     let idUsuario = calendarEl.dataset.idusuario; // Obtener el id_usuario del elemento HTML
                     let isAdmin = calendarEl.dataset.isadmin; // Obtener el id_usuario del elemento HTML
+                    let isEncargado = calendarEl.dataset.isencargado == 1; // Verificar si es encargado
+                    let estado = info.event.extendedProps.estado;
 
-                    // console.log(idUsuario, idEventoUsuario, isAdmin);
+                    console.log(info.event);
 
-                    // Verificamos si el evento pertenece al usuario actual o si es admin
-                    if (idUsuario == idEventoUsuario || isAdmin == 1) {
+                    // Para encargado solo mostrar reservas aprobadas
+                    // Para otros roles mostrar sus propias reservas o todas si es admin
+                    if ((idUsuario == idEventoUsuario || isAdmin == 1) || (isEncargado && estado === 'aprobada')) {
                         $('#eventDate').text(info.event.start.toLocaleDateString());
                         $('#eventType').text(info.event.title);
-
-                        // Determinar estado según el color
-                        let estado = info.event.extendedProps.estado;
+                        $('#eventNombre').text(info.event.extendedProps.nombre);
+                        $('#eventTelefono').text(info.event.extendedProps.telefono);
+                        $('#eventCorreo').text(info.event.extendedProps.correo);
 
                         $('#eventStatus').html(estado);
                         $('#viewDetailBtn').attr('href', 'index.php?controlador=reservas&accion=ver&id=' + info.event.id);
