@@ -74,7 +74,7 @@ if (isset($_SESSION['error'])) {
                     </div>
                     
 
-                    <?php if (!empty($formularios)): ?>
+                    <!-- <?php if (!empty($formularios)): ?>
                         <div class="row mb-4">
                             <div class="col-12">
                                 <div class="card">
@@ -92,14 +92,14 @@ if (isset($_SESSION['error'])) {
                                 </div>
                             </div>
                         </div>
-                    <?php endif; ?>
+                    <?php endif; ?> -->
 
                     <?php if (!empty($formularios_municipales)): ?>
                         <div class="row mb-4">
                             <div class="col-12">
                                 <div class="card">
                                     <div class="card-header bg-light">
-                                        <h5 class="mb-0">2. Descargar Formulario Municipal</h5>
+                                        <h5 class="mb-0">1. Descargar Formulario Municipal</h5>
                                     </div>
                                     <div class="card-body">
                                         <p>Descargue el formulario Municipal</p>
@@ -138,7 +138,7 @@ if (isset($_SESSION['error'])) {
                         echo '<div class="alert alert-danger">' . $motivoDeshabilitado . ' No se pueden subir más archivos.</div>';
                     } elseif ($reserva['estado'] === 'aprobada' || $reserva['estado'] === 'confirmada') {
                         // Mostrar mensaje informativo para estados aprobados
-                        echo '<div class="alert alert-success">Reserva ' . $reserva['estado'] . '. Puede continuar subiendo los archivos faltantes (comprobantes de pago o formularios adicionales).</div>';
+                        // echo '<div class="alert alert-success">Reserva ' . $reserva['estado'] . '. Puede continuar subiendo los archivos faltantes (comprobantes de pago o formularios adicionales).</div>';
                     }
                     ?>
 
@@ -147,7 +147,7 @@ if (isset($_SESSION['error'])) {
                             <div class="col-12">
                                 <div class="card">
                                     <div class="card-header bg-light">
-                                        <h5 class="mb-0">3. Subir Formulario Completado</h5>
+                                        <h5 class="mb-0">2. Subir Formulario Completado</h5>
                                     </div>
                                     <div class="card-body">
                                         <div class="form-group">
@@ -171,7 +171,7 @@ if (isset($_SESSION['error'])) {
                             <div class="col-12">
                                 <div class="card">
                                     <div class="card-header bg-light">
-                                        <h5 class="mb-0">4. Subir Formulario Municipal</h5>
+                                        <h5 class="mb-0">3. Subir Formulario Municipal</h5>
                                     </div>
                                     <div class="card-body">
                                         <div class="form-group">
@@ -194,7 +194,7 @@ if (isset($_SESSION['error'])) {
                             <div class="col-12">
                                 <div class="card">
                                     <div class="card-header bg-light">
-                                        <h5 class="mb-0">5. Subir Comprobante de Pago</h5>
+                                        <h5 class="mb-0">4. Subir Comprobante de Pago</h5>
                                     </div>
                                     <div class="card-body">
                                         <p>Suba el comprobante de pago del anticipo (50% del valor total).</p>
@@ -218,7 +218,7 @@ if (isset($_SESSION['error'])) {
                             <div class="col-12">
                                 <div class="card">
                                     <div class="card-header bg-light">
-                                        <h5 class="mb-0">6. Subir Comprobante de Pago (50% del valor total o 100% del valor total)</h5>
+                                        <h5 class="mb-0">5. Subir Comprobante de Pago (50% del valor total o 100% del valor total)</h5>
                                     </div>
                                     <div class="card-body">
                                         <p>Suba el comprobante de pago del anticipo (50% del valor total o 100% del valor total).</p>
