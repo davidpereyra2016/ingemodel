@@ -262,23 +262,9 @@ class ModeloReservas {
                                            FROM reservas r
                                            INNER JOIN usuarios u ON r.id_usuario = u.id
                                            WHERE r.fecha_evento >= CURDATE()
-                                           AND r.estado NOT IN ('cancelada', 'baja', 'rechazada') -- Ajustado para no mostrar canceladas, bajas o rechazadas en calendario
+                                           AND r.estado NOT IN ('cancelada', 'baja') -- Modificado para mostrar rechazadas en calendario
                                            ORDER BY r.fecha_evento");
         return $consulta->fetchAll(PDO::FETCH_ASSOC);
-    }
-
-    // Registrar en historial
-    public function registrarHistorial($id_reserva, $id_usuario, $accion, $estado_anterior, $estado_nuevo, $comentario = null) {
-        $consulta = $this->conexion->prepare("INSERT INTO historial_reservas 
-                                             (id_reserva, id_usuario, accion, estado_anterior, estado_nuevo, comentario) 
-                                             VALUES (:id_reserva, :id_usuario, :accion, :estado_anterior, :estado_nuevo, :comentario)");
-        $consulta->bindParam(':id_reserva', $id_reserva);
-        $consulta->bindParam(':id_usuario', $id_usuario);
-        $consulta->bindParam(':accion', $accion);
-        $consulta->bindParam(':estado_anterior', $estado_anterior);
-        $consulta->bindParam(':estado_nuevo', $estado_nuevo);
-        $consulta->bindParam(':comentario', $comentario);
-        return $consulta->execute();
     }
     
     // Obtener matriculados de un grupo
