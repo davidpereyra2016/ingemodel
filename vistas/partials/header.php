@@ -16,6 +16,15 @@
           <a class="nav-link text-uppercase <?php echo $accion == 'inicio' ? 'active' : ''; ?>"
             aria-current="page" href="?controlador=paginas&accion=inicio">Inicio</a>
         </li>
+        <?php if ($esEncargado): ?>
+        <!-- Para rol encargado: solo mostrar Salón directamente sin dropdown -->
+        <li class="nav-item">
+          <a class="nav-link text-uppercase <?php echo $accion == 'calendario' ? 'active' : ''; ?>" href="?controlador=reservas&accion=calendario">
+            <i class="bi bi-calendar-event me-2"></i> Salón
+          </a>
+        </li>
+        <?php else: ?>
+        <!-- Para otros roles: mostrar dropdown completo -->
         <li class="nav-item dropdown">
           <a class="nav-link text-uppercase dropdown-toggle <?php echo $accion == 'calendario' || $accion == 'futbol' ? 'active' : ''; ?>" role="button" data-bs-toggle="dropdown" aria-expanded="true">
             Reservas
@@ -25,8 +34,9 @@
             <li><a class="dropdown-item" href="?controlador=reservas&accion=listar" disabled> <i class="bi bi-calendar-event-fill me-2"></i>Cancha</a></li>
           </ul>
         </li>
+        <?php endif; ?>
 
-        <?php if (!$esIngeniero): ?>
+        <?php if (!$esIngeniero && !$esEncargado): ?>
           <li class="nav-item dropdown text-uppercase">
             <a class="nav-link dropdown-toggle text-uppercase <?php echo $controlador == 'reservas' && ($accion == 'listar' || $accion == 'listar&tipo=2') ? 'active' : ''; ?>" role="button" data-bs-toggle="dropdown" aria-expanded="true">
               Gestión
@@ -36,14 +46,14 @@
               <li><a class="dropdown-item" href="?controlador=reservas&accion=listar&tipo=2"> <i class="bi bi-calendar-range-fill me-2"></i> Gestionar Reservas</a></li>
             </ul>
           </li>
-        <?php else: ?>
+        <?php elseif ($esIngeniero): ?>
           <li class="nav-item">
             <a class="nav-link text-uppercase <?php echo $controlador == 'reservas' && $accion == 'listar' ? 'active' : ''; ?>"
               aria-current="page" href="?controlador=reservas&accion=listar"><i class="bi bi-calendar2-event me-2"></i>Mis Reservas</a>
           </li>
         <?php endif; ?>
 
-        <?php if (!$esIngeniero): ?>
+        <?php if (!$esIngeniero && !$esEncargado): ?>
           <li class="nav-item dropdown text-uppercase">
             <a class="nav-link dropdown-toggle <?php echo $controlador == 'configuracion' ? 'active' : ''; ?>" role="button" data-bs-toggle="dropdown" aria-expanded="true">
               <i class="bi bi-gear-fill"></i>
@@ -77,6 +87,7 @@
             </ul>
           </li>
         <?php endif; ?>
+
         <li class="nav-item dropdown">
           <a class="nav-link text-uppercase dropdown-toggle <?php echo $controlador == 'usuarios' && $accion == 'logout' ? 'active' : ''; ?>" role="button" data-bs-toggle="dropdown" aria-expanded="true">
             <i class="fas fa-user-circle me-1"></i>
@@ -93,7 +104,7 @@
         </li>
 
         <!-- Notificaciones dropdown -->
-        <?php if (!$esIngeniero): ?>
+        <?php if (!$esIngeniero && !$esEncargado): ?>
           <li class="nav-item dropdown">
             <a
               class="nav-link dropdown-toggle <?php echo $controlador == 'notificaciones' && $accion == 'listar' ? 'active' : ''; ?>"

@@ -32,6 +32,7 @@
         <?php
         $rol = $_SESSION['rol']; // Obtener el rol del usuario
         $esIngeniero = ($rol === 'ingeniero');
+        $esEncargado = ($rol === 'encargado');
         ?>
 
         <!-- Menu -->
