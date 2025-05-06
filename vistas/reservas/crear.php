@@ -26,27 +26,25 @@
                         </div>
 
                         <div class="form-group row mb-4">
-                            <div class="col-md-4">
-                                <label for="fecha_evento mb-2">Fecha del Evento:</label>
+                            <div class="col-md-6">
+                                <label for="fecha_evento" class="mb-2">Fecha del Evento:</label>
                                 <input type="date" class="form-control" id="fecha_evento" name="fecha_evento" required min="<?php echo date('Y-m-d'); ?>">
                             </div>
-                            <div class="col-md-4">
-                                <label for="hora_inicio mb-2">Hora de Inicio:</label>
-                                <input type="time" class="form-control" id="hora_inicio" name="hora_inicio" required>
-                            </div>
-                            <div class="col-md-4">
-                                <label for="hora_fin mb-2">Hora de Finalización:</label>
-                                <input type="time" class="form-control" id="hora_fin" name="hora_fin" required>
+                            <div class="col-md-6">
+                                <label for="rango_horario" class="mb-2">Rango Horario:</label>
+                                <select class="form-control" id="rango_horario" name="rango_horario" required>
+                                    <option value="">Seleccione un rango horario</option>
+                                    <option value="manana_tarde">Mañana/Tarde: 11:00 a 16:00</option>
+                                    <option value="tarde_noche">Tarde/Noche: 17:00 a 21:00</option>
+                                    <option value="noche_madrugada">Noche/Madrugada: 22:00 a 05:00</option>
+                                </select>
+                                <input type="hidden" id="hora_inicio" name="hora_inicio">
+                                <input type="hidden" id="hora_fin" name="hora_fin">
                             </div>
                         </div>
 
                         <div class="alert alert-success mt-2">
-                            <small><strong>Importante:</strong> Los horarios deben estar dentro de alguno de estos rangos:</small>
-                            <ul class="mb-0 small">
-                                <li><strong>Mañana/Tarde:</strong> 11:00 a 16:00</li>
-                                <li><strong>Tarde/Noche:</strong> 17:00 a 21:00</li>
-                                <li> <strong>Noche/Madrugada:</strong> 22:00 a 05:00</li>
-                            </ul>
+                            <small><strong>Importante:</strong> Seleccione uno de los rangos horarios disponibles para la reserva del salón.</small>
                         </div>
 
                         <div class="form-group mb-4">
@@ -198,19 +196,33 @@
         const btnEnviar = document.getElementById('btn-enviar');
 
         // Definir los rangos permitidos
-        const rangosPermitidos = [{
+        const rangosPermitidos = {
+            'manana_tarde': {
                 inicio: '11:00',
                 fin: '16:00'
             },
-            {
+            'tarde_noche': {
                 inicio: '17:00',
                 fin: '21:00'
             },
-            {
+            'noche_madrugada': {
                 inicio: '22:00',
                 fin: '05:00'
             }
-        ];
+        };
+        
+        // Manejar cambio en selección de rango horario
+        const rangoHorarioSelect = document.getElementById('rango_horario');
+        rangoHorarioSelect.addEventListener('change', function() {
+            const rangoSeleccionado = this.value;
+            if (rangoSeleccionado && rangosPermitidos[rangoSeleccionado]) {
+                horaInicioInput.value = rangosPermitidos[rangoSeleccionado].inicio;
+                horaFinInput.value = rangosPermitidos[rangoSeleccionado].fin;
+            } else {
+                horaInicioInput.value = '';
+                horaFinInput.value = '';
+            }
+        });
 
         // Mostrar/Ocultar sección de grupo según selección
         const grupoRadios = document.querySelectorAll('input[name="es_grupo"]');
@@ -246,8 +258,15 @@
             container.appendChild(row);
         });
         
-        // Validar términos y condiciones
+        // Validar formulario antes de enviar
         formulario.addEventListener('submit', function(e) {
+            // Verificar que se haya seleccionado un rango horario
+            if (!horaInicioInput.value || !horaFinInput.value) {
+                e.preventDefault();
+                alert('Por favor, seleccione un rango horario válido.');
+                return;
+            }
+            
             // Verificar que los términos y condiciones estén aceptados
             if (!aceptaTerminos.checked) {
                 e.preventDefault(); // Detener el envío del formulario
