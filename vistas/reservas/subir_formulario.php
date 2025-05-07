@@ -143,7 +143,7 @@ if (isset($_SESSION['error'])) {
                     ?>
 
                     <form action="index.php?controlador=reservas&accion=subirFormulario&codigo=<?php echo isset($codigo_unico) ? $codigo_unico : (isset($_GET['codigo']) ? $_GET['codigo'] : ''); ?>" method="POST" enctype="multipart/form-data">
-                        <div class="row mb-4">
+                        <!-- <div class="row mb-4">
                             <div class="col-12">
                                 <div class="card">
                                     <div class="card-header bg-light">
@@ -164,14 +164,14 @@ if (isset($_SESSION['error'])) {
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        </div> -->
 
                         <!-- Subir formulario municipal -->
                         <div class="row mb-4">
                             <div class="col-12">
                                 <div class="card">
                                     <div class="card-header bg-light">
-                                        <h5 class="mb-0">3. Subir Formulario Municipal</h5>
+                                        <h5 class="mb-0">2. Subir Formulario Municipal</h5>
                                     </div>
                                     <div class="card-body">
                                         <div class="form-group">
@@ -194,7 +194,7 @@ if (isset($_SESSION['error'])) {
                             <div class="col-12">
                                 <div class="card">
                                     <div class="card-header bg-light">
-                                        <h5 class="mb-0">4. Subir Comprobante de Pago</h5>
+                                        <h5 class="mb-0">3. Subir Comprobante de Pago</h5>
                                     </div>
                                     <div class="card-body">
                                         <p>Suba el comprobante de pago del anticipo (50% del valor total).</p>
@@ -218,7 +218,7 @@ if (isset($_SESSION['error'])) {
                             <div class="col-12">
                                 <div class="card">
                                     <div class="card-header bg-light">
-                                        <h5 class="mb-0">5. Subir Comprobante de Pago (50% del valor total o 100% del valor total)</h5>
+                                        <h5 class="mb-0">4. Subir Comprobante de Pago (50% del valor total o 100% del valor total)</h5>
                                     </div>
                                     <div class="card-body">
                                         <p>Suba el comprobante de pago del anticipo (50% del valor total o 100% del valor total).</p>
@@ -255,204 +255,204 @@ if (isset($_SESSION['error'])) {
 
 <!-- INICIO: Script del Contador y Verificación -->
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const fechaVencimientoStr = "<?php echo $reserva['fecha_vencimiento']; ?>";
-    const codigoUnico = "<?php echo isset($codigo_unico) ? $codigo_unico : (isset($_GET['codigo']) ? $_GET['codigo'] : ''); ?>";
-    const estadoInicial = "<?php echo $reserva['estado']; ?>";
+    document.addEventListener('DOMContentLoaded', function() {
+        const fechaVencimientoStr = "<?php echo $reserva['fecha_vencimiento']; ?>";
+        const codigoUnico = "<?php echo isset($codigo_unico) ? $codigo_unico : (isset($_GET['codigo']) ? $_GET['codigo'] : ''); ?>";
+        const estadoInicial = "<?php echo $reserva['estado']; ?>";
 
-    const countdownElement = document.getElementById('countdown-timer');
-    const estadoActualElement = document.getElementById('estado-actual').querySelector('span');
-    const contadorContainer = document.getElementById('contador-container');
-    const mensajeEstadoElement = document.getElementById('mensaje-estado');
-    const inputs = document.querySelectorAll('input[type=file]');
-    const submitButton = document.getElementById('submit-button');
+        const countdownElement = document.getElementById('countdown-timer');
+        const estadoActualElement = document.getElementById('estado-actual').querySelector('span');
+        const contadorContainer = document.getElementById('contador-container');
+        const mensajeEstadoElement = document.getElementById('mensaje-estado');
+        const inputs = document.querySelectorAll('input[type=file]');
+        const submitButton = document.getElementById('submit-button');
 
-    let intervalId = null;
-    let checkIntervalId = null;
+        let intervalId = null;
+        let checkIntervalId = null;
 
-    // Verificar si ya hay un comprobante de pago
-    function verificarComprobantePago() {
-        // Verificar directamente en el DOM si existen enlaces a comprobantes
-        const tienePagoAnticipo = <?php echo !empty($reserva['archivo_comprobante']) ? 'true' : 'false'; ?>;
-        const tienePagoTotal = <?php echo !empty($reserva['archivo_comprobante_total']) ? 'true' : 'false'; ?>;
-        
-        return tienePagoAnticipo || tienePagoTotal;
-    }
-
-    function actualizarContador() {
-        // Si ya tiene pago registrado, no mostrar el contador sino un mensaje positivo
-        if (verificarComprobantePago()) {
-            countdownElement.innerHTML = "Pago registrado";
-            countdownElement.classList.remove('alert-warning', 'alert-danger');
-            countdownElement.classList.add('alert-success');
-            clearInterval(intervalId);
-            return;
+        // Verificar si ya hay un comprobante de pago
+        function verificarComprobantePago() {
+            // Verificar directamente en el DOM si existen enlaces a comprobantes
+            const tienePagoAnticipo = <?php echo !empty($reserva['archivo_comprobante']) ? 'true' : 'false'; ?>;
+            const tienePagoTotal = <?php echo !empty($reserva['archivo_comprobante_total']) ? 'true' : 'false'; ?>;
+            
+            return tienePagoAnticipo || tienePagoTotal;
         }
-        
-        const ahora = new Date().getTime();
-        // Asegurarse que la fecha de vencimiento se interpreta correctamente
-        const fechaVencimiento = new Date(fechaVencimientoStr.replace(' ', 'T')).getTime(); 
-        const diferencia = fechaVencimiento - ahora;
 
-        if (diferencia <= 0) {
-            // Si el tiempo expiró, verificar en el servidor si hay pagos (por si se subieron despues)
-            fetch(`index.php?controlador=reservas&accion=verificarEstado&codigo=${codigoUnico}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data && data.tiene_pago === true) {
-                        // Si tiene pago, mostrar mensaje positivo
-                        countdownElement.innerHTML = "Pago registrado";
-                        countdownElement.classList.remove('alert-warning', 'alert-danger');
-                        countdownElement.classList.add('alert-success');
-                    } else {
-                        // Si no tiene pago y expiró, mostrar mensaje de expiración
+        function actualizarContador() {
+            // Si ya tiene pago registrado, no mostrar el contador sino un mensaje positivo
+            if (verificarComprobantePago()) {
+                countdownElement.innerHTML = "Pago registrado";
+                countdownElement.classList.remove('alert-warning', 'alert-danger');
+                countdownElement.classList.add('alert-success');
+                clearInterval(intervalId);
+                return;
+            }
+            
+            const ahora = new Date().getTime();
+            // Asegurarse que la fecha de vencimiento se interpreta correctamente
+            const fechaVencimiento = new Date(fechaVencimientoStr.replace(' ', 'T')).getTime(); 
+            const diferencia = fechaVencimiento - ahora;
+
+            if (diferencia <= 0) {
+                // Si el tiempo expiró, verificar en el servidor si hay pagos (por si se subieron despues)
+                fetch(`index.php?controlador=reservas&accion=verificarEstado&codigo=${codigoUnico}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data && data.tiene_pago === true) {
+                            // Si tiene pago, mostrar mensaje positivo
+                            countdownElement.innerHTML = "Pago registrado";
+                            countdownElement.classList.remove('alert-warning', 'alert-danger');
+                            countdownElement.classList.add('alert-success');
+                        } else {
+                            // Si no tiene pago y expiró, mostrar mensaje de expiración
+                            countdownElement.innerHTML = "Tiempo Expirado";
+                            countdownElement.classList.remove('alert-warning');
+                            countdownElement.classList.add('alert-danger');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error al verificar estado:', error);
                         countdownElement.innerHTML = "Tiempo Expirado";
                         countdownElement.classList.remove('alert-warning');
                         countdownElement.classList.add('alert-danger');
+                    });
+                    
+                clearInterval(intervalId);
+                verificarEstadoReserva(); 
+                return;
+            }
+
+            const dias = Math.floor(diferencia / (1000 * 60 * 60 * 24));
+            const horas = Math.floor((diferencia % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutos = Math.floor((diferencia % (1000 * 60 * 60)) / (1000 * 60));
+            const segundos = Math.floor((diferencia % (1000 * 60)) / 1000);
+
+            countdownElement.innerHTML = `${dias}d ${horas}h ${minutos}m ${segundos}s`;
+        }
+
+        function deshabilitarFormulario(mensaje, estado) {
+            // Si el estado es aprobada o confirmada, mostramos el mensaje pero NO deshabilitamos los campos
+            if (estado === 'aprobada' || estado === 'confirmada') {
+                contadorContainer.style.display = 'none'; // Ocultar contador
+                mensajeEstadoElement.textContent = mensaje;
+                mensajeEstadoElement.className = 'alert alert-success'; // Cambiamos a clase success
+                mensajeEstadoElement.style.display = 'block';
+                if (intervalId) clearInterval(intervalId);
+                if (checkIntervalId) clearInterval(checkIntervalId); // Detener chequeos
+            } else {
+                // Para estados cancelada, rechazada o baja, deshabilitamos todo
+                inputs.forEach(input => input.disabled = true);
+                submitButton.disabled = true;
+                contadorContainer.style.display = 'none'; // Ocultar contador
+                mensajeEstadoElement.textContent = mensaje;
+                mensajeEstadoElement.className = 'alert alert-danger'; // Clase base + clase específica
+                mensajeEstadoElement.style.display = 'block';
+                if (intervalId) clearInterval(intervalId);
+                if (checkIntervalId) clearInterval(checkIntervalId); // Detener chequeos
+            }
+        }
+
+        function actualizarEstadoUI(estado, motivo) {
+            const badgeClasses = {
+                'pendiente': 'badge-warning',
+                'en_revision': 'badge-info',
+                'aprobada': 'badge-success',
+                'confirmada': 'badge-success',
+                'cancelada': 'badge-danger',
+                'rechazada': 'badge-danger',
+                'baja': 'badge-danger',
+                'no_encontrada': 'badge-dark',
+                'error': 'badge-danger'
+            };
+            estadoActualElement.textContent = estado.charAt(0).toUpperCase() + estado.slice(1).replace('_', ' ');
+            estadoActualElement.className = 'badge ' + (badgeClasses[estado] || 'badge-secondary');
+
+            if (['cancelada', 'rechazada', 'baja', 'aprobada', 'confirmada', 'no_encontrada', 'error'].includes(estado)) {
+                let mensaje = '';
+                if (estado === 'cancelada') {
+                    mensaje = 'Reserva cancelada' + (motivo ? ': ' + motivo : '.');
+                } else if (estado === 'rechazada') {
+                    mensaje = 'Reserva rechazada' + (motivo ? ': ' + motivo : '.');
+                } else if (estado === 'baja') {
+                    mensaje = 'Reserva dada de baja.';
+                } else if (estado === 'aprobada' || estado === 'confirmada') {
+                    mensaje = 'Reserva ' + estado + '. Puede continuar subiendo los archivos faltantes (comprobantes de pago o formularios adicionales).';
+                } else {
+                    mensaje = 'No se pudo verificar el estado o la reserva no existe.';
+                }
+                deshabilitarFormulario(mensaje, estado);
+            } else {
+                // Si vuelve a pendiente o en revisión (poco probable pero posible), rehabilitar
+                // (Considerar si esto es deseado)
+                // inputs.forEach(input => input.disabled = false);
+                // submitButton.disabled = false;
+                contadorContainer.style.display = 'block';
+                mensajeEstadoElement.style.display = 'none';
+                if (!intervalId && estado === 'pendiente') { 
+                    // Reiniciar contador si no estaba corriendo y el estado es pendiente
+                    intervalId = setInterval(actualizarContador, 1000);
+                    actualizarContador(); // Llamada inicial
+                }
+            }
+        }
+
+        function verificarEstadoReserva() {
+            fetch(`index.php?controlador=reservas&accion=verificarEstado&codigo=${codigoUnico}`)
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Estado verificado:', data); // Para depuración
+                    // Ocultar cualquier mensaje de error previo
+                    mensajeEstadoElement.style.display = 'none';
+                    
+                    if (data && data.estado) {
+                        // Si hay comprobantes de pago, mostrar mensaje adecuado en el contador
+                        if (data.tiene_pago === true) {
+                            countdownElement.innerHTML = "Pago registrado";
+                            countdownElement.classList.remove('alert-warning', 'alert-danger');
+                            countdownElement.classList.add('alert-success');
+                            clearInterval(intervalId); // Detener contador
+                        }
+                        
+                        actualizarEstadoUI(data.estado, data.motivo_rechazo);
+                    } else {
+                        actualizarEstadoUI('error', 'Respuesta inválida del servidor');
                     }
                 })
                 .catch(error => {
                     console.error('Error al verificar estado:', error);
-                    countdownElement.innerHTML = "Tiempo Expirado";
-                    countdownElement.classList.remove('alert-warning');
-                    countdownElement.classList.add('alert-danger');
-                });
-                
-            clearInterval(intervalId);
-            verificarEstadoReserva(); 
-            return;
-        }
-
-        const dias = Math.floor(diferencia / (1000 * 60 * 60 * 24));
-        const horas = Math.floor((diferencia % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-        const minutos = Math.floor((diferencia % (1000 * 60 * 60)) / (1000 * 60));
-        const segundos = Math.floor((diferencia % (1000 * 60)) / 1000);
-
-        countdownElement.innerHTML = `${dias}d ${horas}h ${minutos}m ${segundos}s`;
-    }
-
-    function deshabilitarFormulario(mensaje, estado) {
-        // Si el estado es aprobada o confirmada, mostramos el mensaje pero NO deshabilitamos los campos
-        if (estado === 'aprobada' || estado === 'confirmada') {
-            contadorContainer.style.display = 'none'; // Ocultar contador
-            mensajeEstadoElement.textContent = mensaje;
-            mensajeEstadoElement.className = 'alert alert-success'; // Cambiamos a clase success
-            mensajeEstadoElement.style.display = 'block';
-            if (intervalId) clearInterval(intervalId);
-            if (checkIntervalId) clearInterval(checkIntervalId); // Detener chequeos
-        } else {
-            // Para estados cancelada, rechazada o baja, deshabilitamos todo
-            inputs.forEach(input => input.disabled = true);
-            submitButton.disabled = true;
-            contadorContainer.style.display = 'none'; // Ocultar contador
-            mensajeEstadoElement.textContent = mensaje;
-            mensajeEstadoElement.className = 'alert alert-danger'; // Clase base + clase específica
-            mensajeEstadoElement.style.display = 'block';
-            if (intervalId) clearInterval(intervalId);
-            if (checkIntervalId) clearInterval(checkIntervalId); // Detener chequeos
-        }
-    }
-
-    function actualizarEstadoUI(estado, motivo) {
-        const badgeClasses = {
-            'pendiente': 'badge-warning',
-            'en_revision': 'badge-info',
-            'aprobada': 'badge-success',
-            'confirmada': 'badge-success',
-            'cancelada': 'badge-danger',
-            'rechazada': 'badge-danger',
-            'baja': 'badge-danger',
-            'no_encontrada': 'badge-dark',
-            'error': 'badge-danger'
-        };
-        estadoActualElement.textContent = estado.charAt(0).toUpperCase() + estado.slice(1).replace('_', ' ');
-        estadoActualElement.className = 'badge ' + (badgeClasses[estado] || 'badge-secondary');
-
-        if (['cancelada', 'rechazada', 'baja', 'aprobada', 'confirmada', 'no_encontrada', 'error'].includes(estado)) {
-            let mensaje = '';
-            if (estado === 'cancelada') {
-                mensaje = 'Reserva cancelada' + (motivo ? ': ' + motivo : '.');
-            } else if (estado === 'rechazada') {
-                mensaje = 'Reserva rechazada' + (motivo ? ': ' + motivo : '.');
-            } else if (estado === 'baja') {
-                mensaje = 'Reserva dada de baja.';
-            } else if (estado === 'aprobada' || estado === 'confirmada') {
-                mensaje = 'Reserva ' + estado + '. Puede continuar subiendo los archivos faltantes (comprobantes de pago o formularios adicionales).';
-            } else {
-                mensaje = 'No se pudo verificar el estado o la reserva no existe.';
-            }
-            deshabilitarFormulario(mensaje, estado);
-        } else {
-            // Si vuelve a pendiente o en revisión (poco probable pero posible), rehabilitar
-            // (Considerar si esto es deseado)
-            // inputs.forEach(input => input.disabled = false);
-            // submitButton.disabled = false;
-            contadorContainer.style.display = 'block';
-            mensajeEstadoElement.style.display = 'none';
-            if (!intervalId && estado === 'pendiente') { 
-                 // Reiniciar contador si no estaba corriendo y el estado es pendiente
-                intervalId = setInterval(actualizarContador, 1000);
-                actualizarContador(); // Llamada inicial
-            }
-        }
-    }
-
-    function verificarEstadoReserva() {
-        fetch(`index.php?controlador=reservas&accion=verificarEstado&codigo=${codigoUnico}`)
-            .then(response => response.json())
-            .then(data => {
-                console.log('Estado verificado:', data); // Para depuración
-                // Ocultar cualquier mensaje de error previo
-                mensajeEstadoElement.style.display = 'none';
-                
-                if (data && data.estado) {
-                    // Si hay comprobantes de pago, mostrar mensaje adecuado en el contador
-                    if (data.tiene_pago === true) {
-                        countdownElement.innerHTML = "Pago registrado";
-                        countdownElement.classList.remove('alert-warning', 'alert-danger');
-                        countdownElement.classList.add('alert-success');
-                        clearInterval(intervalId); // Detener contador
+                    // No mostrar error si ya hay un pago registrado
+                    if (!verificarComprobantePago()) {
+                        mensajeEstadoElement.textContent = 'Error de red al verificar estado. Intente recargar la página.';
+                        mensajeEstadoElement.className = 'alert alert-danger';
+                        mensajeEstadoElement.style.display = 'block';
                     }
-                    
-                    actualizarEstadoUI(data.estado, data.motivo_rechazo);
-                } else {
-                     actualizarEstadoUI('error', 'Respuesta inválida del servidor');
-                }
-            })
-            .catch(error => {
-                console.error('Error al verificar estado:', error);
-                // No mostrar error si ya hay un pago registrado
-                if (!verificarComprobantePago()) {
-                    mensajeEstadoElement.textContent = 'Error de red al verificar estado. Intente recargar la página.';
-                    mensajeEstadoElement.className = 'alert alert-danger';
-                    mensajeEstadoElement.style.display = 'block';
-                }
-            });
-    }
+                });
+        }
 
-    // Comprobar primero si ya hay un comprobante de pago subido
-    if (verificarComprobantePago()) {
-        // Si ya hay pago, mostrar mensaje positivo y no iniciar el contador
-        countdownElement.innerHTML = "Pago registrado";
-        countdownElement.classList.remove('alert-warning', 'alert-danger');
-        countdownElement.classList.add('alert-success');
-        // Iniciar verificación periódica del estado de todos modos
-        checkIntervalId = setInterval(verificarEstadoReserva, 30000); 
-    }
-    // Iniciar contador solo si el estado inicial es 'pendiente' y no hay comprobante de pago
-    else if (estadoInicial === 'pendiente') {
-        intervalId = setInterval(actualizarContador, 1000);
-        actualizarContador(); // Llamada inicial
-        // Iniciar verificación periódica del estado
-        checkIntervalId = setInterval(verificarEstadoReserva, 30000); // Verificar cada 30 segundos
-    } else {
-        // Si el estado inicial no es pendiente, mostramos el mensaje correspondiente
-        // La lógica PHP ya debería haber deshabilitado los campos, pero reforzamos
-        actualizarEstadoUI(estadoInicial, "<?php echo addslashes($reserva['motivo_rechazo'] ?? ''); ?>");
-    }
+        // Comprobar primero si ya hay un comprobante de pago subido
+        if (verificarComprobantePago()) {
+            // Si ya hay pago, mostrar mensaje positivo y no iniciar el contador
+            countdownElement.innerHTML = "Pago registrado";
+            countdownElement.classList.remove('alert-warning', 'alert-danger');
+            countdownElement.classList.add('alert-success');
+            // Iniciar verificación periódica del estado de todos modos
+            checkIntervalId = setInterval(verificarEstadoReserva, 30000); 
+        }
+        // Iniciar contador solo si el estado inicial es 'pendiente' y no hay comprobante de pago
+        else if (estadoInicial === 'pendiente') {
+            intervalId = setInterval(actualizarContador, 1000);
+            actualizarContador(); // Llamada inicial
+            // Iniciar verificación periódica del estado
+            checkIntervalId = setInterval(verificarEstadoReserva, 30000); // Verificar cada 30 segundos
+        } else {
+            // Si el estado inicial no es pendiente, mostramos el mensaje correspondiente
+            // La lógica PHP ya debería haber deshabilitado los campos, pero reforzamos
+            actualizarEstadoUI(estadoInicial, "<?php echo addslashes($reserva['motivo_rechazo'] ?? ''); ?>");
+        }
 
-    // Primera verificación inmediata por si cambió entre carga de página y ejecución JS
-    // verificarEstadoReserva(); // Descomentar si se quiere una verificación extra inmediata
-});
+        // Primera verificación inmediata por si cambió entre carga de página y ejecución JS
+        // verificarEstadoReserva(); // Descomentar si se quiere una verificación extra inmediata
+    });
 </script>
 <!-- FIN: Script del Contador y Verificación -->
