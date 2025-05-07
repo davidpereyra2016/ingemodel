@@ -282,4 +282,18 @@ class ModeloReservas {
         $consulta->execute();
         return $consulta->fetch(PDO::FETCH_ASSOC);
     }
+
+    // Registrar en historial
+    public function registrarHistorial($id_reserva, $id_usuario, $accion, $estado_anterior, $estado_nuevo, $comentario = null) {
+        $consulta = $this->conexion->prepare("INSERT INTO historial_reservas 
+                                             (id_reserva, id_usuario, accion, estado_anterior, estado_nuevo, comentario) 
+                                             VALUES (:id_reserva, :id_usuario, :accion, :estado_anterior, :estado_nuevo, :comentario)");
+        $consulta->bindParam(':id_reserva', $id_reserva);
+        $consulta->bindParam(':id_usuario', $id_usuario);
+        $consulta->bindParam(':accion', $accion);
+        $consulta->bindParam(':estado_anterior', $estado_anterior);
+        $consulta->bindParam(':estado_nuevo', $estado_nuevo);
+        $consulta->bindParam(':comentario', $comentario);
+        return $consulta->execute();
+    }
 }
