@@ -90,15 +90,16 @@ $(document).ready(function () {
                 let html = '';
                 let htmlCount = '';
                 if (data.length > 0) {
-                    // Convertir fecha a cadena legible ej. "12 de Diciembre."
-                    const fecha = new Date(data[0].fecha).toLocaleString('es-ES', {
-                        month: 'long',
-                        day: 'numeric',
-                    });
 
                     // Mostrar notificaciones
                     for (let i = 0; i < data.length; i++) {
                         const notificacion = data[i];
+
+                        // Convertir fecha a cadena legible ej. "12 de Diciembre" para cada notificación
+                        const fecha = new Date(notificacion.fecha).toLocaleString('es-ES', {
+                            month: 'long',
+                            day: 'numeric',
+                        });
 
                         if (notificacion.leido === 0) {
                             countNotificaciones++;
