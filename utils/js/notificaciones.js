@@ -106,7 +106,7 @@ $(document).ready(function () {
                         }
 
                         html += `<li>
-                                    <button type="button" class="dropdown-item border-bottom d-flex align-items-center gap-2 btn-ver" id="btn-ver" data-id="${notificacion.id_reserva}">
+                                    <button type="button" class="dropdown-item border-bottom d-flex align-items-center gap-2 btn-ver" id="btn-ver" data-id="${notificacion.id_reserva}" data-notification-id="${notificacion.id}">
                                         <i class="bi bi-eye"></i>
                                         <span class="ms-2">
                                             ${notificacion.mensaje}
@@ -177,19 +177,20 @@ $(document).ready(function () {
     // Marcar como leido cuando damos click al ver reservas
     $(document).on('click', '.btn-ver', function () {
         
-        const id = $(this).data('id');
+        const reservaId = $(this).data('id');
+        const notificationId = $(this).data('notification-id');
 
         $.ajax({
             url: '?controlador=notificaciones&accion=marcarLeido',
             type: 'POST',
             dataType: 'json',
-            data: { id },
+            data: { id: notificationId },
             success: function (data) {
                 if (data.success) {
                     cargarNotificaciones();
                     cargarNotificacionesHeader();
                     // Redirigir a la página de reservas
-                    window.location.href = '?controlador=reservas&accion=ver&id=' + id;
+                    window.location.href = '?controlador=reservas&accion=ver&id=' + reservaId;
                 } else {
                     console.error('Error al marcar la notificación como leída');
                 }
