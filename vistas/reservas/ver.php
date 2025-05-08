@@ -136,7 +136,7 @@
                                     <h5 class="card-title text-success mb-0"><i class="bi bi-file-earmark-text me-2"></i> Documentos</h5>
                                 </div>
                                 <div class="card-body row">
-                                    <div class="col-md-6">
+                                    <!-- <div class="col-md-6">
                                         <div class="card mb-3">
                                             <div class="card-header bg-light">Formulario de Solicitud</div>
                                             <div class="card-body">
@@ -149,8 +149,8 @@
                                                 <?php endif; ?>
                                             </div>
                                         </div>
-                                    </div>
-                                    <div class="col-md-6">
+                                    </div> -->
+                                    <div class="col-md-12">
                                         <div class="card mb-3">
                                             <div class="card-header bg-light">Formulario de Solicitud Municipal</div>
                                             <div class="card-body">
@@ -164,8 +164,6 @@
                                             </div>
                                         </div>
                                     </div>
-
-
                                     <div class="col-md-6">
                                         <div class="card mb-3">
                                             <div class="card-header bg-light">Comprobante de Pago</div>
