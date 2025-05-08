@@ -193,7 +193,7 @@
     ?>
 
     <div class="header">
-        <img src="../../assets/img/logo-2.png" alt="Logo">
+        <!-- <img src="../../assets/img/logo-2.png" alt="Logo"> -->
         <h1>Colegio Público de Ingenieros de Formosa</h1>
         <p>Reporte Semanal de Reservas del Salón</p>
         <p><strong>Período:</strong> <?php echo $fechaObj->format('d/m/Y'); ?> al <?php echo $finSemanaObj->format('d/m/Y'); ?></p>

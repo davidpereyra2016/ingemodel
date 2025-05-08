@@ -133,7 +133,7 @@
     ?>
 
     <div class="header">
-        <img src="../../assets/img/logo-2.png" alt="Logo">
+        <!-- <img src="../../assets/img/logo-2.png" alt="Logo"> -->
         <h1>Colegio Público de Ingenieros de Formosa</h1>
         <p>Reporte Mensual de Reservas del Salón</p>
         <p><strong>Periodo:</strong> <?php echo $nombresMeses[intval($mes)]; ?> de <?php echo $anio; ?></p>
