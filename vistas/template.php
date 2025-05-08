@@ -65,6 +65,7 @@
     <script src='./utils/js/fullcalendar.js'></script>
     <script src="./utils/js/notificaciones.js"></script>
     <script src="./utils/js/dataTable.js"></script>
+    <script src="./utils/js/validacionesForm.js"></script>
 
 </body>
 
