@@ -372,9 +372,15 @@ class ControladorReservas
             exit();
         }
         
-        // Aquí iría el código para generar el PDF con la biblioteca FPDF o similar
-        // Por simplicidad, redirigimos a la vista de ver
-        header("Location: index.php?controlador=reservas&accion=ver&id=".$id_reserva);
+        // Verificar que la reserva esté aprobada
+        if ($reserva['estado'] != 'aprobada') {
+            $_SESSION['error'] = "Solo se pueden generar comprobantes para reservas aprobadas.";
+            header("Location: index.php?controlador=reservas&accion=ver&id=".$id_reserva);
+            exit();
+        }
+        
+        // Cargar la vista del comprobante para impresión
+        include_once("vistas/reservas/comprobante_pdf.php");
         exit();
     }
 
