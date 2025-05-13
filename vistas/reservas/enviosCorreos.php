@@ -140,7 +140,7 @@ $email_body .= "
             <p>Si tiene alguna consulta, por favor no dude en contactarnos.</p>
             
             <p>Saludos cordiales,<br>
-            Equipo de IngeModel</p>
+            Colegio de Ingenieros</p>
         </div>
         <div class='footer'>
             <p>Este es un correo automático, por favor no responda a este mensaje.</p>
@@ -168,7 +168,7 @@ if ($reserva['estado'] == 'rechazada' && !empty($reserva['motivo_rechazo'])) {
 
 $email_alt_body .= "Si tiene alguna consulta, por favor no dude en contactarnos.\n\n" .
                   "Saludos cordiales,\n" .
-                  "Equipo de IngeModel";
+                  "Equipo de Ingenieros";
 
 //Create an instance; passing `true` enables exceptions
 $mail = new PHPMailer(true);
@@ -194,7 +194,7 @@ try {
     $mail->Port       = $GLOBALS['correoHostingerPort'];        //TCP port to connect to
 
     //Recipients
-    $mail->setFrom($GLOBALS['correoHostingerFrom'], 'IngeModel - Reservas');
+    $mail->setFrom($GLOBALS['correoHostingerFrom'], 'Colegio de Ingenieros - Reservas');
     $mail->addAddress($reserva['email'], $reserva['nombre'] . ' ' . $reserva['apellido']);     //Add the user as recipient
     
     // Add a copy to the admin (optional)
