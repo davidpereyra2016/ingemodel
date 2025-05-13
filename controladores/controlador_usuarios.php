@@ -115,7 +115,7 @@ class ControladorUsuarios
                 $_SESSION['mensaje'] = "Usuario creado correctamente";
                 header('Location: index.php?controlador=usuarios&accion=listar');
             } else {
-                $_SESSION['error'] = "Error al crear usuario";
+                $_SESSION['error'] = "Error en crear usuario por que necesita registrar manualmente los campos y no hacerlo por defecto:";
                 header('Location: index.php?controlador=usuarios&accion=listar');
             }
             exit;

@@ -81,7 +81,7 @@ class ModeloUsuarios
             $stmt->execute();
             return true;
         } catch (Exception $e) {
-            error_log("Error en crear usuario: " . $e->getMessage());
+            error_log("Error en crear usuario por que necesita registrar manualmente los campos y no hacerlo por defecto: " . $e->getMessage());
             return false;
         }
     }
