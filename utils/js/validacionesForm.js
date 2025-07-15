@@ -9,6 +9,13 @@ document.addEventListener('DOMContentLoaded', function () {
     const terminosCheck = document.getElementById('terminos_check');
     const btnEnviar = document.getElementById('btn-enviar');
 
+    // Verificar si el usuario es administrador para habilitar fechas pasadas
+    const fechaInput = document.getElementById('fecha_evento');
+    if (fechaInput && fechaInput.dataset.role === 'administrador') {
+        // Eliminar la restricción de fecha mínima para administradores
+        fechaInput.removeAttribute('min');
+    }
+
     // Definir los rangos permitidos
     const rangosPermitidos = {
         'manana_tarde': {

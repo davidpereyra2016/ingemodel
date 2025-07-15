@@ -51,20 +51,23 @@ class ModeloReservas {
     }
 
     // Crear una nueva reserva
-    public function crearReserva($id_usuario, $fecha_evento, $hora_inicio, $hora_fin, $tipo_uso, $motivo_de_uso, $codigo_unico, $fecha_vencimiento) {
+    public function crearReserva($id_usuario, $fecha_evento, $hora_inicio, $hora_fin, $tipo_uso, $motivo_de_uso, $codigo_unico, $fecha_vencimiento, $rol = null) {
 
         // Verificar si la fecha es fin de semana (6=sábado, 7=domingo)
-        $fecha_dia = date('N', strtotime($fecha_evento));
-        if ($fecha_dia >= 6) {
-            $consulta_limite = $this->conexion->prepare("SELECT COUNT(*) as total FROM reservas 
-                                                        WHERE id_usuario = :id_usuario 
-                                                        AND DAYOFWEEK(fecha_evento) IN (6,7) 
-                                                        AND estado IN ('pendiente', 'aprobada')");
-            $consulta_limite->bindParam(':id_usuario', $id_usuario);
-            $consulta_limite->execute();
-            $limite = $consulta_limite->fetch(PDO::FETCH_ASSOC);
-            if ($limite['total'] >= 3) {
-                return ['error' => 'Límite alcanzado: Máximo 3 reservas en fines de semana.'];
+        // Los administradores no tienen límite de reservas en fin de semana
+        if ($rol !== 'administrador') {
+            $fecha_dia = date('N', strtotime($fecha_evento));
+            if ($fecha_dia >= 6) {
+                $consulta_limite = $this->conexion->prepare("SELECT COUNT(*) as total FROM reservas 
+                                                            WHERE id_usuario = :id_usuario 
+                                                            AND DAYOFWEEK(fecha_evento) IN (6,7) 
+                                                            AND estado IN ('pendiente', 'aprobada')");
+                $consulta_limite->bindParam(':id_usuario', $id_usuario);
+                $consulta_limite->execute();
+                $limite = $consulta_limite->fetch(PDO::FETCH_ASSOC);
+                if ($limite['total'] >= 3) {
+                    return ['error' => 'Límite alcanzado: Máximo 3 reservas en fines de semana.'];
+                }
             }
         }
         
@@ -136,8 +139,17 @@ class ModeloReservas {
         $consulta_monto->execute();
         $config_arancel = $consulta_monto->fetch(PDO::FETCH_ASSOC);
         
+        // Corregir la lógica para aplicar el monto correcto según el horario seleccionado
         $hora_comparacion = "22:00:00";
-        $monto = ($hora_fin <= $hora_comparacion) ? $config_arancel['monto_antes_22'] : $config_arancel['monto_despues_22'];
+        $hora_inicio_ts = strtotime($hora_inicio);
+        $hora_comparacion_ts = strtotime($hora_comparacion);
+        
+        // Si la hora de inicio es igual o posterior a las 22:00 o está dentro del rango nocturno, usar monto_despues_22
+        if ($hora_inicio_ts >= $hora_comparacion_ts) {
+            $monto = $config_arancel['monto_despues_22'];
+        } else {
+            $monto = $config_arancel['monto_antes_22'];
+        }
         
         // Crear la reserva
         $consulta = $this->conexion->prepare("INSERT INTO reservas (id_usuario, fecha_evento, hora_inicio, hora_fin, tipo_uso, monto, motivo_de_uso, codigo_unico, fecha_vencimiento, estado) 

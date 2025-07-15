@@ -204,4 +204,24 @@ class ModeloUsuarios
             return null;
         }
     }
+    
+    public function validarUsuarioPorUUID($uuid)
+    {
+        try {
+            $stmt = $this->conexion->prepare("
+                SELECT * FROM usuarios
+                WHERE uuid = :uuid AND estado = 'activo' LIMIT 1
+            ");
+            $stmt->bindParam(":uuid", $uuid);
+            $stmt->execute();
+
+            if ($usuario = $stmt->fetch(PDO::FETCH_ASSOC)) {
+                return $usuario;
+            }
+            return false;
+        } catch (PDOException $e) {
+            error_log("Error en validarUsuarioPorUUID: " . $e->getMessage());
+            return false;
+        }
+    }
 }

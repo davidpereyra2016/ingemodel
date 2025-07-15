@@ -24,6 +24,28 @@ class ControladorUsuarios
         }
 
         $modelo = new ModeloUsuarios();
+        
+        // Verificar si viene un UUID desde SICOPRO
+        if (isset($_POST['uuid']) && !empty($_POST['uuid'])) {
+            $uuid = htmlspecialchars($_POST['uuid'], ENT_QUOTES, 'UTF-8');
+            
+            // Validar usuario por UUID
+            if ($usuario = $modelo->validarUsuarioPorUUID($uuid)) {
+                // Iniciar sesión
+                $_SESSION['id_usuario'] = $usuario['id'];
+                $_SESSION['nombre'] = $usuario['nombre'];
+                $_SESSION['apellido'] = $usuario['apellido'];
+                $_SESSION['email'] = $usuario['email'];
+                $_SESSION['matricula'] = $usuario['matricula'];
+                $_SESSION['rol'] = $usuario['rol'];
+                $_SESSION['uuid'] = $usuario['uuid'];
+                
+                // Profesionales de SICOPRO siempre tienen rol 'ingeniero'
+                header('Location: index.php?controlador=reservas&accion=calendario');
+                exit;
+            }
+            // Si no se encuentra el UUID o es inválido, continuamos con el login normal
+        }
 
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             // Obtener datos del formulario
@@ -40,6 +62,9 @@ class ControladorUsuarios
                     $_SESSION['email'] = $usuario['email'];
                     $_SESSION['matricula'] = $usuario['matricula'];
                     $_SESSION['rol'] = $usuario['rol'];
+                    if (!empty($usuario['uuid'])) {
+                        $_SESSION['uuid'] = $usuario['uuid'];
+                    }
 
                     // Redirigir según el rol
                     if ($usuario['rol'] === 'ingeniero') {

@@ -28,7 +28,14 @@
                         <div class="form-group row mb-4">
                             <div class="col-md-6">
                                 <label for="fecha_evento" class="mb-2">Fecha del Evento:</label>
-                                <input type="date" class="form-control" id="fecha_evento" name="fecha_evento" required min="<?php echo date('Y-m-d'); ?>">
+                                <input type="date" class="form-control" id="fecha_evento" name="fecha_evento" required
+                                <?php if($_SESSION['rol'] !== 'administrador'): ?>
+                                    min="<?php echo date('Y-m-d'); ?>"
+                                <?php endif; ?>
+                                data-role="<?php echo $_SESSION['rol']; ?>">
+                                <?php if($_SESSION['rol'] === 'administrador'): ?>
+                                <small class="text-info">Como administrador, puede seleccionar cualquier fecha, incluyendo fechas pasadas.</small>
+                                <?php endif; ?>
                             </div>
                             <div class="col-md-6">
                                 <label for="rango_horario" class="mb-2">Rango Horario:</label>

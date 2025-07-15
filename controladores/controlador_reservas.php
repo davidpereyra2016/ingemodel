@@ -69,8 +69,11 @@ class ControladorReservas
             // Guardar código en sesión para debug
             $_SESSION['ultimo_codigo_reserva'] = $codigo_unico;
             
+            // Obtener el rol del usuario para aplicar validaciones específicas
+            $rol = isset($_SESSION['rol']) ? $_SESSION['rol'] : 'ingeniero';
+            
             // 1. Llamar al modelo y capturar el resultado
-            $id_reserva = $this->modelo->crearReserva($id_usuario, $fecha_evento, $hora_inicio, $hora_fin, $tipo_uso, $motivo_de_uso, $codigo_unico, $fecha_vencimiento);
+            $id_reserva = $this->modelo->crearReserva($id_usuario, $fecha_evento, $hora_inicio, $hora_fin, $tipo_uso, $motivo_de_uso, $codigo_unico, $fecha_vencimiento, $rol);
             // 2. Verificar si hay error primero
             if (isset($id_reserva['error'])) {
                 $_SESSION['error'] = $id_reserva['error'];
