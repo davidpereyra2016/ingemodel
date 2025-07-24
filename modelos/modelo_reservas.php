@@ -295,6 +295,26 @@ class ModeloReservas {
         return $consulta->fetch(PDO::FETCH_ASSOC);
     }
 
+    // Eliminar reserva (dar de baja o eliminar completamente)
+    public function eliminarReserva($id, $eliminarCompletamente = false) {
+        if ($eliminarCompletamente) {
+            // Eliminar completamente de la base de datos
+            // La BD maneja automáticamente la eliminación en cascada de:
+            // - historial_reservas (ON DELETE CASCADE)
+            // - grupo_matriculados (ON DELETE CASCADE) 
+            // - notificaciones (ON DELETE CASCADE)
+            
+            $consulta = $this->conexion->prepare("DELETE FROM reservas WHERE id = :id");
+            $consulta->bindParam(':id', $id);
+            return $consulta->execute();
+        } else {
+            // Solo cambiar estado a 'baja' (eliminación lógica)
+            $consulta = $this->conexion->prepare("UPDATE reservas SET estado = 'baja' WHERE id = :id");
+            $consulta->bindParam(':id', $id);
+            return $consulta->execute();
+        }
+    }
+
     // Registrar en historial
     public function registrarHistorial($id_reserva, $id_usuario, $accion, $estado_anterior, $estado_nuevo, $comentario = null) {
         $consulta = $this->conexion->prepare("INSERT INTO historial_reservas 

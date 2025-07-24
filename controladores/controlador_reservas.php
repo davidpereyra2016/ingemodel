@@ -387,6 +387,72 @@ class ControladorReservas
         exit();
     }
 
+    public function eliminar() {
+        // Verificar que solo los administradores puedan eliminar reservas
+        if ($_SESSION['rol'] != 'administrador') {
+            $_SESSION['error'] = "No tienes permisos para eliminar reservas.";
+            header("Location: index.php?controlador=reservas&accion=listar");
+            exit();
+        }
+        
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id_reserva']) && isset($_POST['tipo_accion'])) {
+            $id_reserva = $_POST['id_reserva'];
+            $tipo_accion = $_POST['tipo_accion']; // 'baja' o 'eliminar'
+            
+            // Obtener información de la reserva antes de procesarla
+            $reserva = $this->modelo->obtenerReserva($id_reserva);
+            
+            if ($reserva) {
+                $estado_anterior = $reserva['estado'];
+                
+                if ($tipo_accion === 'baja') {
+                    // Dar de baja (cambiar estado a 'baja')
+                    if ($this->modelo->eliminarReserva($id_reserva, false)) {
+                        // Registrar en historial
+                        $this->modelo->registrarHistorial(
+                            $id_reserva, 
+                            $_SESSION['id_usuario'], 
+                            'baja', 
+                            $estado_anterior, 
+                            'baja', 
+                            'Reserva dada de baja por administrador'
+                        );
+                        
+                        $_SESSION['mensaje'] = "La reserva ha sido dada de baja correctamente.";
+                    } else {
+                        $_SESSION['error'] = "Error al dar de baja la reserva.";
+                    }
+                } elseif ($tipo_accion === 'eliminar') {
+                    // Registrar en historial ANTES de la eliminación completa
+                    $this->modelo->registrarHistorial(
+                        $id_reserva, 
+                        $_SESSION['id_usuario'], 
+                        'eliminacion_completa', 
+                        $estado_anterior, 
+                        'eliminada', 
+                        'Reserva eliminada completamente por administrador'
+                    );
+                    
+                    // Eliminar completamente de la base de datos
+                    if ($this->modelo->eliminarReserva($id_reserva, true)) {
+                        $_SESSION['mensaje'] = "La reserva ha sido eliminada completamente de la base de datos.";
+                    } else {
+                        $_SESSION['error'] = "Error al eliminar completamente la reserva.";
+                    }
+                } else {
+                    $_SESSION['error'] = "Tipo de acción no válida.";
+                }
+            } else {
+                $_SESSION['error'] = "Reserva no encontrada.";
+            }
+        } else {
+            $_SESSION['error'] = "Solicitud inválida. Faltan parámetros requeridos.";
+        }
+        
+        header("Location: index.php?controlador=reservas&accion=listar");
+        exit();
+    }
+
     public function enviarCorreos() {
         $id_reserva = $_GET['id'];
         $reserva = $this->modelo->obtenerReserva($id_reserva);

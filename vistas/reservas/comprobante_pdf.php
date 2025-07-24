@@ -265,7 +265,7 @@
 
     <div class="disclaimer">
         <p>Este comprobante es válido con firma y sello de la autoridad del Colegio Público de Ingenieros de Formosa.</p>
-        <p>Para consultas o modificaciones comuníquese al teléfono: (0370) 4436677 o por email a info@cpiformosa.org.ar</p>
+        <p>Para consultas o modificaciones comuníquese al teléfono: (3704) 043114 o por email a ingenierosformosa@gmail.com</p>
     </div>
 
     <div class="footer">

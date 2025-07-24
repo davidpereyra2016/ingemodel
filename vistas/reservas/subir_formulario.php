@@ -74,12 +74,12 @@ if (isset($_SESSION['error'])) {
                     </div>
                     
 
-                    <!-- <?php if (!empty($formularios)): ?>
+                    <?php if (!empty($formularios)): ?>
                         <div class="row mb-4">
                             <div class="col-12">
                                 <div class="card">
                                     <div class="card-header bg-light">
-                                        <h5 class="mb-0">1. Descargar Formulario de Solicitud</h5>
+                                        <h5 class="mb-0">Descargar Formulario de Solicitud</h5>
                                     </div>
                                     <div class="card-body">
                                         <p>Descargue el formulario de solicitud, complete todos los datos requeridos y fírmelo.</p>
@@ -92,14 +92,14 @@ if (isset($_SESSION['error'])) {
                                 </div>
                             </div>
                         </div>
-                    <?php endif; ?> -->
+                    <?php endif; ?>
 
                     <?php if (!empty($formularios_municipales)): ?>
                         <div class="row mb-4">
                             <div class="col-12">
                                 <div class="card">
                                     <div class="card-header bg-light">
-                                        <h5 class="mb-0">1. Descargar Formulario Municipal</h5>
+                                        <h5 class="mb-0">Descargar Formulario Municipal</h5>
                                     </div>
                                     <div class="card-body">
                                         <p>Descargue el formulario Municipal</p>
@@ -143,16 +143,16 @@ if (isset($_SESSION['error'])) {
                     ?>
 
                     <form action="index.php?controlador=reservas&accion=subirFormulario&codigo=<?php echo isset($codigo_unico) ? $codigo_unico : (isset($_GET['codigo']) ? $_GET['codigo'] : ''); ?>" method="POST" enctype="multipart/form-data">
-                        <!-- <div class="row mb-4">
+                        <div class="row mb-4">
                             <div class="col-12">
                                 <div class="card">
                                     <div class="card-header bg-light">
-                                        <h5 class="mb-0">2. Subir Formulario Completado</h5>
+                                        <h5 class="mb-0">Subir Formulario de solicitud Completado</h5>
                                     </div>
                                     <div class="card-body">
                                         <div class="form-group">
-                                            <label for="formulario">Seleccione el formulario completado (PDF):</label>
-                                            <input type="file" class="form-control-file" id="formulario" name="formulario" accept=".pdf" <?php echo $camposDeshabilitados ? 'disabled' : ''; ?>>
+                                            <label for="formulario">Seleccione el formulario de solicitud completado (PDF, DOC, DOCX):</label>
+                                            <input type="file" class="form-control-file" id="formulario" name="formulario" accept=".pdf,.doc,.docx" <?php echo $camposDeshabilitados ? 'disabled' : ''; ?>>
                                             <?php if ($reserva['archivo_formulario']): ?>
                                                 <div class="mt-2">
                                                     <small class="text-success">Ya ha subido un formulario. Si sube otro, reemplazará al anterior.</small>
@@ -164,19 +164,19 @@ if (isset($_SESSION['error'])) {
                                     </div>
                                 </div>
                             </div>
-                        </div> -->
+                        </div>
 
                         <!-- Subir formulario municipal -->
                         <div class="row mb-4">
                             <div class="col-12">
                                 <div class="card">
                                     <div class="card-header bg-light">
-                                        <h5 class="mb-0">2. Subir Formulario Municipal</h5>
+                                        <h5 class="mb-0">Subir Formulario Municipal</h5>
                                     </div>
                                     <div class="card-body">
                                         <div class="form-group">
-                                            <label for="formulario_municipal">Seleccione el formulario municipal completado (PDF):</label>
-                                            <input type="file" class="form-control-file" id="formulario_municipal" name="formulario_municipal" accept=".pdf" <?php echo $camposDeshabilitados ? 'disabled' : ''; ?>>
+                                            <label for="formulario_municipal">Seleccione el formulario municipal completado (PDF, DOC, DOCX):</label>
+                                            <input type="file" class="form-control-file" id="formulario_municipal" name="formulario_municipal" accept=".pdf,.doc,.docx" <?php echo $camposDeshabilitados ? 'disabled' : ''; ?>>
                                             <?php if ($reserva['archivo_municipal']): ?>
                                                 <div class="mt-2">
                                                     <small class="text-success">Ya ha subido un formulario. Si sube otro, reemplazará al anterior.</small>
@@ -194,7 +194,7 @@ if (isset($_SESSION['error'])) {
                             <div class="col-12">
                                 <div class="card">
                                     <div class="card-header bg-light">
-                                        <h5 class="mb-0">3. Subir Comprobante de Pago</h5>
+                                        <h5 class="mb-0">Subir Comprobante de Pago</h5>
                                     </div>
                                     <div class="card-body">
                                         <p>Suba el comprobante de pago del anticipo (50% del valor total).</p>
@@ -218,7 +218,7 @@ if (isset($_SESSION['error'])) {
                             <div class="col-12">
                                 <div class="card">
                                     <div class="card-header bg-light">
-                                        <h5 class="mb-0">4. Subir Comprobante de Pago (50% del valor total o 100% del valor total)</h5>
+                                        <h5 class="mb-0">Subir Comprobante de Pago (50% del valor total o 100% del valor total)</h5>
                                     </div>
                                     <div class="card-body">
                                         <p>Suba el comprobante de pago del anticipo (50% del valor total o 100% del valor total).</p>

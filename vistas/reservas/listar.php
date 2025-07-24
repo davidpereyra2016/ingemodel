@@ -115,14 +115,20 @@ if (isset($_SESSION['error'])) {
 
                                     <?php if ($reserva['estado'] == 'aprobada'): ?>
                                         <a href="index.php?controlador=reservas&accion=generarPDF&id=<?php echo $reserva['id']; ?>" class="btn btn-sm btn-light border"> <i class="fas fa-file-pdf me-1"></i> Descargar PDF</a>
-                                        <?php if (isset($_SESSION['rol']) && $_SESSION['rol'] == 'administrador'): ?>
+                                        <!-- <?php if (isset($_SESSION['rol']) && $_SESSION['rol'] == 'administrador'): ?>
                                             <a href="index.php?controlador=reservas&accion=enviarCorreos&id=<?php echo $reserva['id']; ?>" class="btn btn-sm btn-primary"> <i class="fas fa-envelope me-1"></i> Enviar Correos</a>
-                                        <?php endif; ?>
+                                        <?php endif; ?> -->
                                     <?php endif; ?>
                                     <?php if ($reserva['estado'] == 'rechazada'): ?>
-                                        <?php if (isset($_SESSION['rol']) && $_SESSION['rol'] == 'administrador'): ?>
+                                        <!-- <?php if (isset($_SESSION['rol']) && $_SESSION['rol'] == 'administrador'): ?>
                                             <a href="index.php?controlador=reservas&accion=enviarCorreos&id=<?php echo $reserva['id']; ?>" class="btn btn-sm btn-primary"> <i class="fas fa-envelope me-1"></i> Enviar Correos</a>
-                                        <?php endif; ?>
+                                        <?php endif; ?> -->
+                                    <?php endif; ?>
+                                    
+                                    <?php if (isset($_SESSION['rol']) && $_SESSION['rol'] == 'administrador'): ?>
+                                        <button type="button" class="btn btn-sm btn-danger" onclick="confirmarEliminacion(<?php echo $reserva['id']; ?>, '<?php echo addslashes($reserva['tipo_uso']); ?>')"> 
+                                            <i class="fas fa-trash me-1"></i> Eliminar 
+                                        </button>
                                     <?php endif; ?>
                                 </td>
                             </tr>
@@ -263,6 +269,71 @@ Offcanvas para el formulario de reserva
             }, 30000); // Cada 30 segundos
         });
     });
+
+    // Función para confirmar eliminación de reserva con SweetAlert
+    function confirmarEliminacion(idReserva, tipoUso) {
+        Swal.fire({
+            title: '¿Qué acción deseas realizar?',
+            html: `<p>Reserva: <strong>"${tipoUso}"</strong> (ID: ${idReserva})</p>
+                   <p class="text-muted">Elige una de las siguientes opciones:</p>`,
+            icon: 'question',
+            showCancelButton: true,
+            showDenyButton: true,
+            confirmButtonText: '<i class="fas fa-ban me-1"></i> Dar de Baja',
+            denyButtonText: '<i class="fas fa-trash me-1"></i> Eliminar Completamente',
+            cancelButtonText: '<i class="fas fa-times me-1"></i> Cancelar',
+            confirmButtonColor: '#ffc107',
+            denyButtonColor: '#dc3545',
+            cancelButtonColor: '#6c757d',
+            reverseButtons: true,
+            focusCancel: true
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Dar de baja (cambiar estado a 'baja')
+                enviarSolicitudEliminacion(idReserva, 'baja');
+            } else if (result.isDenied) {
+                // Confirmar eliminación completa
+                Swal.fire({
+                    title: '¡Atención!',
+                    html: `<p>Estás a punto de <strong>eliminar completamente</strong> la reserva.</p>
+                           <p class="text-danger"><i class="fas fa-exclamation-triangle me-1"></i> Esta acción <strong>NO SE PUEDE DESHACER</strong></p>`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: '<i class="fas fa-trash me-1"></i> Sí, Eliminar Completamente',
+                    cancelButtonText: '<i class="fas fa-times me-1"></i> Cancelar',
+                    confirmButtonColor: '#dc3545',
+                    cancelButtonColor: '#6c757d'
+                }).then((confirmResult) => {
+                    if (confirmResult.isConfirmed) {
+                        enviarSolicitudEliminacion(idReserva, 'eliminar');
+                    }
+                });
+            }
+        });
+    }
+
+    // Función para enviar la solicitud de eliminación
+    function enviarSolicitudEliminacion(idReserva, tipoAccion) {
+        // Crear formulario dinámico para enviar la solicitud POST
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = 'index.php?controlador=reservas&accion=eliminar';
+        
+        const inputId = document.createElement('input');
+        inputId.type = 'hidden';
+        inputId.name = 'id_reserva';
+        inputId.value = idReserva;
+        
+        const inputTipo = document.createElement('input');
+        inputTipo.type = 'hidden';
+        inputTipo.name = 'tipo_accion';
+        inputTipo.value = tipoAccion;
+        
+        form.appendChild(inputId);
+        form.appendChild(inputTipo);
+        document.body.appendChild(form);
+        form.submit();
+    }
 </script>
 
 <!-- Estilos para contadores -->
