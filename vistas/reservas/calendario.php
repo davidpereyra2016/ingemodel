@@ -66,7 +66,7 @@ $isEncargado = $rol === 'encargado'; // Verifica si el usuario es encargado
                         </div>
                     </div>
 
-                    <div id="calendar" data-name="salon" data-idUsuario="<?php echo $idUsuario; ?>" data-isAdmin="<?php echo $isAdmin; ?>" data-isEncargado="<?php echo $isEncargado ? '1' : '0'; ?>"></div>
+                    <div id="calendar" data-name="salon" data-idUsuario="<?php echo $idUsuario; ?>" data-isAdmin="<?php echo $isAdmin; ?>" data-isEncargado="<?php echo $isEncargado ? '1' : '0'; ?>" data-rol="<?php echo $rol; ?>"></div>
                 </div>
             </div>
         </div>

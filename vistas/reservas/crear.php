@@ -32,9 +32,14 @@
                                 <?php if($_SESSION['rol'] !== 'administrador'): ?>
                                     min="<?php echo date('Y-m-d'); ?>"
                                 <?php endif; ?>
+                                <?php if($_SESSION['rol'] === 'ingeniero'): ?>
+                                    max="<?php echo date('Y-m-d', strtotime('+6 months')); ?>"
+                                <?php endif; ?>
                                 data-role="<?php echo $_SESSION['rol']; ?>">
                                 <?php if($_SESSION['rol'] === 'administrador'): ?>
                                 <small class="text-info">Como administrador, puede seleccionar cualquier fecha, incluyendo fechas pasadas.</small>
+                                <?php elseif($_SESSION['rol'] === 'ingeniero'): ?>
+                                <small class="text-warning">Solo puede reservar hasta 6 meses de adelanto (hasta <?php echo date('d/m/Y', strtotime('+6 months')); ?>).</small>
                                 <?php endif; ?>
                             </div>
                             <div class="col-md-6">

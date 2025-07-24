@@ -87,6 +87,19 @@ document.addEventListener('DOMContentLoaded', function () {
                     if (eventoExistente) {
                         return false; // No permitir la selección si ya hay un evento en esa fecha
                     }
+                    
+                    // Restricción para ingenieros: máximo 6 meses de adelanto
+                    const rolUsuario = calendarEl.dataset.rol;
+                    if (rolUsuario === 'ingeniero') {
+                        const fechaActual = new Date();
+                        const fechaMaxima = new Date(fechaActual.getFullYear(), fechaActual.getMonth() + 6, fechaActual.getDate());
+                        const fechaSeleccionadaDate = new Date(fechaSeleccionada);
+                        
+                        if (fechaSeleccionadaDate > fechaMaxima) {
+                            return false; // No permitir selección más allá de 6 meses para ingenieros
+                        }
+                    }
+                    
                     return true;
                 },
                 select: function (info) {
@@ -111,6 +124,27 @@ document.addEventListener('DOMContentLoaded', function () {
                             }
                         });
                         return;
+                    }
+                    
+                    // Validación específica para ingenieros: máximo 6 meses de adelanto
+                    const rolUsuario = calendarEl.dataset.rol;
+                    if (rolUsuario === 'ingeniero') {
+                        const fechaActualDate = new Date();
+                        const fechaMaxima = new Date(fechaActualDate.getFullYear(), fechaActualDate.getMonth() + 6, fechaActualDate.getDate());
+                        const fechaSeleccionadaDate = new Date(fechaSeleccionada);
+                        
+                        if (fechaSeleccionadaDate > fechaMaxima) {
+                            Swal.fire({
+                                title: 'Fecha fuera del rango permitido',
+                                text: `Como ingeniero, solo puede reservar hasta 6 meses de adelanto (hasta ${fechaMaxima.toLocaleDateString('es-ES')}).`,
+                                icon: 'warning',
+                                confirmButtonText: 'Entendido',
+                                customClass: {
+                                    confirmButton: 'btn btn-warning'
+                                }
+                            });
+                            return;
+                        }
                     }
 
                     // Mostramos la fecha en el offcanvas

@@ -15,6 +15,28 @@ document.addEventListener('DOMContentLoaded', function () {
         // Eliminar la restricción de fecha mínima para administradores
         fechaInput.removeAttribute('min');
     }
+    
+    // Configurar restricciones para ingenieros (máximo 6 meses de adelanto)
+    if (fechaInput && fechaInput.dataset.role === 'ingeniero') {
+        const fechaActual = new Date();
+        const fechaMaxima = new Date(fechaActual.getFullYear(), fechaActual.getMonth() + 6, fechaActual.getDate());
+        const fechaMaximaStr = fechaMaxima.toISOString().split('T')[0];
+        fechaInput.setAttribute('max', fechaMaximaStr);
+        
+        // Agregar validación en tiempo real
+        fechaInput.addEventListener('change', function() {
+            const fechaSeleccionada = new Date(this.value);
+            if (fechaSeleccionada > fechaMaxima) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Fecha no válida',
+                    text: 'Solo puede reservar hasta 6 meses de adelanto (' + fechaMaxima.toLocaleDateString('es-ES') + ').',
+                    confirmButtonText: 'Entendido'
+                });
+                this.value = '';
+            }
+        });
+    }
 
     // Definir los rangos permitidos
     const rangosPermitidos = {
