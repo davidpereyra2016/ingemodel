@@ -169,8 +169,8 @@
                                                 </a><br>
                                             <?php endforeach; ?>
                                         </div>
-                                        <div class="form-check" id="terminos_check" hidden>
-                                            <input class="form-check-input" type="checkbox" name="acepta_terminos" id="acepta_terminos">
+                                        <div class="form-check p-3 px-2 text-warning-emphasis bg-warning-subtle border border-danger-subtle rounded-3" id="terminos_check" hidden>
+                                            <input class="form-check-input border-danger float-none mx-0" style="cursor: pointer;" type="checkbox" name="acepta_terminos" id="acepta_terminos">
                                             <label class="form-check-label" for="acepta_terminos">
                                                 <strong>He leído y acepto los términos y condiciones para la reserva del salón.</strong>
                                             </label>
