@@ -115,14 +115,14 @@ if (isset($_SESSION['error'])) {
 
                                     <?php if ($reserva['estado'] == 'aprobada'): ?>
                                         <a href="index.php?controlador=reservas&accion=generarPDF&id=<?php echo $reserva['id']; ?>" class="btn btn-sm btn-light border"> <i class="fas fa-file-pdf me-1"></i> Descargar PDF</a>
-                                        <!-- <?php if (isset($_SESSION['rol']) && $_SESSION['rol'] == 'administrador'): ?>
+                                        <?php if (isset($_SESSION['rol']) && $_SESSION['rol'] == 'administrador'): ?>
                                             <a href="index.php?controlador=reservas&accion=enviarCorreos&id=<?php echo $reserva['id']; ?>" class="btn btn-sm btn-primary"> <i class="fas fa-envelope me-1"></i> Enviar Correos</a>
-                                        <?php endif; ?> -->
+                                        <?php endif; ?>
                                     <?php endif; ?>
                                     <?php if ($reserva['estado'] == 'rechazada'): ?>
-                                        <!-- <?php if (isset($_SESSION['rol']) && $_SESSION['rol'] == 'administrador'): ?>
+                                        <?php if (isset($_SESSION['rol']) && $_SESSION['rol'] == 'administrador'): ?>
                                             <a href="index.php?controlador=reservas&accion=enviarCorreos&id=<?php echo $reserva['id']; ?>" class="btn btn-sm btn-primary"> <i class="fas fa-envelope me-1"></i> Enviar Correos</a>
-                                        <?php endif; ?> -->
+                                        <?php endif; ?>
                                     <?php endif; ?>
                                     
                                     <?php if (isset($_SESSION['rol']) && $_SESSION['rol'] == 'administrador'): ?>
