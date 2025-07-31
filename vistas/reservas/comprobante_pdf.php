@@ -254,17 +254,17 @@
     </div>
     -->
 
-    <div class="signature">
+    <!-- <div class="signature">
         <div class="signature-line">
             <p>Firma del Solicitante</p>
         </div>
         <div class="signature-line">
             <p>Sello y Firma Autoridad</p>
         </div>
-    </div>
+    </div> -->
 
     <div class="disclaimer">
-        <p>Este comprobante es válido con firma y sello de la autoridad del Colegio Público de Ingenieros de Formosa.</p>
+        <!-- <p>Este comprobante es válido con firma y sello de la autoridad del Colegio Público de Ingenieros de Formosa.</p> -->
         <p>Para consultas o modificaciones comuníquese al teléfono: (3704) 043114 o por email a ingenierosformosa@gmail.com</p>
     </div>
 
