@@ -27,7 +27,7 @@
             <div class="card">
                 <div class="card-header bg-light d-flex justify-content-between align-items-center">
                     <h3 class="mb-0 card-title">Detalles de la Reserva #<?php echo $reserva['id']; ?></h3>
-                    <span class="badge badge-pill bg-<?php echo $reserva['estado'] == 'aprobada' ? 'success' : ($reserva['estado'] == 'rechazada' ? 'danger' : ($reserva['estado'] == 'pendiente' ? 'warning' : 'secondary')); ?>">
+                    <span class="badge badge-pill bg-<?php echo $reserva['estado'] == 'aprobada' ? 'success' : ($reserva['estado'] == 'rechazada' ? 'danger' : ($reserva['estado'] == 'pendiente' ? 'warning' : ($reserva['estado'] == 'cancelada' ? 'secondary' : 'danger'))); ?>">
                         <?php
                         switch ($reserva['estado']) {
                             case 'pendiente':
@@ -41,6 +41,9 @@
                                 break;
                             case 'cancelada':
                                 echo 'Cancelada';
+                                break;
+                            case 'baja':
+                                echo 'Baja';
                                 break;
                         }
                         ?>
@@ -79,18 +82,67 @@
                                     <strong>Anticipo:</strong>
                                     <?php if ($reserva['anticipo_pagado']): ?>
                                         <span class="text-success">Pagado ✓</span>
+                                        <?php if ($reserva['monto_anticipo'] !== null): ?>
+                                            <span class="text-muted"> - Monto: $<?php echo number_format($reserva['monto_anticipo'], 2); ?></span>
+                                        <?php endif; ?>
                                     <?php else: ?>
                                         <span class="text-danger">Pendiente ✗</span>
                                     <?php endif; ?>
+                                    <br><small class="text-muted">Anticipo sugerido (50%): $<?php echo number_format($reserva['monto'] / 2, 2); ?></small>
                                 </li>
                                 <li class="list-group-item">
                                     <strong>Saldo:</strong>
                                     <?php if ($reserva['saldo_pagado']): ?>
                                         <span class="text-success">Pagado ✓</span>
+                                        <?php if ($reserva['monto_saldo'] !== null): ?>
+                                            <span class="text-muted"> - Monto: $<?php echo number_format($reserva['monto_saldo'], 2); ?></span>
+                                        <?php endif; ?>
                                     <?php else: ?>
                                         <span class="text-danger">Pendiente ✗</span>
                                     <?php endif; ?>
+                                    <?php 
+                                    // Calcular montos reales considerando los flags de pago (misma lógica que PDF)
+                                    
+                                    // Para anticipo: si anticipo_pagado = 1 pero monto_anticipo es NULL/0, usar 50% del monto total
+                                    if ($reserva['anticipo_pagado'] == 1) {
+                                        $anticipo_real = ($reserva['monto_anticipo'] !== null && $reserva['monto_anticipo'] > 0) 
+                                                       ? $reserva['monto_anticipo'] 
+                                                       : ($reserva['monto'] / 2);
+                                    } else {
+                                        $anticipo_real = $reserva['monto_anticipo'] ?? 0;
+                                    }
+                                    
+                                    // Para saldo: si saldo_pagado = 1 pero monto_saldo es NULL/0, calcular el resto
+                                    if ($reserva['saldo_pagado'] == 1) {
+                                        if ($reserva['monto_saldo'] !== null && $reserva['monto_saldo'] > 0) {
+                                            $saldo_real = $reserva['monto_saldo'];
+                                        } else {
+                                            // Si pagó saldo pero no hay monto específico, es el resto del monto total menos el anticipo
+                                            $saldo_real = $reserva['monto'] - $anticipo_real;
+                                        }
+                                    } else {
+                                        $saldo_real = $reserva['monto_saldo'] ?? 0;
+                                    }
+                                    
+                                    $total_pagado = $anticipo_real + $saldo_real;
+                                    $saldo_pendiente = $reserva['monto'] - $total_pagado;
+                                    ?>
+                                    <br><small class="text-muted">Saldo pendiente: $<?php echo number_format($saldo_pendiente, 2); ?></small>
                                 </li>
+                                
+                                <?php if ($saldo_pendiente > 0): ?>
+                                    <li class="list-group-item bg-light border-warning">
+                                        <strong class="text-warning">💰 Saldo Pendiente de Pago:</strong>
+                                        <span class="text-danger fw-bold">$<?php echo number_format($saldo_pendiente, 2); ?></span>
+                                        <br><small class="text-muted">Monto restante por abonar para completar la reserva</small>
+                                    </li>
+                                <?php elseif ($saldo_pendiente <= 0 && $total_pagado > 0): ?>
+                                    <li class="list-group-item bg-light border-success">
+                                        <strong class="text-success">✅ Pago Completo:</strong>
+                                        <span class="text-success fw-bold">$<?php echo number_format($total_pagado, 2); ?></span>
+                                        <br><small class="text-muted">Reserva completamente abonada</small>
+                                    </li>
+                                <?php endif; ?>
                             </ul>
 
                             <?php if ($reserva['estado'] == 'cancelada'): ?>
@@ -196,6 +248,66 @@
                             </div>
                         </div>
                     </div>
+
+                    <?php if ($_SESSION['rol'] == 'administrador'): ?>
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <div class="card border-info">
+                                    <div class="card-header bg-info text-white">
+                                        <h5 class="mb-0"><i class="fas fa-dollar-sign me-2"></i> Editar Montos de Pago (Solo Administrador)</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <form action="index.php?controlador=reservas&accion=actualizarMontosPago" method="POST">
+                                            <input type="hidden" name="id_reserva" value="<?php echo $reserva['id']; ?>">
+                                            
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <div class="form-group mb-3">
+                                                        <label for="monto_anticipo" class="form-label">Monto Real del Anticipo:</label>
+                                                        <div class="input-group">
+                                                            <span class="input-group-text">$</span>
+                                                            <input type="number" step="0.01" class="form-control" id="monto_anticipo" name="monto_anticipo" 
+                                                                   value="<?php echo $reserva['monto_anticipo'] ?? ''; ?>" 
+                                                                   placeholder="<?php echo number_format($reserva['monto'] / 2, 2); ?>">
+                                                        </div>
+                                                        <small class="form-text text-muted">Monto sugerido (50%): $<?php echo number_format($reserva['monto'] / 2, 2); ?></small>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="form-group mb-3">
+                                                        <label for="monto_saldo" class="form-label">Monto Real del Saldo:</label>
+                                                        <div class="input-group">
+                                                            <span class="input-group-text">$</span>
+                                                            <input type="number" step="0.01" class="form-control" id="monto_saldo" name="monto_saldo" 
+                                                                   value="<?php echo $reserva['monto_saldo'] ?? ''; ?>" 
+                                                                   placeholder="<?php echo number_format($reserva['monto'] / 2, 2); ?>">
+                                                        </div>
+                                                        <?php 
+                                                        $anticipo_real = $reserva['monto_anticipo'] ?? 0;
+                                                        $saldo_sugerido = $reserva['monto'] - $anticipo_real;
+                                                        ?>
+                                                        <small class="form-text text-muted">Saldo pendiente: $<?php echo number_format($saldo_sugerido, 2); ?></small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="alert alert-info">
+                                                <i class="fas fa-info-circle me-2"></i>
+                                                <strong>Información:</strong> Estos campos permiten ajustar los montos reales según los comprobantes de pago subidos por el usuario. 
+                                                Deje vacío si no desea modificar el monto.
+                                            </div>
+                                            
+                                            <div class="form-group text-end">
+                                                <button type="submit" class="btn btn-info">
+                                                    <i class="fas fa-save me-2"></i> Actualizar Montos
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    <?php endif; ?>
 
                     <?php if ($_SESSION['rol'] == 'administrador' && $reserva['estado'] == 'pendiente'): ?>
                         <div class="row mt-4">
