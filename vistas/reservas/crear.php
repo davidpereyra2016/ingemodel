@@ -185,6 +185,9 @@
                             </div>
                         </div>
 
+                        <!-- Token de seguridad anti-reenvío -->
+                        <input type="hidden" name="form_token" value="<?php echo isset($_SESSION['form_token']) ? $_SESSION['form_token'] : ''; ?>">
+                        
                         <div class="form-group mt-4 border-top pt-3 d-flex justify-content-between align-items-center">
                             <a href="index.php?controlador=reservas&accion=listar" class="btn btn-light">Cancelar</a>
                             <button type="submit" id="btn-enviar" class="btn btn-success-theme">Enviar Solicitud</button>
