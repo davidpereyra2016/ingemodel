@@ -44,12 +44,19 @@
             <ul class="dropdown-menu" data-bs-popper="static">
               <li><a class="dropdown-item" href="?controlador=reservas&accion=listar&tipo=1"><i class="bi bi-calendar2-event me-2"></i> Mis Reservas</a></li>
               <li><a class="dropdown-item" href="?controlador=reservas&accion=listar&tipo=2"> <i class="bi bi-calendar-range-fill me-2"></i> Gestionar Reservas</a></li>
+              <li><a class="dropdown-item" href="?controlador=observaciones&accion=listar"> <i class="bi bi-file-text me-2"></i> Gestionar Observaciones</a></li>
             </ul>
           </li>
         <?php elseif ($esIngeniero): ?>
           <li class="nav-item">
             <a class="nav-link text-uppercase <?php echo $controlador == 'reservas' && $accion == 'listar' ? 'active' : ''; ?>"
               aria-current="page" href="?controlador=reservas&accion=listar"><i class="bi bi-calendar2-event me-2"></i>Mis Reservas</a>
+          </li>
+        <?php endif; ?>
+        <?php if ($esIngeniero): ?>
+          <li class="nav-item">
+            <a class="nav-link text-uppercase <?php echo $controlador == 'observaciones' && $accion == 'listar' ? 'active' : ''; ?>"
+              aria-current="page" href="?controlador=observaciones&accion=listar"><i class="bi bi-file-text me-2"></i>Mis Observaciones</a>
           </li>
         <?php endif; ?>
 
