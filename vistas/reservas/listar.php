@@ -83,6 +83,9 @@ if (isset($_SESSION['error'])) {
                                         case 'cancelada':
                                             echo '<span class="badge rounded-pill text-bg-secondary">Cancelada</span>';
                                             break;
+                                        case 'baja':
+                                            echo '<span class="badge rounded-pill text-bg-info">Baja</span>';
+                                            break;
                                     }
                                     ?>
                                 </td>
@@ -124,11 +127,27 @@ if (isset($_SESSION['error'])) {
                                             <a href="index.php?controlador=reservas&accion=enviarCorreos&id=<?php echo $reserva['id']; ?>" class="btn btn-sm btn-primary"> <i class="fas fa-envelope me-1"></i> Enviar Correos</a>
                                         <?php endif; ?>
                                     <?php endif; ?>
+                                    <?php if ($reserva['estado'] == 'cancelada'): ?>
+                                        <?php if (isset($_SESSION['rol']) && $_SESSION['rol'] == 'administrador'): ?>
+                                            <a href="index.php?controlador=reservas&accion=enviarCorreos&id=<?php echo $reserva['id']; ?>" class="btn btn-sm btn-primary"> <i class="fas fa-envelope me-1"></i> Enviar Correos</a>
+                                        <?php endif; ?>
+                                    <?php endif; ?>
+                                    <?php if ($reserva['estado'] == 'baja'): ?>
+                                        <?php if (isset($_SESSION['rol']) && $_SESSION['rol'] == 'administrador'): ?>
+                                            <a href="index.php?controlador=reservas&accion=enviarCorreos&id=<?php echo $reserva['id']; ?>" class="btn btn-sm btn-primary"> <i class="fas fa-envelope me-1"></i> Enviar Correos</a>
+                                        <?php endif; ?>
+                                    <?php endif; ?>
                                     
                                     <?php if (isset($_SESSION['rol']) && $_SESSION['rol'] == 'administrador'): ?>
                                         <button type="button" class="btn btn-sm btn-danger" onclick="confirmarEliminacion(<?php echo $reserva['id']; ?>, '<?php echo addslashes($reserva['tipo_uso']); ?>')"> 
                                             <i class="fas fa-trash me-1"></i> Eliminar 
                                         </button>
+                                    <?php else: ?>
+                                        <?php if (in_array($reserva['estado'], ['pendiente', 'aprobada'])): ?>
+                                            <button type="button" class="btn btn-sm btn-danger" onclick="confirmarBajaUsuario(<?php echo $reserva['id']; ?>, '<?php echo addslashes($reserva['tipo_uso']); ?>', '<?php echo $reserva['estado']; ?>')"> 
+                                                <i class="fas fa-ban me-1"></i> Dar de Baja 
+                                            </button>
+                                        <?php endif; ?>
                                     <?php endif; ?>
                                 </td>
                             </tr>
@@ -270,7 +289,56 @@ Offcanvas para el formulario de reserva
         });
     });
 
-    // Función para confirmar eliminación de reserva con SweetAlert
+    // Función para que usuarios confirmen baja de su propia reserva
+    function confirmarBajaUsuario(idReserva, tipoUso, estadoActual) {
+        Swal.fire({
+            title: '¿Estás seguro de dar de baja tu reserva?',
+            html: `<div class="text-start">
+                       <p><strong>Reserva:</strong> "${tipoUso}" (ID: ${idReserva})</p>
+                       <p><strong>Estado actual:</strong> <span class="badge bg-${estadoActual === 'pendiente' ? 'warning' : 'success'}">${estadoActual}</span></p>
+                       <hr>
+                       <div class="alert alert-warning">
+                           <h6><i class="fas fa-exclamation-triangle me-2"></i>Información Importante:</h6>
+                           <ul class="mb-0">
+                               <li><strong>Esta acción es IRREVERSIBLE</strong></li>
+                               <li>Una vez dada de baja, no podrás reactivar la reserva</li>
+                               <li>Perderás tu lugar reservado para esa fecha y horario</li>
+                               <li>Si necesitas el salón nuevamente, deberás crear una nueva reserva</li>
+                           </ul>
+                       </div>
+                   </div>`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: '<i class="fas fa-ban me-1"></i> Sí, Dar de Baja',
+            cancelButtonText: '<i class="fas fa-times me-1"></i> Cancelar',
+            confirmButtonColor: '#dc3545',
+            cancelButtonColor: '#6c757d',
+            focusCancel: true,
+            customClass: {
+                popup: 'swal-wide'
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Confirmación adicional para mayor seguridad
+                Swal.fire({
+                    title: 'Confirmación Final',
+                    text: '¿Realmente deseas dar de baja tu reserva? Esta acción NO se puede deshacer.',
+                    icon: 'error',
+                    showCancelButton: true,
+                    confirmButtonText: '<i class="fas fa-check me-1"></i> Confirmar Baja',
+                    cancelButtonText: '<i class="fas fa-arrow-left me-1"></i> Volver',
+                    confirmButtonColor: '#dc3545',
+                    cancelButtonColor: '#6c757d'
+                }).then((finalResult) => {
+                    if (finalResult.isConfirmed) {
+                        enviarSolicitudEliminacion(idReserva, 'baja');
+                    }
+                });
+            }
+        });
+    }
+
+    // Función para confirmar eliminación de reserva con SweetAlert (solo administradores)
     function confirmarEliminacion(idReserva, tipoUso) {
         Swal.fire({
             title: '¿Qué acción deseas realizar?',
@@ -336,7 +404,7 @@ Offcanvas para el formulario de reserva
     }
 </script>
 
-<!-- Estilos para contadores -->
+<!-- Estilos para contadores y modales -->
 <style>
     .countdown-display {
         font-size: 0.85rem;
@@ -348,5 +416,38 @@ Offcanvas para el formulario de reserva
     .alert-sm {
         padding: 0.25rem 0.5rem;
         margin-bottom: 0;
+    }
+
+    /* Estilos para modal de confirmación de baja de usuario */
+    .swal-wide {
+        width: 600px !important;
+    }
+
+    .swal2-html-container .alert {
+        margin: 10px 0;
+        padding: 10px;
+        border-radius: 5px;
+    }
+
+    .swal2-html-container .alert-warning {
+        background-color: #fff3cd;
+        border: 1px solid #ffeaa7;
+        color: #856404;
+    }
+
+    .swal2-html-container .badge {
+        padding: 0.25em 0.6em;
+        font-size: 0.75em;
+        border-radius: 0.375rem;
+    }
+
+    .swal2-html-container .bg-warning {
+        background-color: #ffc107 !important;
+        color: #000;
+    }
+
+    .swal2-html-container .bg-success {
+        background-color: #198754 !important;
+        color: #fff;
     }
 </style>
