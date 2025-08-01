@@ -58,4 +58,11 @@ class ModeloNotificaciones {
         return $consulta->execute();
     }
 
+    // Crear nueva notificación
+    public static function crearNotificacion($id_usuario, $mensaje, $id_reserva, $tipo = 'info') {
+        $conexion = BD::crearInstancia();
+        $consulta = $conexion->prepare("INSERT INTO notificaciones (id_usuario, mensaje, id_reserva, tipo) VALUES (?, ?, ?, ?)");
+        return $consulta->execute([$id_usuario, $mensaje, $id_reserva, $tipo]);
+    }
+
 }
