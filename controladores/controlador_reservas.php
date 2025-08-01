@@ -55,6 +55,16 @@ class ControladorReservas
         }
         
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+            // Validación anti-reenvío: verificar token de sesión
+            if (!isset($_POST['form_token']) || !isset($_SESSION['form_token']) || $_POST['form_token'] !== $_SESSION['form_token']) {
+                $_SESSION['error'] = "Solicitud inválida. Por favor, recarga la página e inténtalo de nuevo.";
+                header('Location: index.php?controlador=reservas&accion=crear');
+                exit();
+            }
+            
+            // Limpiar el token para evitar reutilización
+            unset($_SESSION['form_token']);
+            
             $id_usuario = $_SESSION['id_usuario'];
             $fecha_evento = $_POST['fecha_evento'];
             $hora_inicio = $_POST['hora_inicio'];
@@ -103,10 +113,12 @@ class ControladorReservas
                 exit();
             } else {
                 $_SESSION['error'] = "No se pudo crear la reserva. El horario ya está ocupado o has alcanzado el límite de reservas.";
-                include_once("vistas/reservas/crear.php");
+                header('Location: index.php?controlador=reservas&accion=crear');
                 exit();
             }
         } else {
+            // Generar token único para el formulario
+            $_SESSION['form_token'] = bin2hex(random_bytes(32));
             include_once("vistas/reservas/crear.php");
         }
     }
@@ -233,6 +245,25 @@ class ControladorReservas
                     
                     // Registrar en historial
                     $this->modelo->registrarHistorial($reserva['id'], $_SESSION['id_usuario'], 'pago', null, 'comprobante_total', 'Pago de comprobante total registrado');
+                }
+                
+                // Crear notificación para administradores cuando un usuario sube documentación
+                include_once("modelos/modelo_notificaciones.php");
+                $tipos_documentos = [];
+                if ($archivo_formulario) $tipos_documentos[] = "formulario de solicitud";
+                if ($archivo_municipal) $tipos_documentos[] = "formulario municipal";
+                if ($archivo_comprobante) $tipos_documentos[] = "comprobante de anticipo";
+                if ($archivo_comprobante_total) $tipos_documentos[] = "comprobante de pago total";
+                
+                if (!empty($tipos_documentos)) {
+                    $documentos_texto = implode(", ", $tipos_documentos);
+                    $mensaje_notificacion = "El usuario {$reserva['nombre']} {$reserva['apellido']} ha subido documentación ({$documentos_texto}) para la reserva #{$reserva['id']} ({$reserva['tipo_uso']})";
+                    ModeloNotificaciones::crearNotificacion(
+                        $reserva['id_usuario'], 
+                        $mensaje_notificacion, 
+                        $reserva['id'], 
+                        'documentacion'
+                    );
                 }
                 
                 $_SESSION['mensaje'] = "Documentos subidos correctamente. Su solicitud será revisada por un administrador.";
@@ -388,11 +419,44 @@ class ControladorReservas
     }
 
     public function eliminar() {
-        // Verificar que solo los administradores puedan eliminar reservas
-        if ($_SESSION['rol'] != 'administrador') {
-            $_SESSION['error'] = "No tienes permisos para eliminar reservas.";
-            header("Location: index.php?controlador=reservas&accion=listar");
-            exit();
+        // Verificar permisos según el tipo de acción
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['tipo_accion'])) {
+            $tipo_accion = $_POST['tipo_accion'];
+            
+            // Solo administradores pueden eliminar completamente
+            if ($tipo_accion === 'eliminar' && $_SESSION['rol'] != 'administrador') {
+                $_SESSION['error'] = "No tienes permisos para eliminar completamente reservas.";
+                header("Location: index.php?controlador=reservas&accion=listar");
+                exit();
+            }
+            
+            // Para dar de baja: administradores pueden dar de baja cualquier reserva,
+            // usuarios normales solo pueden dar de baja sus propias reservas
+            if ($tipo_accion === 'baja' && $_SESSION['rol'] != 'administrador') {
+                // Verificar que la reserva pertenezca al usuario
+                $id_reserva = $_POST['id_reserva'];
+                $reserva = $this->modelo->obtenerReserva($id_reserva);
+                
+                if (!$reserva || $reserva['id_usuario'] != $_SESSION['id_usuario']) {
+                    $_SESSION['error'] = "No tienes permisos para dar de baja esta reserva.";
+                    header("Location: index.php?controlador=reservas&accion=listar");
+                    exit();
+                }
+                
+                // Verificar que la reserva esté en un estado que permita baja por el usuario
+                if (!in_array($reserva['estado'], ['pendiente', 'aprobada'])) {
+                    $_SESSION['error'] = "Solo puedes dar de baja reservas en estado 'pendiente' o 'aprobada'.";
+                    header("Location: index.php?controlador=reservas&accion=listar");
+                    exit();
+                }
+            }
+        } else {
+            // Si no hay tipo de acción definido, solo administradores pueden acceder
+            if ($_SESSION['rol'] != 'administrador') {
+                $_SESSION['error'] = "No tienes permisos para eliminar reservas.";
+                header("Location: index.php?controlador=reservas&accion=listar");
+                exit();
+            }
         }
         
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id_reserva']) && isset($_POST['tipo_accion'])) {
@@ -408,17 +472,37 @@ class ControladorReservas
                 if ($tipo_accion === 'baja') {
                     // Dar de baja (cambiar estado a 'baja')
                     if ($this->modelo->eliminarReserva($id_reserva, false)) {
-                        // Registrar en historial
-                        $this->modelo->registrarHistorial(
-                            $id_reserva, 
+                    // Registrar en historial con mensaje diferente según quién lo haga
+                    $comentario = ($_SESSION['rol'] == 'administrador') 
+                        ? 'Reserva dada de baja por administrador'
+                        : 'Reserva dada de baja por el usuario propietario';
+                    
+                    $this->modelo->registrarHistorial(
+                        $id_reserva, 
+                        $_SESSION['id_usuario'], 
+                        'baja', 
+                        $estado_anterior, 
+                        'baja', 
+                        $comentario
+                    );
+                    
+                    // Crear notificación para administradores cuando un usuario da de baja su reserva
+                    if ($_SESSION['rol'] != 'administrador') {
+                        include_once("modelos/modelo_notificaciones.php");
+                        $mensaje_notificacion = "El usuario {$reserva['nombre']} {$reserva['apellido']} ha dado de baja su reserva #{$id_reserva} ({$reserva['tipo_uso']})";
+                        ModeloNotificaciones::crearNotificacion(
                             $_SESSION['id_usuario'], 
-                            'baja', 
-                            $estado_anterior, 
-                            'baja', 
-                            'Reserva dada de baja por administrador'
+                            $mensaje_notificacion, 
+                            $id_reserva, 
+                            'baja_usuario'
                         );
-                        
-                        $_SESSION['mensaje'] = "La reserva ha sido dada de baja correctamente.";
+                    }
+                    
+                    $mensaje_exito = ($_SESSION['rol'] == 'administrador')
+                        ? "La reserva ha sido dada de baja correctamente."
+                        : "Tu reserva ha sido dada de baja correctamente. Esta acción es irreversible.";
+                    
+                    $_SESSION['mensaje'] = $mensaje_exito;
                     } else {
                         $_SESSION['error'] = "Error al dar de baja la reserva.";
                     }
@@ -472,6 +556,60 @@ class ControladorReservas
         // Redireccionar a la vista de ver después de intentar enviar los correos
         $_SESSION['mensaje'] = "Correos enviados correctamente.";
         header("Location: index.php?controlador=reservas&accion=listar");
+        exit();
+    }
+
+    public function actualizarMontosPago() {
+        // Verificar que solo los administradores puedan actualizar montos
+        if ($_SESSION['rol'] != 'administrador') {
+            $_SESSION['error'] = "No tienes permisos para modificar montos de pago.";
+            header("Location: index.php?controlador=reservas&accion=listar");
+            exit();
+        }
+        
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id_reserva'])) {
+            $id_reserva = $_POST['id_reserva'];
+            $monto_anticipo = isset($_POST['monto_anticipo']) && $_POST['monto_anticipo'] !== '' ? floatval($_POST['monto_anticipo']) : null;
+            $monto_saldo = isset($_POST['monto_saldo']) && $_POST['monto_saldo'] !== '' ? floatval($_POST['monto_saldo']) : null;
+            
+            // Obtener información de la reserva antes de la actualización
+            $reserva = $this->modelo->obtenerReserva($id_reserva);
+            
+            if ($reserva) {
+                // Actualizar los montos
+                if ($this->modelo->actualizarMontosPago($id_reserva, $monto_anticipo, $monto_saldo)) {
+                    // Registrar en historial
+                    $comentario = "Montos actualizados por administrador. ";
+                    if ($monto_anticipo !== null) {
+                        $comentario .= "Anticipo: $" . number_format($monto_anticipo, 2) . ". ";
+                    }
+                    if ($monto_saldo !== null) {
+                        $comentario .= "Saldo: $" . number_format($monto_saldo, 2) . ".";
+                    }
+                    
+                    $this->modelo->registrarHistorial(
+                        $id_reserva, 
+                        $_SESSION['id_usuario'], 
+                        'actualizacion_montos', 
+                        null, 
+                        null, 
+                        $comentario
+                    );
+                    
+                    $_SESSION['mensaje'] = "Los montos de pago han sido actualizados correctamente.";
+                } else {
+                    $_SESSION['error'] = "Error al actualizar los montos de pago.";
+                }
+            } else {
+                $_SESSION['error'] = "Reserva no encontrada.";
+            }
+        } else {
+            $_SESSION['error'] = "Solicitud inválida. Faltan parámetros requeridos.";
+        }
+        
+        // Redireccionar de vuelta a la vista de detalles
+        $redirect_id = isset($_POST['id_reserva']) ? $_POST['id_reserva'] : '';
+        header("Location: index.php?controlador=reservas&accion=ver&id=" . $redirect_id);
         exit();
     }
 }
