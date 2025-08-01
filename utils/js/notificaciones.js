@@ -40,35 +40,69 @@ $(document).ready(function () {
                             hour12: true
                         });
 
-                        html += `<div class="alert alert-${notificacion.leido == 0 ? 'success' : 'secondary'}
-                             show d-flex justify-content-between align-items-center flex-wrap" role="alert">`;
+                        // Detectar tipo de notificación basándose en el contenido del mensaje
+                        let alertClass, iconClass, badgeClass, tipoTexto;
+                        const mensaje = notificacion.mensaje.toLowerCase();
+                        
+                        if (mensaje.includes('ha dado de baja') || mensaje.includes('baja su reserva')) {
+                            // Notificación de baja de usuario
+                            alertClass = notificacion.leido == 0 ? 'alert-warning' : 'alert-secondary';
+                            iconClass = 'fas fa-user-times';
+                            badgeClass = 'bg-warning';
+                            tipoTexto = 'Baja de Usuario';
+                        } else if (mensaje.includes('ha subido documentación') || mensaje.includes('subido documentación')) {
+                            // Notificación de documentación
+                            alertClass = notificacion.leido == 0 ? 'alert-info' : 'alert-secondary';
+                            iconClass = 'fas fa-file-upload';
+                            badgeClass = 'bg-info';
+                            tipoTexto = 'Documentación';
+                        } else {
+                            // Notificación de nueva reserva o general
+                            alertClass = notificacion.leido == 0 ? 'alert-primary' : 'alert-secondary';
+                            iconClass = 'fas fa-calendar-plus';
+                            badgeClass = 'bg-primary';
+                            tipoTexto = 'Nueva Reserva';
+                        }
 
-                        html += '<span >' + "ID: #" + notificacion.id + '</span>';
+                        html += `<div class="alert ${alertClass} border-start border-4 border-${badgeClass.replace('bg-', '')}
+                             show shadow-sm mb-3" role="alert">`;
 
-                        html += `<div class="mb-0">
-                                     <p class="mb-0">${notificacion.mensaje}</p>
-                                     <p class="mb-0">${fecha}</p>
-                                </div>`;
-
-                        html += `<span> Estado: ${notificacion.leido ? 'Leido' : 'No leido'} </span>`;
-
-                        html += `
-                                <div class=" d-flex gap-2 flex-wrap">
-                                    <button type="button" class="btn btn-primary btn-sm btn-theme btn-ver" id="btn-ver" data-id="${notificacion.id_reserva}">
-                                        <i class="fas fa-eye"></i>
-                                        <span class="ms-2">Ver Reserva</span>
-                                    </button>
-                                    ${notificacion.leido == 0 ?
-                                `<button class="btn btn-success btn-sm btn-theme btn-leido" id="btn-leido" data-id="${notificacion.id}">
-                                        <i class="fas fa-check"></i>
-                                        <span class="ms-2">Marcar como leido</span>
-                                    </button>` : ''}
-                                    <button class="btn btn-warning btn-sm btn-theme btn-eliminar" id="btn-eliminar" data-id="${notificacion.id}">
-                                        <i class="fas fa-trash"></i>
-                                        <span class="ms-2">Eliminar</span>
-                                    </button>
-                                </div>`;
-                        html += '</div>';
+                        html += `<div class="d-flex align-items-start w-100">`;
+                        html += `<div class="me-3 mt-1">
+                                    <i class="${iconClass} text-${badgeClass.replace('bg-', '')} fs-4"></i>
+                                 </div>`;
+                        
+                        html += `<div class="flex-grow-1">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <span class="badge ${badgeClass} rounded-pill">${tipoTexto}</span>
+                                        <small class="text-muted">ID: #${notificacion.id}</small>
+                                    </div>
+                                    <p class="mb-2 fw-medium">${notificacion.mensaje}</p>
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <small class="text-muted"><i class="fas fa-clock me-1"></i>${fecha}</small>
+                                        <span class="badge ${notificacion.leido ? 'bg-success' : 'bg-danger'} rounded-pill">
+                                            <i class="fas fa-${notificacion.leido ? 'check' : 'exclamation'} me-1"></i>
+                                            ${notificacion.leido ? 'Leído' : 'No leído'}
+                                        </span>
+                                    </div>
+                                    <div class="d-flex gap-2 flex-wrap">
+                                        <button type="button" class="btn btn-primary btn-sm btn-theme btn-ver" data-id="${notificacion.id_reserva}">
+                                            <i class="fas fa-eye"></i>
+                                            <span class="ms-2">Ver Reserva</span>
+                                        </button>
+                                        ${notificacion.leido == 0 ?
+                                        `<button class="btn btn-success btn-sm btn-theme btn-leido" data-id="${notificacion.id}">
+                                            <i class="fas fa-check"></i>
+                                            <span class="ms-2">Marcar como leído</span>
+                                        </button>` : ''}
+                                        <button class="btn btn-warning btn-sm btn-theme btn-eliminar" data-id="${notificacion.id}">
+                                            <i class="fas fa-trash"></i>
+                                            <span class="ms-2">Eliminar</span>
+                                        </button>
+                                    </div>
+                                 </div>
+                        </div>
+                        </div>`; // Cerrar todos los contenedores
                     }
                     $('#contenedor-notificaciones').html(html);
                 }
@@ -105,13 +139,25 @@ $(document).ready(function () {
                             countNotificaciones++;
                         }
 
+                        // Simplificar mensaje para el dropdown
+                        let mensajeSimplificado;
+                        const mensajeCompleto = notificacion.mensaje.toLowerCase();
+                        
+                        if (mensajeCompleto.includes('ha dado de baja') || mensajeCompleto.includes('baja su reserva')) {
+                            mensajeSimplificado = 'Nueva baja de reserva';
+                        } else if (mensajeCompleto.includes('ha subido documentación') || mensajeCompleto.includes('subido documentación')) {
+                            mensajeSimplificado = 'Nueva documentación';
+                        } else {
+                            mensajeSimplificado = 'Nueva reserva';
+                        }
+
                         html += `<li>
                                     <button type="button" class="dropdown-item border-bottom d-flex align-items-center gap-2 btn-ver" id="btn-ver" data-id="${notificacion.id_reserva}" data-notification-id="${notificacion.id}">
                                         <i class="bi bi-eye"></i>
                                         <span class="ms-2">
-                                            ${notificacion.mensaje}
+                                            ${mensajeSimplificado}
                                             <br>
-                                            ${fecha}
+                                            <small class="text-muted">${fecha}</small>
                                         </span>
                                         <span class="badge ${notificacion.leido === 0 ? 'bg-success' : 'bg-secondary'} rounded-pill">
                                         ${notificacion.leido === 0 ? 'Nuevo' : 'Leído'}
@@ -180,25 +226,35 @@ $(document).ready(function () {
         const reservaId = $(this).data('id');
         const notificationId = $(this).data('notification-id');
 
-        $.ajax({
-            url: '?controlador=notificaciones&accion=marcarLeido',
-            type: 'POST',
-            dataType: 'json',
-            data: { id: notificationId },
-            success: function (data) {
-                if (data.success) {
-                    cargarNotificaciones();
-                    cargarNotificacionesHeader();
-                    // Redirigir a la página de reservas
+        // Si tenemos notification-id (desde el header), marcar como leído primero
+        if (notificationId) {
+            $.ajax({
+                url: '?controlador=notificaciones&accion=marcarLeido',
+                type: 'POST',
+                dataType: 'json',
+                data: { id: notificationId },
+                success: function (data) {
+                    if (data.success) {
+                        cargarNotificaciones();
+                        cargarNotificacionesHeader();
+                        // Redirigir a la página de reservas
+                        window.location.href = '?controlador=reservas&accion=ver&id=' + reservaId;
+                    } else {
+                        console.error('Error al marcar la notificación como leída');
+                        // Redirigir aunque falle el marcado
+                        window.location.href = '?controlador=reservas&accion=ver&id=' + reservaId;
+                    }
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error al marcar la notificación como leída:', error);
+                    // Redirigir aunque falle el marcado
                     window.location.href = '?controlador=reservas&accion=ver&id=' + reservaId;
-                } else {
-                    console.error('Error al marcar la notificación como leída');
                 }
-            },
-            error: function (xhr, status, error) {
-                console.error('Error al marcar la notificación como leída:', error);
-            }
-        });
+            });
+        } else {
+            // Si no hay notification-id (desde la vista listar), redirigir directamente
+            window.location.href = '?controlador=reservas&accion=ver&id=' + reservaId;
+        }
     });
 
     // Eliminar
