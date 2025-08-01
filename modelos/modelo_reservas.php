@@ -29,7 +29,7 @@ class ModeloReservas {
     public function obtenerReserva($id) {
         $consulta = $this->conexion->prepare("SELECT r.*, u.nombre, u.apellido, u.matricula, u.email, u.telefono, 
                                              r.archivo_formulario, r.archivo_municipal, r.archivo_comprobante, r.archivo_comprobante_total,
-                                             r.codigo_unico 
+                                             r.codigo_unico, r.monto_anticipo, r.monto_saldo 
                                              FROM reservas r 
                                              INNER JOIN usuarios u ON r.id_usuario = u.id 
                                              WHERE r.id = :id");
@@ -41,7 +41,8 @@ class ModeloReservas {
     // Obtener una reserva específica por Código Único
     public function obtenerReservaPorCodigo($codigoUnico) {
         $consulta = $this->conexion->prepare("SELECT r.*, u.nombre, u.apellido, u.matricula, u.email, u.telefono, 
-                                             r.archivo_formulario, r.archivo_municipal, r.archivo_comprobante, r.archivo_comprobante_total 
+                                             r.archivo_formulario, r.archivo_municipal, r.archivo_comprobante, r.archivo_comprobante_total,
+                                             r.monto_anticipo, r.monto_saldo 
                                              FROM reservas r 
                                              INNER JOIN usuarios u ON r.id_usuario = u.id 
                                              WHERE r.codigo_unico = :codigo_unico");
@@ -313,6 +314,17 @@ class ModeloReservas {
             $consulta->bindParam(':id', $id);
             return $consulta->execute();
         }
+    }
+
+    // Actualizar montos de pago (solo para administradores)
+    public function actualizarMontosPago($id_reserva, $monto_anticipo, $monto_saldo) {
+        $consulta = $this->conexion->prepare("UPDATE reservas 
+                                             SET monto_anticipo = :monto_anticipo, monto_saldo = :monto_saldo 
+                                             WHERE id = :id_reserva");
+        $consulta->bindParam(':monto_anticipo', $monto_anticipo);
+        $consulta->bindParam(':monto_saldo', $monto_saldo);
+        $consulta->bindParam(':id_reserva', $id_reserva);
+        return $consulta->execute();
     }
 
     // Registrar en historial
