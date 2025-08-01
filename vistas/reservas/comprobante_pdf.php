@@ -225,26 +225,84 @@
             <span class="info-label">Monto Total:</span>
             <span class="info-value">$<?php echo number_format($reserva['monto'], 2, ',', '.'); ?></span>
         </div>
-        <div class="info-row">
-            <span class="info-label">Anticipo:</span>
-            <span class="info-value">
-                <?php if ($reserva['anticipo_pagado']): ?>
-                    <span style="color: #28a745;">Pagado ✓</span>
-                <?php else: ?>
+        <?php 
+        // Calcular montos reales considerando los flags de pago
+        
+        // Para anticipo: si anticipo_pagado = 1 pero monto_anticipo es NULL/0, usar 50% del monto total
+        if ($reserva['anticipo_pagado'] == 1) {
+            $anticipo_real = ($reserva['monto_anticipo'] !== null && $reserva['monto_anticipo'] > 0) 
+                           ? $reserva['monto_anticipo'] 
+                           : ($reserva['monto'] / 2);
+        } else {
+            $anticipo_real = $reserva['monto_anticipo'] ?? 0;
+        }
+        
+        // Para saldo: si saldo_pagado = 1 pero monto_saldo es NULL/0, calcular el resto
+        if ($reserva['saldo_pagado'] == 1) {
+            if ($reserva['monto_saldo'] !== null && $reserva['monto_saldo'] > 0) {
+                $saldo_real = $reserva['monto_saldo'];
+            } else {
+                // Si pagó saldo pero no hay monto específico, es el resto del monto total menos el anticipo
+                $saldo_real = $reserva['monto'] - $anticipo_real;
+            }
+        } else {
+            $saldo_real = $reserva['monto_saldo'] ?? 0;
+        }
+        
+        $total_pagado = $anticipo_real + $saldo_real;
+        $saldo_pendiente = $reserva['monto'] - $total_pagado;
+        
+        // Determinar si se pagó el 100% del monto total
+        // Solo es pago completo si el total pagado cubre o supera el monto total
+        $pago_completo = ($total_pagado >= $reserva['monto']);
+        ?>
+        
+        <?php if ($pago_completo): ?>
+            <!-- Si se pagó el 100%, mostrar solo el monto total pagado -->
+            <div class="info-row">
+                <span class="info-label">Monto Pagado:</span>
+                <span class="info-value">
+                    <span class="info-value">$<?php echo number_format($total_pagado, 2, ',', '.'); ?></span>
+                    <span style="color: #28a745;">Completo ✓</span>
+                </span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">Saldo Pendiente:</span>
+                <span class="info-value">
+                    <span class="info-value">$0,00</span>
+                    <span style="color: #28a745;">Completo ✓</span>
+                </span>
+            </div>
+        <?php else: ?>
+            <!-- Si no se pagó el 100%, mostrar desglose -->
+            <?php if ($anticipo_real > 0): ?>
+                <div class="info-row">
+                    <span class="info-label">Anticipo Pagado:</span>
+                    <span class="info-value">
+                        <span class="info-value">$<?php echo number_format($anticipo_real, 2, ',', '.'); ?></span>
+                        <span style="color: #28a745;">Pagado ✓</span>
+                    </span>
+                </div>
+            <?php endif; ?>
+            
+            <?php if ($saldo_real > 0): ?>
+                <div class="info-row">
+                    <span class="info-label">Saldo Pagado:</span>
+                    <span class="info-value">
+                        <span class="info-value">$<?php echo number_format($saldo_real, 2, ',', '.'); ?></span>
+                        <span style="color: #28a745;">Pagado ✓</span>
+                    </span>
+                </div>
+            <?php endif; ?>
+            
+            <div class="info-row">
+                <span class="info-label">Saldo Pendiente:</span>
+                <span class="info-value">
+                    <span class="info-value">$<?php echo number_format($saldo_pendiente, 2, ',', '.'); ?></span>
                     <span style="color: #dc3545;">Pendiente ✗</span>
-                <?php endif; ?>
-            </span>
-        </div>
-        <div class="info-row">
-            <span class="info-label">Saldo:</span>
-            <span class="info-value">
-                <?php if ($reserva['saldo_pagado']): ?>
-                    <span style="color: #28a745;">Pagado ✓</span>
-                <?php else: ?>
-                    <span style="color: #dc3545;">Pendiente ✗</span>
-                <?php endif; ?>
-            </span>
-        </div>
+                </span>
+            </div>
+        <?php endif; ?>
     </div>
 
     <!-- 
