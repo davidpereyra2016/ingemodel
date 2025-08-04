@@ -1,10 +1,19 @@
 <nav class="navbar navbar-expand-lg navbar-dark bg-success-2" style="z-index: 9;">
   <div class="container flex justify-content-between">
 
-    <a class="navbar-brand logo-header" href="?controlador=paginas&accion=inicio">
-      <img src="assets/img/logo-2.png" alt="Logo" width="50" height="50" class="d-inline-block align-text-top me-2">
-      <span class="text-light">Colegio Público de Ingenieros de Formosa</span>
-    </a>
+    <?php if ($esEncargado): ?>
+      <!-- Para encargados: enlace al calendario en lugar del inicio -->
+      <a class="navbar-brand logo-header" href="?controlador=reservas&accion=calendario">
+        <img src="assets/img/logo-2.png" alt="Logo" width="50" height="50" class="d-inline-block align-text-top me-2">
+        <span class="text-light">Colegio Público de Ingenieros de Formosa</span>
+      </a>
+    <?php else: ?>
+      <!-- Para otros roles: enlace normal al inicio -->
+      <a class="navbar-brand logo-header" href="?controlador=paginas&accion=inicio">
+        <img src="assets/img/logo-2.png" alt="Logo" width="50" height="50" class="d-inline-block align-text-top me-2">
+        <span class="text-light">Colegio Público de Ingenieros de Formosa</span>
+      </a>
+    <?php endif; ?>
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
@@ -12,10 +21,13 @@
 
     <div class="collapse navbar-collapse ms-auto" id="navbarNavDropdown" style="flex-grow: 0;">
       <ul class="navbar-nav">
-        <li class="nav-item">
-          <a class="nav-link text-uppercase <?php echo $accion == 'inicio' ? 'active' : ''; ?>"
-            aria-current="page" href="?controlador=paginas&accion=inicio">Inicio</a>
-        </li>
+        <?php if (!$esEncargado): ?>
+          <!-- Ocultar enlace de Inicio para encargados -->
+          <li class="nav-item">
+            <a class="nav-link text-uppercase <?php echo $accion == 'inicio' ? 'active' : ''; ?>"
+              aria-current="page" href="?controlador=paginas&accion=inicio">Inicio</a>
+          </li>
+        <?php endif; ?>
         <?php if ($esEncargado): ?>
         <!-- Para rol encargado: solo mostrar Salón directamente sin dropdown -->
         <li class="nav-item">

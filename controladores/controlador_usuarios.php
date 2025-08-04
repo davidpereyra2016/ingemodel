@@ -13,8 +13,8 @@ class ControladorUsuarios
 
         if (isset($_SESSION['id_usuario'])) {
             // Verificar el rol del usuario
-            if ($_SESSION['rol'] === 'ingeniero') {
-                // Ingenieros van al calendario de reservas
+            if ($_SESSION['rol'] === 'ingeniero' || $_SESSION['rol'] === 'encargado') {
+                // Ingenieros y encargados van al calendario de reservas
                 header('Location: index.php?controlador=reservas&accion=calendario');
             } else {
                 // Administradores van al panel de administración
@@ -67,7 +67,7 @@ class ControladorUsuarios
                     }
 
                     // Redirigir según el rol
-                    if ($usuario['rol'] === 'ingeniero') {
+                    if ($usuario['rol'] === 'ingeniero' || $usuario['rol'] === 'encargado') {
                         header('Location: index.php?controlador=reservas&accion=calendario');
                     } else {
                         header('Location: index.php?controlador=paginas&accion=inicio');
