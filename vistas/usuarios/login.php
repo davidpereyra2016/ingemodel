@@ -1,11 +1,18 @@
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-header">
-                    <h3 class="text-center">Iniciar Sesión</h3>
-                </div>
-                <div class="card-body">
+<link rel="stylesheet" href="assets/css/login.css">
+
+<div class="login-container">
+    <div class="card login-card">
+        <div class="row g-0">
+            <div class="col-md-6 login-image-side">
+                <!-- Columna de la imagen (visible en escritorio) -->
+            </div>
+            <div class="col-md-6">
+                <div class="login-form-side">
+                    <div class="text-center">
+                        <img src="assets/img/logo-2.png" alt="Logo" class="login-logo">
+                        <h3 class="mb-4">Iniciar Sesión</h3>
+                    </div>
+
                     <?php if(isset($error)): ?>
                         <div class="alert alert-danger" role="alert">
                             <?php echo $error; ?>
@@ -14,11 +21,11 @@
                     
                     <form method="POST" action="?controlador=usuarios&accion=login">
                         <div class="form-group mb-3">
-                            <label for="email">Correo Electrónico</label>
+                            <label for="email" class="form-label">Correo Electrónico</label>
                             <input type="email" class="form-control" id="email" name="email" required>
                         </div>
-                        <div class="form-group mb-3">
-                            <label for="password">Contraseña</label>
+                        <div class="form-group mb-4">
+                            <label for="password" class="form-label">Contraseña</label>
                             <div class="input-group">
                                 <input type="password" class="form-control" id="password" name="password" required>
                                 <button class="btn btn-outline-secondary" type="button" id="togglePassword">
@@ -27,7 +34,7 @@
                             </div>
                         </div>
                         <div class="d-grid">
-                            <button type="submit" class="btn btn-primary">Iniciar Sesión</button>
+                            <button type="submit" class="btn btn-success">Iniciar Sesión</button>
                         </div>
                     </form>
                 </div>
@@ -37,24 +44,21 @@
 </div>
 
 <script>
+document.body.classList.add('login-page');
+
 document.addEventListener('DOMContentLoaded', function () {
     const togglePassword = document.querySelector('#togglePassword');
     const password = document.querySelector('#password');
     const icon = togglePassword.querySelector('i');
 
-    togglePassword.addEventListener('click', function (e) {
-        // toggle the type attribute
-        const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
-        password.setAttribute('type', type);
-        
-        // toggle the icon
-        if (type === 'password') {
-            icon.classList.remove('fa-eye-slash');
-            icon.classList.add('fa-eye');
-        } else {
-            icon.classList.remove('fa-eye');
-            icon.classList.add('fa-eye-slash');
-        }
-    });
+    if (togglePassword) {
+        togglePassword.addEventListener('click', function () {
+            const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+            password.setAttribute('type', type);
+            
+            icon.classList.toggle('fa-eye');
+            icon.classList.toggle('fa-eye-slash');
+        });
+    }
 });
 </script>
