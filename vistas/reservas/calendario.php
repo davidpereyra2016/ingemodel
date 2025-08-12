@@ -85,6 +85,7 @@ $isEncargado = $rol === 'encargado'; // Verifica si el usuario es encargado
                 <div id="eventDetails">
                     <p><strong>Fecha:</strong> <span id="eventDate"></span></p>
                     <p><strong>Tipo de Uso:</strong> <span id="eventType"></span></p>
+                    <p><strong>Motivo de Uso:</strong> <span id="eventMotivoUso"></span></p>
                     <p><strong>Estado:</strong> <span id="eventStatus"></span></p>
                     <p><strong>Nombre:</strong> <span id="eventNombre"></span></p>
                     <p><strong>telefono:</strong> <span id="eventTelefono"></span></p>

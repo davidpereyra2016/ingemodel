@@ -171,6 +171,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     if ((idUsuario == idEventoUsuario || isAdmin == 1) || (isEncargado && estado === 'aprobada')) {
                         $('#eventDate').text(info.event.start.toLocaleDateString());
                         $('#eventType').text(info.event.title);
+                        $('#eventMotivoUso').text(info.event.extendedProps.motivo_de_uso);
                         $('#eventNombre').text(info.event.extendedProps.nombre);
                         $('#eventTelefono').text(info.event.extendedProps.telefono);
                         $('#eventCorreo').text(info.event.extendedProps.correo);
