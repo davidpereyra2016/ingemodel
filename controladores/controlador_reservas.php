@@ -112,7 +112,7 @@ class ControladorReservas
                 header("Location: " . $redirect_url);
                 exit();
             } else {
-                $_SESSION['error'] = "No se pudo crear la reserva. El horario ya está ocupado o has alcanzado el límite de reservas.";
+                $_SESSION['error'] = "No se pudo crear la reserva. Ya existe una reserva para esa fecha o has alcanzado el límite de reservas.";
                 header('Location: index.php?controlador=reservas&accion=crear');
                 exit();
             }
@@ -170,8 +170,16 @@ class ControladorReservas
             $reservaActualizada = $this->modelo->obtenerReservaPorCodigo($codigo_unico); // Obtener estado más reciente
 
             // Si la reserva fue cancelada mientras el usuario tenía el formulario abierto
-            if ($reservaActualizada['estado'] === 'cancelada' || $reservaActualizada['estado'] === 'rechazada' || $reservaActualizada['estado'] === 'baja') {
+            // EXCEPCIÓN: Permitir a administradores subir comprobantes de devolución en estado 'baja'
+            if ($reservaActualizada['estado'] === 'cancelada' || $reservaActualizada['estado'] === 'rechazada') {
                 $_SESSION['error'] = 'No se pueden subir archivos. La reserva ha sido cancelada o rechazada.';
+                header('Location: index.php?controlador=reservas&accion=subirFormulario&codigo=' . $codigo_unico);
+                exit();
+            }
+            
+            // Para estado 'baja': solo permitir a administradores subir comprobantes de devolución
+            if ($reservaActualizada['estado'] === 'baja' && $_SESSION['rol'] !== 'administrador') {
+                $_SESSION['error'] = 'No se pueden subir archivos. La reserva ha sido dada de baja.';
                 header('Location: index.php?controlador=reservas&accion=subirFormulario&codigo=' . $codigo_unico);
                 exit();
             }
@@ -231,7 +239,40 @@ class ControladorReservas
                 }
             }
             
-            if ($this->modelo->subirArchivos($reserva['id'], $archivo_formulario, $archivo_comprobante, $archivo_municipal, $archivo_comprobante_total)) {
+            // Manejo del comprobante de devolución (solo para administradores en estado 'baja')
+            $archivo_comprobante_devolucion = null;
+            $monto_devolucion = null;
+            $observaciones_devolucion = null;
+            
+            if ($reservaActualizada['estado'] === 'baja' && $_SESSION['rol'] === 'administrador') {
+                // Procesar comprobante de devolución
+                if (isset($_FILES['comprobante_devolucion']) && $_FILES['comprobante_devolucion']['error'] == 0) {
+                    $archivo_temp = $_FILES['comprobante_devolucion']['tmp_name'];
+                    $nombre_archivo = time() . '_devolucion_' . $_FILES['comprobante_devolucion']['name'];
+                    $ruta_destino = $target_dir . $nombre_archivo;
+                    
+                    if (move_uploaded_file($archivo_temp, $ruta_destino)) {
+                        $archivo_comprobante_devolucion = $nombre_archivo;
+                    }
+                }
+                
+                // Obtener datos de devolución
+                if (isset($_POST['monto_devolucion']) && !empty($_POST['monto_devolucion'])) {
+                    $monto_devolucion = floatval($_POST['monto_devolucion']);
+                    // Validar que el monto no exceda el monto de la reserva
+                    if ($monto_devolucion > $reservaActualizada['monto']) {
+                        $_SESSION['error'] = 'El monto de devolución no puede ser mayor al monto de la reserva.';
+                        header('Location: index.php?controlador=reservas&accion=subirFormulario&codigo=' . $codigo_unico);
+                        exit();
+                    }
+                }
+                
+                if (isset($_POST['observaciones_devolucion'])) {
+                    $observaciones_devolucion = trim($_POST['observaciones_devolucion']);
+                }
+            }
+            
+            if ($this->modelo->subirArchivos($reserva['id'], $archivo_formulario, $archivo_comprobante, $archivo_municipal, $archivo_comprobante_total, $archivo_comprobante_devolucion, $monto_devolucion, $observaciones_devolucion)) {
                 // Registrar pago de anticipo si se cargó comprobante
                 if ($archivo_comprobante) {
                     $this->modelo->registrarPago($reserva['id'], 'anticipo');
@@ -247,6 +288,26 @@ class ControladorReservas
                     $this->modelo->registrarHistorial($reserva['id'], $_SESSION['id_usuario'], 'pago', null, 'comprobante_total', 'Pago de comprobante total registrado');
                 }
                 
+                // Registrar devolución si se procesó
+                if ($archivo_comprobante_devolucion || $monto_devolucion || $observaciones_devolucion) {
+                    $detalles_devolucion = [];
+                    if ($monto_devolucion) $detalles_devolucion[] = "Monto: $" . number_format($monto_devolucion, 2);
+                    if ($archivo_comprobante_devolucion) $detalles_devolucion[] = "Comprobante: {$archivo_comprobante_devolucion}";
+                    if ($observaciones_devolucion) $detalles_devolucion[] = "Observaciones: {$observaciones_devolucion}";
+                    
+                    $detalle_historial = 'Devolución registrada - ' . implode(', ', $detalles_devolucion);
+                    
+                    // Registrar en historial
+                    $this->modelo->registrarHistorial(
+                        $reserva['id'], 
+                        $_SESSION['id_usuario'], 
+                        'devolucion', 
+                        null, 
+                        'comprobante_devolucion', 
+                        $detalle_historial
+                    );
+                }
+                
                 // Crear notificación para administradores cuando un usuario sube documentación
                 include_once("modelos/modelo_notificaciones.php");
                 $tipos_documentos = [];
@@ -254,19 +315,32 @@ class ControladorReservas
                 if ($archivo_municipal) $tipos_documentos[] = "formulario municipal";
                 if ($archivo_comprobante) $tipos_documentos[] = "comprobante de anticipo";
                 if ($archivo_comprobante_total) $tipos_documentos[] = "comprobante de pago total";
+                if ($archivo_comprobante_devolucion) $tipos_documentos[] = "comprobante de devolución";
                 
                 if (!empty($tipos_documentos)) {
                     $documentos_texto = implode(", ", $tipos_documentos);
-                    $mensaje_notificacion = "El usuario {$reserva['nombre']} {$reserva['apellido']} ha subido documentación ({$documentos_texto}) para la reserva #{$reserva['id']} ({$reserva['tipo_uso']})";
+                    
+                    // Mensaje diferente si es una devolución (administrador)
+                    if ($archivo_comprobante_devolucion) {
+                        $mensaje_notificacion = "El administrador {$_SESSION['nombre']} {$_SESSION['apellido']} ha registrado una devolución para la reserva #{$reserva['id']} ({$reserva['tipo_uso']}) del usuario {$reserva['nombre']} {$reserva['apellido']}";
+                    } else {
+                        $mensaje_notificacion = "El usuario {$reserva['nombre']} {$reserva['apellido']} ha subido documentación ({$documentos_texto}) para la reserva #{$reserva['id']} ({$reserva['tipo_uso']})";
+                    }
+                    
                     ModeloNotificaciones::crearNotificacion(
                         $reserva['id_usuario'], 
                         $mensaje_notificacion, 
                         $reserva['id'], 
-                        'documentacion'
+                        $archivo_comprobante_devolucion ? 'devolucion' : 'documentacion'
                     );
                 }
                 
-                $_SESSION['mensaje'] = "Documentos subidos correctamente. Su solicitud será revisada por un administrador.";
+                // Mensaje diferente si se registró una devolución
+                if ($archivo_comprobante_devolucion || $monto_devolucion || $observaciones_devolucion) {
+                    $_SESSION['mensaje'] = "Devolución registrada correctamente. Los datos han sido guardados en el sistema.";
+                } else {
+                    $_SESSION['mensaje'] = "Documentos subidos correctamente. Su solicitud será revisada por un administrador.";
+                }
                 header("Location: index.php?controlador=reservas&accion=listar");
                 exit();
             } else {
@@ -378,6 +452,40 @@ class ControladorReservas
     public function calendario() {
         include_once("vistas/reservas/calendario.php");
     }
+
+    public function actualizarMotivoUso()
+    {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_SESSION['rol']) && $_SESSION['rol'] === 'administrador') {
+            if (isset($_POST['id_reserva']) && !empty($_POST['id_reserva']) && isset($_POST['motivo_de_uso'])) {
+                $id_reserva = filter_var($_POST['id_reserva'], FILTER_SANITIZE_NUMBER_INT);
+                $motivo_de_uso = trim(htmlspecialchars($_POST['motivo_de_uso']));
+                $id_usuario_admin = $_SESSION['id_usuario'];
+
+                // Obtener el motivo de uso anterior para el historial
+                $reserva_anterior = $this->modelo->obtenerReserva($id_reserva);
+                $motivo_anterior = $reserva_anterior ? $reserva_anterior['motivo_de_uso'] : 'N/A';
+
+                $actualizado = $this->modelo->actualizarMotivoUso($id_reserva, $motivo_de_uso, $id_usuario_admin, $motivo_anterior);
+
+                if ($actualizado) {
+                    $_SESSION['mensaje'] = "El motivo de uso se ha actualizado correctamente.";
+                } else {
+                    $_SESSION['error'] = "Error al actualizar el motivo de uso.";
+                }
+
+                header('Location: index.php?controlador=reservas&accion=ver&id=' . $id_reserva);
+                exit();
+            } else {
+                $_SESSION['error'] = "Datos incompletos para la actualización.";
+                header('Location: index.php?controlador=reservas&accion=listar');
+                exit();
+            }
+        } else {
+            $_SESSION['error'] = "Acceso no autorizado.";
+            header('Location: index.php?controlador=paginas&accion=inicio');
+            exit();
+        }
+    }
     
     public function obtenerEventos() {
         ob_clean();
@@ -406,9 +514,9 @@ class ControladorReservas
             exit();
         }
         
-        // Verificar que la reserva esté aprobada
-        if ($reserva['estado'] != 'aprobada') {
-            $_SESSION['error'] = "Solo se pueden generar comprobantes para reservas aprobadas.";
+        // Verificar que la reserva esté aprobada o dada de baja (para mostrar devolución)
+        if ($reserva['estado'] != 'aprobada' && $reserva['estado'] != 'baja') {
+            $_SESSION['error'] = "Solo se pueden generar comprobantes para reservas aprobadas o dadas de baja.";
             header("Location: index.php?controlador=reservas&accion=ver&id=".$id_reserva);
             exit();
         }
@@ -472,19 +580,20 @@ class ControladorReservas
                 if ($tipo_accion === 'baja') {
                     // Dar de baja (cambiar estado a 'baja')
                     if ($this->modelo->eliminarReserva($id_reserva, false)) {
-                    // Registrar en historial con mensaje diferente según quién lo haga
-                    $comentario = ($_SESSION['rol'] == 'administrador') 
-                        ? 'Reserva dada de baja por administrador'
-                        : 'Reserva dada de baja por el usuario propietario';
-                    
-                    $this->modelo->registrarHistorial(
-                        $id_reserva, 
-                        $_SESSION['id_usuario'], 
-                        'baja', 
-                        $estado_anterior, 
-                        'baja', 
-                        $comentario
-                    );
+                    // Registrar en historial con mensaje detallado según quién lo haga
+                $usuario_actual = $_SESSION['nombre'] . ' ' . $_SESSION['apellido'];
+                $comentario = ($_SESSION['rol'] == 'administrador') 
+                    ? "Reserva dada de baja por administrador {$usuario_actual} (ID: {$_SESSION['id_usuario']})"
+                    : "Reserva dada de baja por el usuario propietario {$usuario_actual} (ID: {$_SESSION['id_usuario']})";
+                
+                $this->modelo->registrarHistorial(
+                    $id_reserva, 
+                    $_SESSION['id_usuario'], 
+                    'baja', 
+                    $estado_anterior, 
+                    'baja', 
+                    $comentario
+                );
                     
                     // Crear notificación para administradores cuando un usuario da de baja su reserva
                     if ($_SESSION['rol'] != 'administrador') {
@@ -508,13 +617,16 @@ class ControladorReservas
                     }
                 } elseif ($tipo_accion === 'eliminar') {
                     // Registrar en historial ANTES de la eliminación completa
+                    $admin_actual = $_SESSION['nombre'] . ' ' . $_SESSION['apellido'];
+                    $comentario_eliminacion = "Reserva eliminada completamente por administrador {$admin_actual} (ID: {$_SESSION['id_usuario']}). Datos respaldados en tabla reservas_eliminadas.";
+                    
                     $this->modelo->registrarHistorial(
                         $id_reserva, 
                         $_SESSION['id_usuario'], 
                         'eliminacion_completa', 
                         $estado_anterior, 
                         'eliminada', 
-                        'Reserva eliminada completamente por administrador'
+                        $comentario_eliminacion
                     );
                     
                     // Eliminar completamente de la base de datos

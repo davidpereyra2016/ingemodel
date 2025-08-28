@@ -29,7 +29,7 @@ class ModeloReservas {
     public function obtenerReserva($id) {
         $consulta = $this->conexion->prepare("SELECT r.*, u.nombre, u.apellido, u.matricula, u.email, u.telefono, 
                                              r.archivo_formulario, r.archivo_municipal, r.archivo_comprobante, r.archivo_comprobante_total,
-                                             r.codigo_unico, r.monto_anticipo, r.monto_saldo 
+                                             r.codigo_unico, r.monto_anticipo, r.monto_saldo, r.anticipo_pagado, r.saldo_pagado 
                                              FROM reservas r 
                                              INNER JOIN usuarios u ON r.id_usuario = u.id 
                                              WHERE r.id = :id");
@@ -42,7 +42,7 @@ class ModeloReservas {
     public function obtenerReservaPorCodigo($codigoUnico) {
         $consulta = $this->conexion->prepare("SELECT r.*, u.nombre, u.apellido, u.matricula, u.email, u.telefono, 
                                              r.archivo_formulario, r.archivo_municipal, r.archivo_comprobante, r.archivo_comprobante_total,
-                                             r.monto_anticipo, r.monto_saldo 
+                                             r.monto_anticipo, r.monto_saldo, r.anticipo_pagado, r.saldo_pagado 
                                              FROM reservas r 
                                              INNER JOIN usuarios u ON r.id_usuario = u.id 
                                              WHERE r.codigo_unico = :codigo_unico");
@@ -113,7 +113,21 @@ class ModeloReservas {
             return ['error' => $mensaje_error];
         }
 
-        // Verificar si ya existe una reserva para esa fecha
+        // VALIDACIÓN CRÍTICA: Solo se permite UNA reserva por día (independientemente del horario)
+        // Esta validación es prioritaria y aplica a todos los roles
+        $consulta_dia = $this->conexion->prepare("SELECT COUNT(*) as total FROM reservas 
+                                                 WHERE fecha_evento = :fecha_evento 
+                                                 AND estado IN ('pendiente', 'aprobada')");
+        $consulta_dia->bindParam(':fecha_evento', $fecha_evento);
+        $consulta_dia->execute();
+        $resultado_dia = $consulta_dia->fetch(PDO::FETCH_ASSOC);
+        
+        // Si ya existe una reserva para esa fecha (cualquier horario), rechazar
+        if ($resultado_dia['total'] > 0) {
+            return ['error' => 'Ya existe una reserva para la fecha ' . date('d/m/Y', strtotime($fecha_evento)) . '. Solo se permite una reserva por día.'];
+        }
+        
+        // VALIDACIÓN SECUNDARIA: Verificar conflictos de horarios (redundante pero mantenida por seguridad)
         $consulta = $this->conexion->prepare("SELECT COUNT(*) as total FROM reservas 
                                              WHERE fecha_evento = :fecha_evento 
                                              AND ((hora_inicio <= :hora_inicio AND hora_fin >= :hora_inicio) 
@@ -126,9 +140,9 @@ class ModeloReservas {
         $consulta->execute();
         $resultado = $consulta->fetch(PDO::FETCH_ASSOC);
         
-        // Si hay reservas en ese horario, retornar falso
+        // Si hay reservas en ese horario, retornar falso (esta validación ahora es redundante)
         if ($resultado['total'] > 0) {
-            return false;
+            return ['error' => 'Ya existe una reserva para esa fecha y horario.'];
         }
         
         // Obtener monto según horario
@@ -219,19 +233,64 @@ class ModeloReservas {
     }
 
     // Subir archivos relacionados a la reserva
-    public function subirArchivos($id, $archivo_formulario = null, $archivo_comprobante = null, $archivo_municipal = null,$archivo_comprobante_total = null) {
-        $consulta = $this->conexion->prepare("
-            UPDATE reservas SET 
-            archivo_formulario = COALESCE(:archivo_formulario, archivo_formulario),
-            archivo_comprobante = COALESCE(:archivo_comprobante, archivo_comprobante),
-            archivo_municipal = COALESCE(:archivo_municipal, archivo_municipal),
-            archivo_comprobante_total = COALESCE(:archivo_comprobante_total, archivo_comprobante_total)
-            WHERE id = :id");
-        $consulta->bindParam(':id', $id);
-        $consulta->bindParam(':archivo_formulario', $archivo_formulario);
-        $consulta->bindParam(':archivo_comprobante', $archivo_comprobante);
-        $consulta->bindParam(':archivo_municipal', $archivo_municipal);
-        $consulta->bindParam(':archivo_comprobante_total', $archivo_comprobante_total);
+    public function subirArchivos($id, $archivo_formulario = null, $archivo_comprobante = null, $archivo_municipal = null, $archivo_comprobante_total = null, $archivo_comprobante_devolucion = null, $monto_devolucion = null, $observaciones_devolucion = null) {
+        // Construir la consulta dinámicamente según los parámetros proporcionados
+        $campos_actualizar = [];
+        $parametros = [':id' => $id];
+        
+        if ($archivo_formulario !== null) {
+            $campos_actualizar[] = "archivo_formulario = :archivo_formulario";
+            $parametros[':archivo_formulario'] = $archivo_formulario;
+        }
+        
+        if ($archivo_comprobante !== null) {
+            $campos_actualizar[] = "archivo_comprobante = :archivo_comprobante";
+            $parametros[':archivo_comprobante'] = $archivo_comprobante;
+        }
+        
+        if ($archivo_municipal !== null) {
+            $campos_actualizar[] = "archivo_municipal = :archivo_municipal";
+            $parametros[':archivo_municipal'] = $archivo_municipal;
+        }
+        
+        if ($archivo_comprobante_total !== null) {
+            $campos_actualizar[] = "archivo_comprobante_total = :archivo_comprobante_total";
+            $parametros[':archivo_comprobante_total'] = $archivo_comprobante_total;
+        }
+        
+        // Campos de devolución
+        if ($archivo_comprobante_devolucion !== null) {
+            $campos_actualizar[] = "archivo_comprobante_devolucion = :archivo_comprobante_devolucion";
+            $parametros[':archivo_comprobante_devolucion'] = $archivo_comprobante_devolucion;
+        }
+        
+        if ($monto_devolucion !== null) {
+            $campos_actualizar[] = "monto_devolucion = :monto_devolucion";
+            $parametros[':monto_devolucion'] = $monto_devolucion;
+        }
+        
+        if ($observaciones_devolucion !== null) {
+            $campos_actualizar[] = "observaciones_devolucion = :observaciones_devolucion";
+            $parametros[':observaciones_devolucion'] = $observaciones_devolucion;
+        }
+        
+        // Si hay datos de devolución, actualizar la fecha de devolución
+        if ($archivo_comprobante_devolucion !== null || $monto_devolucion !== null || $observaciones_devolucion !== null) {
+            $campos_actualizar[] = "fecha_devolucion = NOW()";
+        }
+        
+        // Si no hay campos para actualizar, retornar true
+        if (empty($campos_actualizar)) {
+            return true;
+        }
+        
+        $sql = "UPDATE reservas SET " . implode(", ", $campos_actualizar) . " WHERE id = :id";
+        $consulta = $this->conexion->prepare($sql);
+        
+        foreach ($parametros as $param => $valor) {
+            $consulta->bindValue($param, $valor);
+        }
+        
         return $consulta->execute();
     }
 
@@ -257,7 +316,7 @@ class ModeloReservas {
     public function obtenerEventosCalendario() {
         $consulta = $this->conexion->query("SELECT r.id, r.fecha_evento as start, 
                                            CONCAT(r.tipo_uso, ' (', r.hora_inicio, ' - ', r.hora_fin, ')') as title, 
-                                           r.id_usuario, r.estado,
+                                           r.id_usuario, r.estado, r.motivo_de_uso,
                                            u.nombre, u.apellido, u.telefono, u.email as correo,
                                            CONCAT(u.nombre, ' ', u.apellido) as nombre_completo,
                                            CASE 
@@ -299,6 +358,9 @@ class ModeloReservas {
     // Eliminar reserva (dar de baja o eliminar completamente)
     public function eliminarReserva($id, $eliminarCompletamente = false) {
         if ($eliminarCompletamente) {
+            // IMPORTANTE: Antes de eliminar, respaldar los datos completos
+            $this->respaldarReservaEliminada($id);
+            
             // Eliminar completamente de la base de datos
             // La BD maneja automáticamente la eliminación en cascada de:
             // - historial_reservas (ON DELETE CASCADE)
@@ -327,17 +389,135 @@ class ModeloReservas {
         return $consulta->execute();
     }
 
-    // Registrar en historial
+    // Registrar en historial con datos completos del usuario
     public function registrarHistorial($id_reserva, $id_usuario, $accion, $estado_anterior, $estado_nuevo, $comentario = null) {
+        // Obtener datos del usuario que realiza la acción
+        $consultaUsuario = $this->conexion->prepare("SELECT nombre, apellido, rol FROM usuarios WHERE id = :id_usuario");
+        $consultaUsuario->bindParam(':id_usuario', $id_usuario);
+        $consultaUsuario->execute();
+        $usuario = $consultaUsuario->fetch(PDO::FETCH_ASSOC);
+        
+        $usuario_nombre = $usuario ? $usuario['nombre'] : null;
+        $usuario_apellido = $usuario ? $usuario['apellido'] : null;
+        $usuario_rol = $usuario ? $usuario['rol'] : null;
+        
         $consulta = $this->conexion->prepare("INSERT INTO historial_reservas 
-                                             (id_reserva, id_usuario, accion, estado_anterior, estado_nuevo, comentario) 
-                                             VALUES (:id_reserva, :id_usuario, :accion, :estado_anterior, :estado_nuevo, :comentario)");
+                                             (id_reserva, id_usuario, accion, estado_anterior, estado_nuevo, comentario, usuario_nombre, usuario_apellido, usuario_rol) 
+                                             VALUES (:id_reserva, :id_usuario, :accion, :estado_anterior, :estado_nuevo, :comentario, :usuario_nombre, :usuario_apellido, :usuario_rol)");
         $consulta->bindParam(':id_reserva', $id_reserva);
         $consulta->bindParam(':id_usuario', $id_usuario);
         $consulta->bindParam(':accion', $accion);
         $consulta->bindParam(':estado_anterior', $estado_anterior);
         $consulta->bindParam(':estado_nuevo', $estado_nuevo);
         $consulta->bindParam(':comentario', $comentario);
+        $consulta->bindParam(':usuario_nombre', $usuario_nombre);
+        $consulta->bindParam(':usuario_apellido', $usuario_apellido);
+        $consulta->bindParam(':usuario_rol', $usuario_rol);
         return $consulta->execute();
+    }
+    
+    // Respaldar reserva antes de eliminación completa
+    public function respaldarReservaEliminada($id_reserva) {
+        // Obtener todos los datos de la reserva y del usuario
+        $consulta = $this->conexion->prepare("
+            SELECT r.*, u.nombre, u.apellido, u.email, u.matricula
+            FROM reservas r 
+            INNER JOIN usuarios u ON r.id_usuario = u.id 
+            WHERE r.id = :id_reserva
+        ");
+        $consulta->bindParam(':id_reserva', $id_reserva);
+        $consulta->execute();
+        $reserva = $consulta->fetch(PDO::FETCH_ASSOC);
+        
+        if (!$reserva) {
+            return false; // Reserva no encontrada
+        }
+        
+        // Obtener datos del administrador que está eliminando
+        $admin_id = $_SESSION['id_usuario'];
+        $consultaAdmin = $this->conexion->prepare("SELECT nombre, apellido FROM usuarios WHERE id = :admin_id");
+        $consultaAdmin->bindParam(':admin_id', $admin_id);
+        $consultaAdmin->execute();
+        $admin = $consultaAdmin->fetch(PDO::FETCH_ASSOC);
+        
+        // Insertar en tabla de respaldo
+        $consultaRespaldo = $this->conexion->prepare("
+            INSERT INTO reservas_eliminadas (
+                reserva_id_original, id_usuario, nombre_usuario, apellido_usuario, email_usuario, matricula_usuario,
+                fecha_evento, hora_inicio, hora_fin, tipo_uso, descripcion, monto, monto_anticipo, monto_saldo,
+                estado, codigo_unico, archivo_formulario, archivo_comprobante, archivo_municipal, archivo_comprobante_total,
+                fecha_vencimiento_pago, fecha_creacion_original, eliminado_por_usuario_id, eliminado_por_nombre, eliminado_por_apellido,
+                motivo_eliminacion
+            ) VALUES (
+                :reserva_id_original, :id_usuario, :nombre_usuario, :apellido_usuario, :email_usuario, :matricula_usuario,
+                :fecha_evento, :hora_inicio, :hora_fin, :tipo_uso, :descripcion, :monto, :monto_anticipo, :monto_saldo,
+                :estado, :codigo_unico, :archivo_formulario, :archivo_comprobante, :archivo_municipal, :archivo_comprobante_total,
+                :fecha_vencimiento_pago, :fecha_creacion_original, :eliminado_por_usuario_id, :eliminado_por_nombre, :eliminado_por_apellido,
+                :motivo_eliminacion
+            )
+        ");
+        
+        // Bind de parámetros de la reserva
+        $consultaRespaldo->bindParam(':reserva_id_original', $reserva['id']);
+        $consultaRespaldo->bindParam(':id_usuario', $reserva['id_usuario']);
+        $consultaRespaldo->bindParam(':nombre_usuario', $reserva['nombre']);
+        $consultaRespaldo->bindParam(':apellido_usuario', $reserva['apellido']);
+        $consultaRespaldo->bindParam(':email_usuario', $reserva['email']);
+        $consultaRespaldo->bindParam(':matricula_usuario', $reserva['matricula']);
+        $consultaRespaldo->bindParam(':fecha_evento', $reserva['fecha_evento']);
+        $consultaRespaldo->bindParam(':hora_inicio', $reserva['hora_inicio']);
+        $consultaRespaldo->bindParam(':hora_fin', $reserva['hora_fin']);
+        $consultaRespaldo->bindParam(':tipo_uso', $reserva['tipo_uso']);
+        $consultaRespaldo->bindParam(':descripcion', $reserva['motivo_de_uso']); // Usar motivo_de_uso como descripción
+        $consultaRespaldo->bindParam(':monto', $reserva['monto']);
+        $consultaRespaldo->bindParam(':monto_anticipo', $reserva['monto_anticipo']);
+        $consultaRespaldo->bindParam(':monto_saldo', $reserva['monto_saldo']);
+        $consultaRespaldo->bindParam(':estado', $reserva['estado']);
+        $consultaRespaldo->bindParam(':codigo_unico', $reserva['codigo_unico']);
+        $consultaRespaldo->bindParam(':archivo_formulario', $reserva['archivo_formulario']);
+        $consultaRespaldo->bindParam(':archivo_comprobante', $reserva['archivo_comprobante']);
+        $consultaRespaldo->bindParam(':archivo_municipal', $reserva['archivo_municipal']);
+        $consultaRespaldo->bindParam(':archivo_comprobante_total', $reserva['archivo_comprobante_total']);
+        $consultaRespaldo->bindParam(':fecha_vencimiento_pago', $reserva['fecha_vencimiento']); // Usar fecha_vencimiento
+        $consultaRespaldo->bindParam(':fecha_creacion_original', $reserva['fecha_solicitud']); // Usar fecha_solicitud
+        
+        // Bind de parámetros del administrador que elimina
+        $consultaRespaldo->bindParam(':eliminado_por_usuario_id', $admin_id);
+        $consultaRespaldo->bindParam(':eliminado_por_nombre', $admin['nombre']);
+        $consultaRespaldo->bindParam(':eliminado_por_apellido', $admin['apellido']);
+        
+        // Motivo de eliminación (se puede personalizar)
+        $motivo = "Eliminación completa realizada por administrador {$admin['nombre']} {$admin['apellido']}";
+        $consultaRespaldo->bindParam(':motivo_eliminacion', $motivo);
+        
+        return $consultaRespaldo->execute();
+    }
+
+    public function actualizarMotivoUso($id_reserva, $motivo_de_uso, $id_usuario_admin, $motivo_anterior)
+    {
+        try {
+            $this->conexion->beginTransaction();
+
+            $consulta = $this->conexion->prepare("UPDATE reservas SET motivo_de_uso = :motivo_de_uso WHERE id = :id_reserva");
+            $consulta->bindParam(':motivo_de_uso', $motivo_de_uso);
+            $consulta->bindParam(':id_reserva', $id_reserva, PDO::PARAM_INT);
+            $consulta->execute();
+
+            // Solo registrar historial si hubo un cambio real
+            if ($consulta->rowCount() > 0) {
+                $comentario = "Motivo de uso actualizado por administrador. Anterior: '" . htmlspecialchars($motivo_anterior) . "'. Nuevo: '" . htmlspecialchars($motivo_de_uso) . "'.";
+                $this->registrarHistorial($id_reserva, $id_usuario_admin, 'actualizacion_motivo', null, null, $comentario);
+                $this->conexion->commit();
+                return true;
+            } else {
+                // Si no se afectaron filas (ej. el texto es idéntico), no es un error. Simplemente no se hace nada.
+                $this->conexion->rollBack();
+                return false;
+            }
+        } catch (PDOException $e) {
+            $this->conexion->rollBack();
+            error_log('Error al actualizar motivo de uso: ' . $e->getMessage());
+            return false;
+        }
     }
 }

@@ -75,9 +75,27 @@
                                 <li class="list-group-item">
                                     <strong>Monto Total:</strong> $<?php echo sprintf("%.2f", $reserva['monto']); ?>
                                 </li>
-                                <li class="list-group-item">
-                                    <strong>Motivo de Uso:</strong> <?php echo $reserva['motivo_de_uso']; ?>
+                                <li class="list-group-item" id="motivo-display">
+                                    <strong>Motivo de Uso:</strong>
+                                    <?php if ($_SESSION['rol'] === 'administrador'): ?>
+                                        <button id="edit-motivo-btn" class="btn btn-outline-warning btn-sm float-end"><i class="bi bi-pencil"></i> Editar</button>
+                                    <?php endif; ?>
+                                    <div class="mt-2"><?php echo $reserva['motivo_de_uso']; ?></div>
                                 </li>
+
+                                <?php if ($_SESSION['rol'] === 'administrador'): ?>
+                                <li class="list-group-item" id="motivo-edit-form" style="display: none;">
+                                    <strong>Editar Motivo de Uso:</strong>
+                                    <form action="index.php?controlador=reservas&accion=actualizarMotivoUso" method="POST" class="mt-2">
+                                        <input type="hidden" name="id_reserva" value="<?php echo $reserva['id']; ?>">
+                                        <div class="mb-3">
+                                            <textarea class="form-control" name="motivo_de_uso" rows="3" required><?php echo htmlspecialchars($reserva['motivo_de_uso']); ?></textarea>
+                                        </div>
+                                        <button type="submit" class="btn btn-success btn-sm">Guardar</button>
+                                        <button type="button" id="cancel-edit-btn" class="btn btn-secondary btn-sm">Cancelar</button>
+                                    </form>
+                                </li>
+                                <?php endif; ?>
                                 <li class="list-group-item">
                                     <strong>Anticipo:</strong>
                                     <?php if ($reserva['anticipo_pagado']): ?>
@@ -338,7 +356,7 @@
                                             </div>
 
                                             <div class="form-group text-right mt-4">
-                                                <button type="submit" class="btn btn-light btn-sm border-success"><i class="fas fa-save me-1"></i> Guardar Cambios</button>
+                                                <button type="button" class="btn btn-light btn-sm border-success" id="btnGuardarCambios"><i class="fas fa-save me-1"></i> Guardar Cambios</button>
                                             </div>
                                         </form>
                                     </div>
@@ -355,24 +373,104 @@
                         Volver a la Lista
                     </a>
 
-                    <?php if (($reserva['estado'] == 'pendiente' || $reserva['estado'] == 'aprobada') &&
-                        (!$reserva['archivo_formulario'] || !$reserva['archivo_comprobante'] ||
-                            !$reserva['archivo_municipal'] || !$reserva['archivo_comprobante_total'])
-                    ): ?>
-                        <a href="index.php?controlador=reservas&accion=subirFormulario&codigo=<?php echo $reserva['codigo_unico']; ?>" class="btn btn-success-theme">
-                            <i class="fas fa-upload me-2"></i> Subir Archivos
-                        </a>
-                    <?php endif; ?>
+                    <div class="d-flex gap-2">
+                        <?php if (($reserva['estado'] == 'pendiente' || $reserva['estado'] == 'aprobada') &&
+                            (!$reserva['archivo_formulario'] || !$reserva['archivo_comprobante'] ||
+                                !$reserva['archivo_municipal'] || !$reserva['archivo_comprobante_total'])
+                        ): ?>
+                            <a href="index.php?controlador=reservas&accion=subirFormulario&codigo=<?php echo $reserva['codigo_unico']; ?>" class="btn btn-success-theme">
+                                <i class="fas fa-upload me-2"></i> Subir Archivos
+                            </a>
+                        <?php endif; ?>
 
-                    <?php if ($reserva['estado'] == 'aprobada'): ?>
-                        <a href="index.php?controlador=reservas&accion=generarPDF&id=<?php echo $reserva['id']; ?>" class="btn btn-secondary">
-                            <i class="fas fa-file-pdf me-2"></i> Descargar Comprobante
-                        </a>
-                    <?php endif; ?>
+                        <?php if ($_SESSION['rol'] == 'administrador' && $reserva['estado'] == 'aprobada'): ?>
+                            <button type="button" class="btn btn-success" id="btnEnviarWhatsApp">
+                                <i class="fab fa-whatsapp me-2"></i> Enviar WhatsApp
+                            </button>
+                        <?php endif; ?>
+
+                        <?php if ($reserva['estado'] == 'aprobada' || $reserva['estado'] == 'baja'): ?>
+                            <a href="index.php?controlador=reservas&accion=generarPDF&id=<?php echo $reserva['id']; ?>" class="btn btn-secondary">
+                                <i class="fas fa-file-pdf me-2"></i> Descargar Comprobante
+                            </a>
+                        <?php endif; ?>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- Modal de confirmación para aprobación -->
+    <div class="modal fade" id="confirmacionAprobacionModal" tabindex="-1" aria-labelledby="confirmacionAprobacionModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title" id="confirmacionAprobacionModalLabel">
+                        <i class="fas fa-check-circle me-2"></i>Reserva Aprobada
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>La reserva ha sido aprobada exitosamente. ¿Desea notificar al Encargado?</p>
+                    
+                    <!-- Información de la reserva -->
+                    <div class="card mb-3">
+                        <div class="card-header bg-light">
+                            <h6 class="mb-0"><i class="fas fa-info-circle me-2"></i>Detalles de la Reserva</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <p><strong>Fecha del Evento:</strong><br><?php echo date('d/m/Y', strtotime($reserva['fecha_evento'])); ?></p>
+                                    <p><strong>Horario:</strong><br><?php echo substr($reserva['hora_inicio'], 0, 5) . ' - ' . substr($reserva['hora_fin'], 0, 5); ?></p>
+                                    <p><strong>Tipo de Uso:</strong><br><?php echo $reserva['tipo_uso']; ?></p>
+                                </div>
+                                <div class="col-md-6">
+                                    <p><strong>Solicitante:</strong><br><?php echo $reserva['nombre'] . ' ' . $reserva['apellido']; ?></p>
+                                    <p><strong>Email:</strong><br><?php echo $reserva['email']; ?></p>
+                                    <p><strong>Teléfono:</strong><br><?php echo $reserva['telefono']; ?></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <form id="formNotificacionAprobacion" action="index.php?controlador=reservas&accion=aprobarRechazar" method="POST">
+                        <input type="hidden" name="id_reserva" value="<?php echo $reserva['id']; ?>">
+                        <input type="hidden" name="estado" value="aprobada">
+                        <input type="hidden" name="motivo" id="motivoHidden" value="">
+                        
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="enviarWhatsApp" name="enviar_whatsapp" value="1" checked>
+                                <label class="form-check-label" for="enviarWhatsApp">
+                                    <i class="fab fa-whatsapp text-success me-1"></i> Enviar notificación por WhatsApp
+                                </label>
+                            </div>
+                            <!-- <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="enviarEmail" name="enviar_email" value="1" checked>
+                                <label class="form-check-label" for="enviarEmail">
+                                    <i class="fas fa-envelope text-primary me-1"></i> Enviar notificación por Email
+                                </label>
+                            </div> -->
+                        </div>
+                        
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-1"></i> 
+                            Las notificaciones incluirán los detalles de la reserva mostrados arriba.
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-success" id="confirmarAprobacion">
+                        <i class="fas fa-paper-plane me-1"></i> Enviar notificaciones
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+<!-- Modal de confirmación para rechazo -->
 </div>
 
 <script>
@@ -392,6 +490,142 @@
                         document.getElementById('motivo').removeAttribute('required');
                     }
                 });
+            });
+        }
+
+        // Funcionalidad de edición del motivo de uso para administradores
+        const editBtn = document.getElementById('edit-motivo-btn');
+        const cancelBtn = document.getElementById('cancel-edit-btn');
+        const displaySection = document.getElementById('motivo-display');
+        const formSection = document.getElementById('motivo-edit-form');
+
+        if (editBtn) {
+            editBtn.addEventListener('click', function() {
+                displaySection.style.display = 'none';
+                formSection.style.display = 'block';
+            });
+        }
+
+        if (cancelBtn) {
+            cancelBtn.addEventListener('click', function() {
+                displaySection.style.display = 'block';
+                formSection.style.display = 'none';
+            });
+        }
+
+        // Manejo del botón "Guardar Cambios" para mostrar modal de notificaciones
+        const btnGuardarCambios = document.getElementById('btnGuardarCambios');
+        const modal = new bootstrap.Modal(document.getElementById('confirmacionAprobacionModal'));
+        
+        if (btnGuardarCambios) {
+            btnGuardarCambios.addEventListener('click', function() {
+                const estadoSeleccionado = document.querySelector('input[name="estado"]:checked');
+                
+                if (!estadoSeleccionado) {
+                    alert('Por favor seleccione una acción (Aprobar o Rechazar)');
+                    return;
+                }
+
+                if (estadoSeleccionado.value === 'aprobada') {
+                    // Si es aprobación, mostrar modal de notificaciones
+                    modal.show();
+                } else {
+                    // Si es rechazo, enviar directamente el formulario original
+                    const motivoRechazo = document.getElementById('motivo').value;
+                    if (!motivoRechazo.trim()) {
+                        alert('Por favor ingrese el motivo del rechazo');
+                        return;
+                    }
+                    document.querySelector('form[action*="aprobarRechazar"]').submit();
+                }
+            });
+        }
+
+        // Manejo del envío de notificaciones desde el modal
+        const confirmarAprobacionBtn = document.getElementById('confirmarAprobacion');
+        
+        if (confirmarAprobacionBtn) {
+            confirmarAprobacionBtn.addEventListener('click', function() {
+                const enviarWhatsApp = document.getElementById('enviarWhatsApp').checked;
+                const enviarEmail = document.getElementById('enviarEmail').checked;
+                
+                if (enviarWhatsApp) {
+                    // Preparar datos para WhatsApp
+                    const reservaData = {
+                        id: '<?php echo $reserva['id']; ?>',
+                        nombre: '<?php echo addslashes($reserva['nombre']); ?>',
+                        apellido: '<?php echo addslashes($reserva['apellido']); ?>',
+                        telefono: '<?php echo $reserva['telefono']; ?>',
+                        email: '<?php echo $reserva['email']; ?>',
+                        fecha_evento: '<?php echo $reserva['fecha_evento']; ?>',
+                        hora_inicio: '<?php echo $reserva['hora_inicio']; ?>',
+                        hora_fin: '<?php echo $reserva['hora_fin']; ?>',
+                        tipo_uso: '<?php echo addslashes($reserva['tipo_uso']); ?>',
+                        monto: '<?php echo $reserva['monto']; ?>'
+                    };
+                    
+                    // Enviar WhatsApp
+                    enviarWhatsAppDirecto(reservaData);
+                }
+                
+                // Enviar el formulario de aprobación
+                document.getElementById('formNotificacionAprobacion').submit();
+            });
+        }
+        
+        // Función para enviar WhatsApp directo
+        function enviarWhatsAppDirecto(reservaData) {
+            const telefono = reservaData.telefono.replace(/\D/g, '');
+            const fechaEvento = new Date(reservaData.fecha_evento).toLocaleDateString('es-ES');
+            const horaInicio = reservaData.hora_inicio.substring(0, 5);
+            const horaFin = reservaData.hora_fin.substring(0, 5);
+            const montoAnticipo = (parseFloat(reservaData.monto) / 2).toFixed(2);
+            const nombreCompleto = reservaData.nombre + ' ' + reservaData.apellido;
+            
+            const mensaje = `
+¡Hola! Hay una reserva *APROBADA* ✅
+
+*Detalles de la reserva:*
+• *Número de reserva:* #${reservaData.id}
+• *Fecha del evento:* ${fechaEvento}
+• *Horario:* ${horaInicio} - ${horaFin}
+• *Tipo de uso:* ${reservaData.tipo_uso}
+
+
+*Datos de contacto a comunicarse:*
+• Nombre: ${nombreCompleto}
+• Email: ${reservaData.email}
+• Teléfono: ${reservaData.telefono}
+            `.trim();
+            
+            const mensajeCodificado = encodeURIComponent(mensaje);
+            const whatsappLink = `https://api.whatsapp.com/send?text=${mensajeCodificado}`;
+            
+            // Abrir WhatsApp en una nueva ventana
+            window.open(whatsappLink, '_blank');
+        }
+
+        // Manejo del botón independiente de WhatsApp para reservas aprobadas
+        const btnEnviarWhatsApp = document.getElementById('btnEnviarWhatsApp');
+        
+        if (btnEnviarWhatsApp) {
+            btnEnviarWhatsApp.addEventListener('click', function() {
+                // Preparar datos para WhatsApp
+                const reservaData = {
+                    id: '<?php echo $reserva['id']; ?>',
+                    nombre: '<?php echo addslashes($reserva['nombre']); ?>',
+                    apellido: '<?php echo addslashes($reserva['apellido']); ?>',
+                    telefono: '<?php echo $reserva['telefono']; ?>',
+                    email: '<?php echo $reserva['email']; ?>',
+                    fecha_evento: '<?php echo $reserva['fecha_evento']; ?>',
+                    hora_inicio: '<?php echo $reserva['hora_inicio']; ?>',
+                    hora_fin: '<?php echo $reserva['hora_fin']; ?>',
+                    tipo_uso: '<?php echo addslashes($reserva['tipo_uso']); ?>',
+                    monto: '<?php echo $reserva['monto']; ?>'
+                };
+                
+                // Enviar WhatsApp directamente
+                enviarWhatsAppDirecto(reservaData);
             });
         }
     });
