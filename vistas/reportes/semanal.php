@@ -133,7 +133,7 @@ if (isset($_SESSION['error'])) {
                     <div class="card border-0 shadow-sm">
                         <div class="card-body text-center">
                             <h6 class="text-muted">Ingresos Totales de la Semana</h6>
-                            <h1 class="display-5 text-primary">$<?php echo number_format($montoTotal, 2, ',', '.'); ?></h1>
+                            <h1 class="display-5 text-primary">$<?php echo number_format($ingresoTotalReal, 2, ',', '.'); ?></h1>
                         </div>
                     </div>
                 </div>

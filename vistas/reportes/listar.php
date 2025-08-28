@@ -40,7 +40,7 @@ $nombresMeses = [
             <form action="index.php" method="GET" class="row g-3 align-items-end">
                 <input type="hidden" name="controlador" value="reportes">
                 <input type="hidden" name="accion" value="listar">
-                
+                <!-- Mes -->
                 <div class="col-md-3">
                     <label for="mes" class="form-label">Mes</label>
                     <select name="mes" id="mes" class="form-select">
@@ -52,6 +52,7 @@ $nombresMeses = [
                     </select>
                 </div>
                 
+                <!-- Año -->
                 <div class="col-md-3">
                     <label for="anio" class="form-label">Año</label>
                     <select name="anio" id="anio" class="form-select">
@@ -63,12 +64,14 @@ $nombresMeses = [
                     </select>
                 </div>
                 
+                <!-- Boton Filtrar -->
                 <div class="col-md-3">
                     <button type="submit" class="btn btn-primary w-100">
                         <i class="fas fa-search me-1"></i> Filtrar
                     </button>
                 </div>
                 
+                <!-- Boton Imprimir Reporte -->
                 <div class="col-md-3">
                     <a href="index.php?controlador=reportes&accion=imprimirReporte&tipo=mensual&mes=<?php echo $mesSeleccionado; ?>&anio=<?php echo $anioSeleccionado; ?>" class="btn btn-success w-100" target="_blank">
                         <i class="fas fa-print me-1"></i> Imprimir Reporte

@@ -78,6 +78,24 @@ class ControladorReportes {
         // Obtener reservas de esa semana
         $reservasSemana = $this->modelo->obtenerReservasPorSemana($fechaInicio, $fechaFin);
         
+        // Calcular el ingreso total REAL para la semana
+        $ingresoTotalReal = 0;
+        foreach ($reservasSemana as $reserva) {
+            if ($reserva['estado'] == 'aprobada') {
+                if ($reserva['anticipo_pagado'] == 1 && $reserva['saldo_pagado'] == 0) {
+                    $ingresoTotalReal += $reserva['monto_anticipo'] ?? ($reserva['monto'] * 0.5);
+                } elseif ($reserva['saldo_pagado'] == 1 && $reserva['anticipo_pagado'] == 0) {
+                    $ingresoTotalReal += $reserva['monto_saldo'] ?? $reserva['monto'];
+                } elseif ($reserva['anticipo_pagado'] == 1 && $reserva['saldo_pagado'] == 1) {
+                    $ingresoTotalReal += ($reserva['monto_anticipo'] ?? ($reserva['monto'] * 0.5)) + 
+                                       ($reserva['monto_saldo'] ?? ($reserva['monto'] * 0.5));
+                }
+            }
+        }
+        
+        // Pasar el ingreso total real a la vista
+        $ingresoTotalReal = $ingresoTotalReal;
+        
         // Cargar la vista
         include_once 'vistas/reportes/semanal.php';
     }

@@ -18,6 +18,10 @@ class ModeloReportes {
                 r.tipo_uso, 
                 r.estado, 
                 r.monto, 
+                r.anticipo_pagado,
+                r.saldo_pagado,
+                r.monto_anticipo,
+                r.monto_saldo,
                 u.nombre, 
                 u.apellido, 
                 u.matricula 
@@ -79,7 +83,29 @@ class ModeloReportes {
                 SUM(CASE WHEN estado = 'pendiente' THEN 1 ELSE 0 END) as pendientes,
                 SUM(CASE WHEN estado = 'rechazada' THEN 1 ELSE 0 END) as rechazadas,
                 SUM(CASE WHEN estado = 'cancelada' THEN 1 ELSE 0 END) as canceladas,
-                SUM(monto) as ingreso_total
+                SUM(CASE WHEN estado = 'baja' THEN 1 ELSE 0 END) as bajas,
+                SUM(
+                    CASE 
+                        WHEN estado = 'aprobada' THEN
+                            CASE 
+                                -- Cuando solo se pagó el anticipo
+                                WHEN anticipo_pagado = 1 AND saldo_pagado = 0 THEN 
+                                    COALESCE(monto_anticipo, monto * 0.5)
+                                
+                                -- Cuando se pagó el saldo completo (pago total de una vez)
+                                WHEN saldo_pagado = 1 AND anticipo_pagado = 0 THEN 
+                                    COALESCE(monto_saldo, monto)
+                                
+                                -- Cuando se pagó anticipo y luego saldo
+                                WHEN anticipo_pagado = 1 AND saldo_pagado = 1 THEN 
+                                    COALESCE(monto_anticipo, monto * 0.5) + COALESCE(monto_saldo, monto * 0.5)
+                                
+                                -- Cuando no se pagó nada en reserva aprobada
+                                ELSE 0
+                            END
+                        ELSE 0
+                    END
+                ) as ingreso_total
             FROM 
                 reservas 
             WHERE 
