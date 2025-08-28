@@ -117,7 +117,9 @@ if (isset($_SESSION['error'])) {
                     <?php
                     // Determinar si los campos deben estar deshabilitados
                     // Permitimos subir archivos si está pendiente, en revisión, aprobada o confirmada
-                    $camposDeshabilitados = !in_array($reserva['estado'], ['pendiente', 'en_revision', 'aprobada', 'confirmada']);
+                    // EXCEPCIÓN: Permitir a administradores en estado 'baja' para devolución
+                    $esAdminEnBaja = ($reserva['estado'] === 'baja' && isset($_SESSION['rol']) && $_SESSION['rol'] === 'administrador');
+                    $camposDeshabilitados = !in_array($reserva['estado'], ['pendiente', 'en_revision', 'aprobada', 'confirmada']) && !$esAdminEnBaja;
                     $motivoDeshabilitado = '';
                     
                     if ($camposDeshabilitados) {
@@ -130,12 +132,17 @@ if (isset($_SESSION['error'])) {
                                 $motivoDeshabilitado = 'La reserva ha sido rechazada' . ($reserva['motivo_rechazo'] ? ': ' . htmlspecialchars($reserva['motivo_rechazo']) : '.');
                                 break;
                             case 'baja':
-                                $motivoDeshabilitado = 'La reserva ha sido dada de baja.';
+                                // Solo mostrar mensaje si NO es administrador
+                                if (!isset($_SESSION['rol']) || $_SESSION['rol'] !== 'administrador') {
+                                    $motivoDeshabilitado = 'La reserva ha sido dada de baja.';
+                                }
                                 break;
                             default:
                                 $motivoDeshabilitado = 'La reserva no se puede modificar en este estado.';
                         }
-                        echo '<div class="alert alert-danger">' . $motivoDeshabilitado . ' No se pueden subir más archivos.</div>';
+                        if (!empty($motivoDeshabilitado)) {
+                            echo '<div class="alert alert-danger">' . $motivoDeshabilitado . ' No se pueden subir más archivos.</div>';
+                        }
                     } elseif ($reserva['estado'] === 'aprobada' || $reserva['estado'] === 'confirmada') {
                         // Mostrar mensaje informativo para estados aprobados
                         // echo '<div class="alert alert-success">Reserva ' . $reserva['estado'] . '. Puede continuar subiendo los archivos faltantes (comprobantes de pago o formularios adicionales).</div>';
@@ -238,10 +245,76 @@ if (isset($_SESSION['error'])) {
                             </div>
                         </div>
                         <!-- fin subir comprobante de pago 100% -->
+                        
+                        <?php if ($reserva['estado'] == 'baja' && isset($_SESSION['rol']) && $_SESSION['rol'] == 'administrador'): ?>
+                        <!-- SECCIÓN DE DEVOLUCIÓN - Solo para administradores cuando la reserva está dada de baja -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <div class="card border-info">
+                                    <div class="card-header bg-info text-white">
+                                        <h5 class="mb-0"><i class="fas fa-money-bill-wave me-2"></i>Comprobante de Devolución</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="alert alert-info">
+                                            <i class="fas fa-info-circle me-2"></i>
+                                            <strong>Reserva dada de baja:</strong> Puede subir el comprobante de devolución del dinero pagado.
+                                        </div>
+                                        
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="form-group mb-3">
+                                                    <label for="monto_devolucion" class="form-label"><strong>Monto a Devolver:</strong></label>
+                                                    <div class="input-group">
+                                                        <span class="input-group-text">$</span>
+                                                        <input type="number" class="form-control" id="monto_devolucion" name="monto_devolucion" 
+                                                               step="0.01" min="0" max="<?php echo $reserva['monto']; ?>"
+                                                               value="<?php echo $reserva['monto_devolucion'] ?? ''; ?>"
+                                                               placeholder="Ingrese el monto a devolver">
+                                                    </div>
+                                                    <small class="text-muted">Monto máximo: $<?php echo sprintf("%.2f", $reserva['monto']); ?></small>
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group mb-3">
+                                                    <label for="comprobante_devolucion" class="form-label"><strong>Comprobante de Devolución:</strong></label>
+                                                    <input type="file" class="form-control" id="comprobante_devolucion" name="comprobante_devolucion" 
+                                                           accept=".pdf,.jpg,.jpeg,.png">
+                                                    <?php if (!empty($reserva['archivo_comprobante_devolucion'])): ?>
+                                                        <div class="mt-2">
+                                                            <small class="text-success">Ya ha subido un comprobante de devolución.</small>
+                                                            <br>
+                                                            <a href="assets/uploads/<?php echo $reserva['archivo_comprobante_devolucion']; ?>" target="_blank" class="btn btn-sm btn-outline-info">
+                                                                <i class="fas fa-eye me-1"></i>Ver comprobante actual
+                                                            </a>
+                                                        </div>
+                                                    <?php endif; ?>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="form-group mb-3">
+                                            <label for="observaciones_devolucion" class="form-label"><strong>Observaciones de la Devolución:</strong></label>
+                                            <textarea class="form-control" id="observaciones_devolucion" name="observaciones_devolucion" 
+                                                      rows="3" placeholder="Ingrese observaciones sobre la devolución (motivo, método de pago, etc.)"><?php echo htmlspecialchars($reserva['observaciones_devolucion'] ?? ''); ?></textarea>
+                                        </div>
+                                        
+                                        <?php if (!empty($reserva['fecha_devolucion'])): ?>
+                                        <div class="alert alert-success">
+                                            <i class="fas fa-check-circle me-2"></i>
+                                            <strong>Devolución registrada:</strong> <?php echo date('d/m/Y H:i', strtotime($reserva['fecha_devolucion'])); ?>
+                                        </div>
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- FIN SECCIÓN DE DEVOLUCIÓN -->
+                        <?php else: ?>
                         <!-- alerta de recordatorio -->
                         <div class="alert alert-warning">
                             <p><strong>Recuerde:</strong> Una vez que suba estos documentos, su solicitud será revisada por un administrador para su aprobación final.</p>
                         </div>
+                        <?php endif; ?>
                 </div>
                 <div class="card-footer d-flex justify-content-between">
                     <button type="submit" id="submit-button" class="btn btn-success-theme" <?php echo $camposDeshabilitados ? 'disabled' : ''; ?>>Subir Documentos</button>
@@ -341,9 +414,29 @@ if (isset($_SESSION['error'])) {
                 if (intervalId) clearInterval(intervalId);
                 if (checkIntervalId) clearInterval(checkIntervalId); // Detener chequeos
             } else {
-                // Para estados cancelada, rechazada o baja, deshabilitamos todo
-                inputs.forEach(input => input.disabled = true);
-                submitButton.disabled = true;
+                // Para estados cancelada, rechazada o baja, deshabilitamos todo EXCEPTO campos de devolución para administradores
+                const esAdministrador = <?php echo (isset($_SESSION['rol']) && $_SESSION['rol'] === 'administrador') ? 'true' : 'false'; ?>;
+                const esBaja = estado === 'baja';
+                
+                inputs.forEach(input => {
+                    // No deshabilitar campos de devolución si es administrador y estado es baja
+                    if (esAdministrador && esBaja && 
+                        (input.id === 'monto_devolucion' || 
+                         input.id === 'comprobante_devolucion' || 
+                         input.id === 'observaciones_devolucion')) {
+                        input.disabled = false;
+                    } else {
+                        input.disabled = true;
+                    }
+                });
+                
+                // Habilitar botón de envío si es administrador en estado baja (para devolución)
+                if (esAdministrador && esBaja) {
+                    submitButton.disabled = false;
+                } else {
+                    submitButton.disabled = true;
+                }
+                
                 contadorContainer.style.display = 'none'; // Ocultar contador
                 mensajeEstadoElement.textContent = mensaje;
                 mensajeEstadoElement.className = 'alert alert-danger'; // Clase base + clase específica
