@@ -305,6 +305,46 @@
         <?php endif; ?>
     </div>
 
+    <?php if ($reserva['estado'] == 'baja' && (!empty($reserva['monto_devolucion']) || !empty($reserva['fecha_devolucion']) || !empty($reserva['observaciones_devolucion']))): ?>
+    <!-- SECCIÓN DE DEVOLUCIÓN -->
+    <div class="info-section">
+        <h3><i class="bi bi-arrow-return-left"></i> Información de Devolución</h3>
+        
+        <?php if (!empty($reserva['monto_devolucion'])): ?>
+        <div class="info-row">
+            <span class="info-label">Monto Devuelto:</span>
+            <span class="info-value">
+                <span style="color: #17a2b8; font-weight: bold;">$<?php echo number_format($reserva['monto_devolucion'], 2, ',', '.'); ?></span>
+                <span style="color: #17a2b8;">Devuelto ↩</span>
+            </span>
+        </div>
+        <?php endif; ?>
+        
+        <?php if (!empty($reserva['fecha_devolucion'])): ?>
+        <div class="info-row">
+            <span class="info-label">Fecha de Devolución:</span>
+            <span class="info-value"><?php echo date('d/m/Y H:i', strtotime($reserva['fecha_devolucion'])); ?></span>
+        </div>
+        <?php endif; ?>
+        
+        <?php if (!empty($reserva['observaciones_devolucion'])): ?>
+        <div class="info-row">
+            <span class="info-label">Observaciones:</span>
+            <span class="info-value"><?php echo nl2br(htmlspecialchars($reserva['observaciones_devolucion'])); ?></span>
+        </div>
+        <?php endif; ?>
+        
+        <div class="info-row">
+            <span class="info-label">Estado de Reserva:</span>
+            <span class="info-value">
+                <span class="badge badge-secondary">DADA DE BAJA</span>
+                <span style="color: #6c757d; margin-left: 10px;">Devolución procesada</span>
+            </span>
+        </div>
+    </div>
+    <?php endif; ?>
+    <!-- FIN SECCIÓN DE DEVOLUCIÓN -->
+
     <!-- 
     <div class="qr-code">
         <img src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=<?php echo urlencode('Reserva#' . $reserva['id'] . '-' . $reserva['codigo_unico']); ?>" alt="QR Code">
