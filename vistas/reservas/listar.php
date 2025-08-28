@@ -18,6 +18,12 @@ if (isset($_SESSION['error'])) {
             <p class="text-muted">Visualiza y gestiona tus reservas</p>
         </div>
         <div class="col-md-4 d-flex justify-content-end align-items-center gap-2">
+            <?php if (isset($_SESSION['rol']) && $_SESSION['rol'] == 'administrador'): ?>
+                <a href="index.php?controlador=auditoria&accion=historial" class="btn btn-info">
+                    <i class="fas fa-history me-1"></i>
+                    Auditoría
+                </a>
+            <?php endif; ?>
             <a href="index.php?controlador=reservas&accion=calendario" class="btn btn-light">
                 <i class="bi bi-calendar2-event me-1"></i>
                 Calendario
@@ -48,6 +54,7 @@ if (isset($_SESSION['error'])) {
                                 <th>Ingeniero</th>
                                 <th>Matrícula</th>
                             <?php endif; ?>
+                            <th>Solicitud</th>
                             <th>Fecha</th>
                             <th>Horarios</th>
                             <th>Tipo de Uso</th>
@@ -65,6 +72,7 @@ if (isset($_SESSION['error'])) {
                                     <td><?php echo $reserva['nombre'] . ' ' . $reserva['apellido']; ?></td>
                                     <td><?php echo $reserva['matricula']; ?></td>
                                 <?php endif; ?>
+                                <td><?php echo date('d/m/Y', strtotime($reserva['fecha_solicitud'])); ?></td>
                                 <td><?php echo date('d/m/Y', strtotime($reserva['fecha_evento'])); ?></td>
                                 <td><?php echo substr($reserva['hora_inicio'], 0, 5) . ' - ' . substr($reserva['hora_fin'], 0, 5); ?></td>
                                 <td><?php echo $reserva['tipo_uso']; ?></td>
@@ -115,8 +123,12 @@ if (isset($_SESSION['error'])) {
                                     ): ?>
                                         <a href="index.php?controlador=reservas&accion=subirFormulario&codigo=<?php echo $reserva['codigo_unico']; ?>" class="btn btn-sm btn-warning"> <i class="fas fa-upload me-1"></i> Subir Archivos</a>
                                     <?php endif; ?>
+                                    
+                                    <?php if ($reserva['estado'] == 'baja' && isset($_SESSION['rol']) && $_SESSION['rol'] == 'administrador'): ?>
+                                        <a href="index.php?controlador=reservas&accion=subirFormulario&codigo=<?php echo $reserva['codigo_unico']; ?>" class="btn btn-sm btn-info"> <i class="fas fa-money-bill-wave me-1"></i> Devolución</a>
+                                    <?php endif; ?>
 
-                                    <?php if ($reserva['estado'] == 'aprobada'): ?>
+                                    <?php if ($reserva['estado'] == 'aprobada' || $reserva['estado'] == 'baja'): ?>
                                         <a href="index.php?controlador=reservas&accion=generarPDF&id=<?php echo $reserva['id']; ?>" class="btn btn-sm btn-light border"> <i class="fas fa-file-pdf me-1"></i> Descargar PDF</a>
                                         <?php if (isset($_SESSION['rol']) && $_SESSION['rol'] == 'administrador'): ?>
                                             <a href="index.php?controlador=reservas&accion=enviarCorreos&id=<?php echo $reserva['id']; ?>" class="btn btn-sm btn-primary"> <i class="fas fa-envelope me-1"></i> Enviar Correos</a>
@@ -132,12 +144,6 @@ if (isset($_SESSION['error'])) {
                                             <a href="index.php?controlador=reservas&accion=enviarCorreos&id=<?php echo $reserva['id']; ?>" class="btn btn-sm btn-primary"> <i class="fas fa-envelope me-1"></i> Enviar Correos</a>
                                         <?php endif; ?>
                                     <?php endif; ?>
-                                    <?php if ($reserva['estado'] == 'baja'): ?>
-                                        <?php if (isset($_SESSION['rol']) && $_SESSION['rol'] == 'administrador'): ?>
-                                            <a href="index.php?controlador=reservas&accion=enviarCorreos&id=<?php echo $reserva['id']; ?>" class="btn btn-sm btn-primary"> <i class="fas fa-envelope me-1"></i> Enviar Correos</a>
-                                        <?php endif; ?>
-                                    <?php endif; ?>
-                                    
                                     <?php if (isset($_SESSION['rol']) && $_SESSION['rol'] == 'administrador'): ?>
                                         <button type="button" class="btn btn-sm btn-danger" onclick="confirmarEliminacion(<?php echo $reserva['id']; ?>, '<?php echo addslashes($reserva['tipo_uso']); ?>')"> 
                                             <i class="fas fa-trash me-1"></i> Eliminar 
