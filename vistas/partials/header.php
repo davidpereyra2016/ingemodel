@@ -80,6 +80,12 @@
             </a>
             <ul class="dropdown-menu" data-bs-popper="static">
               <li>
+                <a class="dropdown-item" href="?controlador=plataforma&accion=listar">
+                  <i class="bi bi-globe"></i>
+                  <span class="ms-2">Gestión de la plataforma</span>
+                </a>
+              </li>
+              <li>
                 <a class="dropdown-item" href="?controlador=usuarios&accion=listar">
                   <i class="bi bi-person-lines-fill"></i>
                   <span class="ms-2">Gestión de Usuarios</span>
