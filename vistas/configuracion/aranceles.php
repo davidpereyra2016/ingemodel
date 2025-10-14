@@ -12,23 +12,45 @@ if (isset($_SESSION['error'])) {
 
 <div class="container">
 
-    <div class="row mt-5 mb-5 flex-row align-items-center justify-content-between">
+    <div class="row mt-5 mb-3 flex-row align-items-center justify-content-between">
         <div class="col-md-8">
             <h2>Gestión de Aranceles</h2>
             <p class="text-muted">Administra los aranceles y períodos vigentes</p>
         </div>
         <div class="col-md-4 d-flex justify-content-end align-items-center gap-2">
+            <a href="index.php?controlador=configuracion&accion=actualizarReservasMasivo" 
+               class="btn btn-warning"
+               onclick="return confirm('¿Está seguro de actualizar todas las reservas según los aranceles vigentes?');">
+                <i class="bi bi-arrow-repeat me-1"></i>
+                Actualizar Reservas
+            </a>
             <a href="index.php?controlador=configuracion&accion=crearArancel" class="btn btn-success-theme">
                 <i class="bi bi-plus-circle me-1"></i>
-                Nueva Arancel
+                Nuevo Arancel
             </a>
         </div>
+    </div>
+
+    <!-- Información importante sobre aranceles dinámicos -->
+    <div class="alert alert-info mb-4">
+        <h5 class="alert-heading"><i class="bi bi-info-circle-fill"></i> Sistema de Aranceles Dinámicos</h5>
+        <hr>
+        <ul class="mb-2">
+            <li><strong>Los aranceles NO se congelan:</strong> Los montos de las reservas se actualizan automáticamente según el arancel vigente para la fecha del evento.</li>
+            <li><strong>Actualización automática:</strong> Al crear o modificar un arancel, todas las reservas futuras afectadas se actualizan automáticamente.</li>
+            <li><strong>Notificaciones:</strong> Los usuarios reciben notificaciones cuando el monto de su reserva cambia por actualización de aranceles.</li>
+            <li><strong>Trazabilidad:</strong> Todos los cambios se registran en el historial de auditoría con fecha y hora.</li>
+        </ul>
+        <p class="mb-0 small text-muted">
+            <i class="bi bi-exclamation-triangle"></i> 
+            <strong>Importante:</strong> Evite solapar fechas de aranceles para prevenir conflictos. 
+            Solo debe haber un arancel activo por rango de fechas.
+        </p>
     </div>
 
     <?php if (empty($aranceles)): ?>
         <div class="alert alert-success mt-4">
             No hay aranceles registrados. Haz clic en "Nuevo Arancel" para agregar uno.
-        </div>
     <?php else: ?>
         <div class="card">
             <div class="card-header bg-light pt-4 ">

@@ -47,8 +47,43 @@ if (isset($_SESSION['error'])) {
                                     <p><strong>Fecha:</strong> <?php echo date('d/m/Y', strtotime($reserva['fecha_evento'])); ?></p>
                                     <p><strong>Horario:</strong> <?php echo substr($reserva['hora_inicio'], 0, 5) . ' - ' . substr($reserva['hora_fin'], 0, 5); ?></p>
                                     <p><strong>Tipo de Uso:</strong> <?php echo $reserva['tipo_uso']; ?></p>
-                                    <p><strong>Monto Total:</strong> $<?php echo sprintf("%.2f", $reserva['monto']); ?></p>
+                                    <p>
+                                        <strong>Monto Total:</strong> 
+                                        $<?php echo sprintf("%.2f", $reserva['monto']); ?>
+                                        <?php if (isset($reserva['requiere_actualizacion']) && $reserva['requiere_actualizacion'] && $reserva['diferencia_monto'] > 0): ?>
+                                            <span class="badge bg-warning text-dark ms-2">
+                                                <i class="fas fa-info-circle"></i> 
+                                                Incluye actualización de arancel: +$<?php echo number_format($reserva['diferencia_monto'], 2); ?>
+                                            </span>
+                                        <?php elseif (isset($reserva['requiere_actualizacion']) && $reserva['requiere_actualizacion'] && $reserva['diferencia_monto'] < 0): ?>
+                                            <span class="badge bg-success ms-2">
+                                                <i class="fas fa-check-circle"></i> 
+                                                Reducción aplicada: $<?php echo number_format(abs($reserva['diferencia_monto']), 2); ?>
+                                            </span>
+                                        <?php endif; ?>
+                                    </p>
                                     <p><strong>Anticipo (50%):</strong> $<?php echo sprintf("%.2f", $reserva['monto'] / 2); ?></p>
+                                    
+                                    <?php if (isset($reserva['requiere_actualizacion']) && $reserva['requiere_actualizacion'] && abs($reserva['diferencia_monto']) > 0): ?>
+                                    <div class="alert alert-info mt-3 mb-0">
+                                        <h6 class="alert-heading"><i class="fas fa-exclamation-circle"></i> Información Importante</h6>
+                                        <p class="mb-1">
+                                            <strong>El arancel para su fecha de evento ha sido actualizado.</strong>
+                                        </p>
+                                        <ul class="mb-0">
+                                            <li>Monto anterior: $<?php echo number_format($reserva['monto_original'] ?? $reserva['monto'], 2); ?></li>
+                                            <li>Nuevo monto: $<?php echo number_format($reserva['monto'], 2); ?></li>
+                                            <?php if ($reserva['diferencia_monto'] > 0): ?>
+                                                <li class="text-danger fw-bold">Diferencia adicional: $<?php echo number_format($reserva['diferencia_monto'], 2); ?></li>
+                                            <?php endif; ?>
+                                        </ul>
+                                        <small class="text-muted d-block mt-2">
+                                            <i class="fas fa-info-circle"></i> 
+                                            Los aranceles se actualizan según la fecha del evento. 
+                                            Por favor, considere este monto al realizar su pago.
+                                        </small>
+                                    </div>
+                                    <?php endif; ?>
                                 </div>
                             </div>
                         </div>

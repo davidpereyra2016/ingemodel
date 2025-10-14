@@ -75,6 +75,47 @@
                                 <li class="list-group-item">
                                     <strong>Monto Total:</strong> $<?php echo sprintf("%.2f", $reserva['monto']); ?>
                                 </li>
+
+                                <?php if (isset($reserva['requiere_actualizacion']) && $reserva['requiere_actualizacion'] && abs($reserva['diferencia_monto']) > 0): ?>
+                                    <li class="list-group-item bg-warning-subtle border-warning">
+                                        <div class="alert alert-warning mb-0">
+                                            <h6 class="alert-heading">
+                                                <i class="fas fa-exclamation-triangle"></i>
+                                                <strong>Actualización de Arancel</strong>
+                                            </h6>
+                                            <hr class="my-2">
+                                            <p class="mb-2"><strong>Importante:</strong> El arancel vigente para la fecha de su evento ha cambiado.</p>
+                                            <ul class="mb-2">
+                                                <li><strong>Monto original:</strong> $<?php echo number_format($reserva['monto_original'] ?? $reserva['monto'], 2); ?></li>
+                                                <li><strong>Nuevo monto:</strong> $<?php echo number_format($reserva['monto'], 2); ?></li>
+                                                <li>
+                                                    <?php if ($reserva['diferencia_monto'] > 0): ?>
+                                                        <strong class="text-danger">
+                                                            <i class="fas fa-arrow-up"></i>
+                                                            Diferencia a pagar: $<?php echo number_format($reserva['diferencia_monto'], 2); ?>
+                                                        </strong>
+                                                    <?php else: ?>
+                                                        <strong class="text-success">
+                                                            <i class="fas fa-arrow-down"></i>
+                                                            Reducción: $<?php echo number_format(abs($reserva['diferencia_monto']), 2); ?>
+                                                        </strong>
+                                                    <?php endif; ?>
+                                                </li>
+                                                <?php if ($reserva['fecha_actualizacion_arancel']): ?>
+                                                    <li class="text-muted small">
+                                                        <i class="fas fa-clock"></i>
+                                                        Actualizado el: <?php echo date('d/m/Y H:i', strtotime($reserva['fecha_actualizacion_arancel'])); ?>
+                                                    </li>
+                                                <?php endif; ?>
+                                            </ul>
+                                            <small class="text-muted d-block">
+                                                <i class="fas fa-info-circle"></i>
+                                                Los aranceles tienen vigencia temporal y se actualizan según la fecha del evento.
+                                                Este cambio se refleja automáticamente en los montos a pagar.
+                                            </small>
+                                        </div>
+                                    </li>
+                                <?php endif; ?>
                                 <li class="list-group-item" id="motivo-display">
                                     <strong>Motivo de Uso:</strong>
                                     <?php if ($_SESSION['rol'] === 'administrador'): ?>
@@ -84,17 +125,17 @@
                                 </li>
 
                                 <?php if ($_SESSION['rol'] === 'administrador'): ?>
-                                <li class="list-group-item" id="motivo-edit-form" style="display: none;">
-                                    <strong>Editar Motivo de Uso:</strong>
-                                    <form action="index.php?controlador=reservas&accion=actualizarMotivoUso" method="POST" class="mt-2">
-                                        <input type="hidden" name="id_reserva" value="<?php echo $reserva['id']; ?>">
-                                        <div class="mb-3">
-                                            <textarea class="form-control" name="motivo_de_uso" rows="3" required><?php echo htmlspecialchars($reserva['motivo_de_uso']); ?></textarea>
-                                        </div>
-                                        <button type="submit" class="btn btn-success btn-sm">Guardar</button>
-                                        <button type="button" id="cancel-edit-btn" class="btn btn-secondary btn-sm">Cancelar</button>
-                                    </form>
-                                </li>
+                                    <li class="list-group-item" id="motivo-edit-form" style="display: none;">
+                                        <strong>Editar Motivo de Uso:</strong>
+                                        <form action="index.php?controlador=reservas&accion=actualizarMotivoUso" method="POST" class="mt-2">
+                                            <input type="hidden" name="id_reserva" value="<?php echo $reserva['id']; ?>">
+                                            <div class="mb-3">
+                                                <textarea class="form-control" name="motivo_de_uso" rows="3" required><?php echo htmlspecialchars($reserva['motivo_de_uso']); ?></textarea>
+                                            </div>
+                                            <button type="submit" class="btn btn-success btn-sm">Guardar</button>
+                                            <button type="button" id="cancel-edit-btn" class="btn btn-secondary btn-sm">Cancelar</button>
+                                        </form>
+                                    </li>
                                 <?php endif; ?>
                                 <li class="list-group-item">
                                     <strong>Anticipo:</strong>
@@ -118,18 +159,18 @@
                                     <?php else: ?>
                                         <span class="text-danger">Pendiente ✗</span>
                                     <?php endif; ?>
-                                    <?php 
+                                    <?php
                                     // Calcular montos reales considerando los flags de pago (misma lógica que PDF)
-                                    
+
                                     // Para anticipo: si anticipo_pagado = 1 pero monto_anticipo es NULL/0, usar 50% del monto total
                                     if ($reserva['anticipo_pagado'] == 1) {
-                                        $anticipo_real = ($reserva['monto_anticipo'] !== null && $reserva['monto_anticipo'] > 0) 
-                                                       ? $reserva['monto_anticipo'] 
-                                                       : ($reserva['monto'] / 2);
+                                        $anticipo_real = ($reserva['monto_anticipo'] !== null && $reserva['monto_anticipo'] > 0)
+                                            ? $reserva['monto_anticipo']
+                                            : ($reserva['monto'] / 2);
                                     } else {
                                         $anticipo_real = $reserva['monto_anticipo'] ?? 0;
                                     }
-                                    
+
                                     // Para saldo: si saldo_pagado = 1 pero monto_saldo es NULL/0, calcular el resto
                                     if ($reserva['saldo_pagado'] == 1) {
                                         if ($reserva['monto_saldo'] !== null && $reserva['monto_saldo'] > 0) {
@@ -141,13 +182,13 @@
                                     } else {
                                         $saldo_real = $reserva['monto_saldo'] ?? 0;
                                     }
-                                    
+
                                     $total_pagado = $anticipo_real + $saldo_real;
                                     $saldo_pendiente = $reserva['monto'] - $total_pagado;
                                     ?>
                                     <br><small class="text-muted">Saldo pendiente: $<?php echo number_format($saldo_pendiente, 2); ?></small>
                                 </li>
-                                
+
                                 <?php if ($saldo_pendiente > 0): ?>
                                     <li class="list-group-item bg-light border-warning">
                                         <strong class="text-warning">💰 Saldo Pendiente de Pago:</strong>
@@ -277,16 +318,16 @@
                                     <div class="card-body">
                                         <form action="index.php?controlador=reservas&accion=actualizarMontosPago" method="POST">
                                             <input type="hidden" name="id_reserva" value="<?php echo $reserva['id']; ?>">
-                                            
+
                                             <div class="row">
                                                 <div class="col-md-6">
                                                     <div class="form-group mb-3">
                                                         <label for="monto_anticipo" class="form-label">Monto Real del Anticipo:</label>
                                                         <div class="input-group">
                                                             <span class="input-group-text">$</span>
-                                                            <input type="number" step="0.01" class="form-control" id="monto_anticipo" name="monto_anticipo" 
-                                                                   value="<?php echo $reserva['monto_anticipo'] ?? ''; ?>" 
-                                                                   placeholder="<?php echo number_format($reserva['monto'] / 2, 2); ?>">
+                                                            <input type="number" step="0.01" class="form-control" id="monto_anticipo" name="monto_anticipo"
+                                                                value="<?php echo $reserva['monto_anticipo'] ?? ''; ?>"
+                                                                placeholder="<?php echo number_format($reserva['monto'] / 2, 2); ?>">
                                                         </div>
                                                         <small class="form-text text-muted">Monto sugerido (50%): $<?php echo number_format($reserva['monto'] / 2, 2); ?></small>
                                                     </div>
@@ -296,11 +337,11 @@
                                                         <label for="monto_saldo" class="form-label">Monto Real del Saldo:</label>
                                                         <div class="input-group">
                                                             <span class="input-group-text">$</span>
-                                                            <input type="number" step="0.01" class="form-control" id="monto_saldo" name="monto_saldo" 
-                                                                   value="<?php echo $reserva['monto_saldo'] ?? ''; ?>" 
-                                                                   placeholder="<?php echo number_format($reserva['monto'] / 2, 2); ?>">
+                                                            <input type="number" step="0.01" class="form-control" id="monto_saldo" name="monto_saldo"
+                                                                value="<?php echo $reserva['monto_saldo'] ?? ''; ?>"
+                                                                placeholder="<?php echo number_format($reserva['monto'] / 2, 2); ?>">
                                                         </div>
-                                                        <?php 
+                                                        <?php
                                                         $anticipo_real = $reserva['monto_anticipo'] ?? 0;
                                                         $saldo_sugerido = $reserva['monto'] - $anticipo_real;
                                                         ?>
@@ -308,13 +349,13 @@
                                                     </div>
                                                 </div>
                                             </div>
-                                            
+
                                             <div class="alert alert-info">
                                                 <i class="fas fa-info-circle me-2"></i>
-                                                <strong>Información:</strong> Estos campos permiten ajustar los montos reales según los comprobantes de pago subidos por el usuario. 
+                                                <strong>Información:</strong> Estos campos permiten ajustar los montos reales según los comprobantes de pago subidos por el usuario.
                                                 Deje vacío si no desea modificar el monto.
                                             </div>
-                                            
+
                                             <div class="form-group text-end">
                                                 <button type="submit" class="btn btn-info">
                                                     <i class="fas fa-save me-2"></i> Actualizar Montos
@@ -412,7 +453,7 @@
                 </div>
                 <div class="modal-body">
                     <p>La reserva ha sido aprobada exitosamente. ¿Desea notificar al Encargado?</p>
-                    
+
                     <!-- Información de la reserva -->
                     <div class="card mb-3">
                         <div class="card-header bg-light">
@@ -433,12 +474,12 @@
                             </div>
                         </div>
                     </div>
-                    
+
                     <form id="formNotificacionAprobacion" action="index.php?controlador=reservas&accion=aprobarRechazar" method="POST">
                         <input type="hidden" name="id_reserva" value="<?php echo $reserva['id']; ?>">
                         <input type="hidden" name="estado" value="aprobada">
                         <input type="hidden" name="motivo" id="motivoHidden" value="">
-                        
+
                         <div class="mb-3">
                             <div class="form-check">
                                 <input class="form-check-input" type="checkbox" id="enviarWhatsApp" name="enviar_whatsapp" value="1" checked>
@@ -446,16 +487,16 @@
                                     <i class="fab fa-whatsapp text-success me-1"></i> Enviar notificación por WhatsApp
                                 </label>
                             </div>
-                            <!-- <div class="form-check">
+                            <div class="form-check">
                                 <input class="form-check-input" type="checkbox" id="enviarEmail" name="enviar_email" value="1" checked>
                                 <label class="form-check-label" for="enviarEmail">
                                     <i class="fas fa-envelope text-primary me-1"></i> Enviar notificación por Email
                                 </label>
-                            </div> -->
+                            </div>
                         </div>
-                        
+
                         <div class="alert alert-info">
-                            <i class="fas fa-info-circle me-1"></i> 
+                            <i class="fas fa-info-circle me-1"></i>
                             Las notificaciones incluirán los detalles de la reserva mostrados arriba.
                         </div>
                     </form>
@@ -470,7 +511,7 @@
         </div>
     </div>
 
-<!-- Modal de confirmación para rechazo -->
+    <!-- Modal de confirmación para rechazo -->
 </div>
 
 <script>
@@ -516,11 +557,11 @@
         // Manejo del botón "Guardar Cambios" para mostrar modal de notificaciones
         const btnGuardarCambios = document.getElementById('btnGuardarCambios');
         const modal = new bootstrap.Modal(document.getElementById('confirmacionAprobacionModal'));
-        
+
         if (btnGuardarCambios) {
             btnGuardarCambios.addEventListener('click', function() {
                 const estadoSeleccionado = document.querySelector('input[name="estado"]:checked');
-                
+
                 if (!estadoSeleccionado) {
                     alert('Por favor seleccione una acción (Aprobar o Rechazar)');
                     return;
@@ -543,12 +584,12 @@
 
         // Manejo del envío de notificaciones desde el modal
         const confirmarAprobacionBtn = document.getElementById('confirmarAprobacion');
-        
+
         if (confirmarAprobacionBtn) {
             confirmarAprobacionBtn.addEventListener('click', function() {
                 const enviarWhatsApp = document.getElementById('enviarWhatsApp').checked;
                 const enviarEmail = document.getElementById('enviarEmail').checked;
-                
+
                 if (enviarWhatsApp) {
                     // Preparar datos para WhatsApp
                     const reservaData = {
@@ -563,16 +604,16 @@
                         tipo_uso: '<?php echo addslashes($reserva['tipo_uso']); ?>',
                         monto: '<?php echo $reserva['monto']; ?>'
                     };
-                    
+
                     // Enviar WhatsApp
                     enviarWhatsAppDirecto(reservaData);
                 }
-                
+
                 // Enviar el formulario de aprobación
                 document.getElementById('formNotificacionAprobacion').submit();
             });
         }
-        
+
         // Función para enviar WhatsApp directo
         function enviarWhatsAppDirecto(reservaData) {
             const telefono = reservaData.telefono.replace(/\D/g, '');
@@ -581,7 +622,7 @@
             const horaFin = reservaData.hora_fin.substring(0, 5);
             const montoAnticipo = (parseFloat(reservaData.monto) / 2).toFixed(2);
             const nombreCompleto = reservaData.nombre + ' ' + reservaData.apellido;
-            
+
             const mensaje = `
 ¡Hola! Hay una reserva *APROBADA* ✅
 
@@ -597,17 +638,17 @@
 • Email: ${reservaData.email}
 • Teléfono: ${reservaData.telefono}
             `.trim();
-            
+
             const mensajeCodificado = encodeURIComponent(mensaje);
             const whatsappLink = `https://api.whatsapp.com/send?text=${mensajeCodificado}`;
-            
+
             // Abrir WhatsApp en una nueva ventana
             window.open(whatsappLink, '_blank');
         }
 
         // Manejo del botón independiente de WhatsApp para reservas aprobadas
         const btnEnviarWhatsApp = document.getElementById('btnEnviarWhatsApp');
-        
+
         if (btnEnviarWhatsApp) {
             btnEnviarWhatsApp.addEventListener('click', function() {
                 // Preparar datos para WhatsApp
@@ -623,7 +664,7 @@
                     tipo_uso: '<?php echo addslashes($reserva['tipo_uso']); ?>',
                     monto: '<?php echo $reserva['monto']; ?>'
                 };
-                
+
                 // Enviar WhatsApp directamente
                 enviarWhatsAppDirecto(reservaData);
             });

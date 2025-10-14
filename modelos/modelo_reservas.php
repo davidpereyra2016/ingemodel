@@ -29,7 +29,9 @@ class ModeloReservas {
     public function obtenerReserva($id) {
         $consulta = $this->conexion->prepare("SELECT r.*, u.nombre, u.apellido, u.matricula, u.email, u.telefono, 
                                              r.archivo_formulario, r.archivo_municipal, r.archivo_comprobante, r.archivo_comprobante_total,
-                                             r.codigo_unico, r.monto_anticipo, r.monto_saldo, r.anticipo_pagado, r.saldo_pagado 
+                                             r.codigo_unico, r.monto_anticipo, r.monto_saldo, r.anticipo_pagado, r.saldo_pagado,
+                                             r.id_arancel_original, r.monto_original, r.requiere_actualizacion, 
+                                             r.diferencia_monto, r.fecha_actualizacion_arancel
                                              FROM reservas r 
                                              INNER JOIN usuarios u ON r.id_usuario = u.id 
                                              WHERE r.id = :id");
@@ -42,7 +44,9 @@ class ModeloReservas {
     public function obtenerReservaPorCodigo($codigoUnico) {
         $consulta = $this->conexion->prepare("SELECT r.*, u.nombre, u.apellido, u.matricula, u.email, u.telefono, 
                                              r.archivo_formulario, r.archivo_municipal, r.archivo_comprobante, r.archivo_comprobante_total,
-                                             r.monto_anticipo, r.monto_saldo, r.anticipo_pagado, r.saldo_pagado 
+                                             r.monto_anticipo, r.monto_saldo, r.anticipo_pagado, r.saldo_pagado,
+                                             r.id_arancel_original, r.monto_original, r.requiere_actualizacion, 
+                                             r.diferencia_monto, r.fecha_actualizacion_arancel
                                              FROM reservas r 
                                              INNER JOIN usuarios u ON r.id_usuario = u.id 
                                              WHERE r.codigo_unico = :codigo_unico");
@@ -145,14 +149,22 @@ class ModeloReservas {
             return ['error' => 'Ya existe una reserva para esa fecha y horario.'];
         }
         
-        // Obtener monto según horario
+        // CAMBIO CRÍTICO: Obtener arancel según fecha del EVENTO, no fecha actual
         $consulta_monto = $this->conexion->prepare("SELECT * FROM configuracion_aranceles 
                                                   WHERE activo = 1 
-                                                  AND :fecha_actual BETWEEN fecha_inicio AND fecha_fin");
-        $fecha_actual = date('Y-m-d');
-        $consulta_monto->bindParam(':fecha_actual', $fecha_actual);
+                                                  AND :fecha_evento BETWEEN fecha_inicio AND fecha_fin
+                                                  ORDER BY id DESC LIMIT 1");
+        $consulta_monto->bindParam(':fecha_evento', $fecha_evento);
         $consulta_monto->execute();
         $config_arancel = $consulta_monto->fetch(PDO::FETCH_ASSOC);
+        
+        // Validar que existe un arancel vigente para la fecha del evento
+        if (!$config_arancel) {
+            return ['error' => 'No hay arancel vigente para la fecha seleccionada. Por favor, contacte al administrador.'];
+        }
+        
+        // Guardar ID del arancel usado
+        $id_arancel_usado = $config_arancel['id'];
         
         // Corregir la lógica para aplicar el monto correcto según el horario seleccionado
         $hora_comparacion = "22:00:00";
@@ -166,15 +178,17 @@ class ModeloReservas {
             $monto = $config_arancel['monto_antes_22'];
         }
         
-        // Crear la reserva
-        $consulta = $this->conexion->prepare("INSERT INTO reservas (id_usuario, fecha_evento, hora_inicio, hora_fin, tipo_uso, monto, motivo_de_uso, codigo_unico, fecha_vencimiento, estado) 
-                                             VALUES (:id_usuario, :fecha_evento, :hora_inicio, :hora_fin, :tipo_uso, :monto, :motivo_de_uso, :codigo_unico, :fecha_vencimiento, 'pendiente')");
+        // Crear la reserva con referencia al arancel usado
+        $consulta = $this->conexion->prepare("INSERT INTO reservas (id_usuario, fecha_evento, hora_inicio, hora_fin, tipo_uso, monto, monto_original, id_arancel_original, motivo_de_uso, codigo_unico, fecha_vencimiento, estado) 
+                                             VALUES (:id_usuario, :fecha_evento, :hora_inicio, :hora_fin, :tipo_uso, :monto, :monto_original, :id_arancel_original, :motivo_de_uso, :codigo_unico, :fecha_vencimiento, 'pendiente')");
         $consulta->bindParam(':id_usuario', $id_usuario);
         $consulta->bindParam(':fecha_evento', $fecha_evento);
         $consulta->bindParam(':hora_inicio', $hora_inicio);
         $consulta->bindParam(':hora_fin', $hora_fin);
         $consulta->bindParam(':tipo_uso', $tipo_uso);
         $consulta->bindParam(':monto', $monto);
+        $consulta->bindParam(':monto_original', $monto);
+        $consulta->bindParam(':id_arancel_original', $id_arancel_usado);
         $consulta->bindParam(':motivo_de_uso', $motivo_de_uso);
         $consulta->bindParam(':codigo_unico', $codigo_unico);
         $consulta->bindParam(':fecha_vencimiento', $fecha_vencimiento);
@@ -519,5 +533,149 @@ class ModeloReservas {
             error_log('Error al actualizar motivo de uso: ' . $e->getMessage());
             return false;
         }
+    }
+
+    // =====================================================
+    // NUEVOS MÉTODOS: SISTEMA DE ACTUALIZACIÓN DE ARANCELES
+    // =====================================================
+
+    /**
+     * Actualiza el monto de una reserva según el arancel vigente para su fecha de evento
+     * @param int $id_reserva ID de la reserva a actualizar
+     * @return array Resultado de la actualización con información detallada
+     */
+    public function actualizarMontosPorCambioArancel($id_reserva) {
+        try {
+            // Obtener la reserva
+            $reserva = $this->obtenerReserva($id_reserva);
+            
+            if (!$reserva) {
+                return ['actualizado' => false, 'motivo' => 'Reserva no encontrada'];
+            }
+            
+            // Solo actualizar reservas pendientes o aprobadas
+            if (!in_array($reserva['estado'], ['pendiente', 'aprobada'])) {
+                return ['actualizado' => false, 'motivo' => 'Estado no permite actualización (solo pendiente/aprobada)'];
+            }
+            
+            // Buscar arancel vigente para la fecha del evento
+            $consulta_nuevo_arancel = $this->conexion->prepare("
+                SELECT * FROM configuracion_aranceles 
+                WHERE activo = 1 
+                AND :fecha_evento BETWEEN fecha_inicio AND fecha_fin
+                ORDER BY id DESC LIMIT 1
+            ");
+            $consulta_nuevo_arancel->bindParam(':fecha_evento', $reserva['fecha_evento']);
+            $consulta_nuevo_arancel->execute();
+            $nuevo_arancel = $consulta_nuevo_arancel->fetch(PDO::FETCH_ASSOC);
+            
+            if (!$nuevo_arancel) {
+                return ['actualizado' => false, 'motivo' => 'No hay arancel vigente para la fecha del evento'];
+            }
+            
+            // Calcular nuevo monto según horario de la reserva
+            $hora_inicio_ts = strtotime($reserva['hora_inicio']);
+            $hora_22_ts = strtotime("22:00:00");
+            
+            $nuevo_monto = ($hora_inicio_ts >= $hora_22_ts) 
+                ? $nuevo_arancel['monto_despues_22'] 
+                : $nuevo_arancel['monto_antes_22'];
+            
+            // Usar monto_original si existe, sino usar monto actual como referencia
+            $monto_referencia = $reserva['monto_original'] ?? $reserva['monto'];
+            $diferencia = $nuevo_monto - $monto_referencia;
+            
+            // Solo actualizar si hay diferencia significativa (mayor a 0.01 para evitar errores de redondeo)
+            if (abs($diferencia) < 0.01) {
+                return ['actualizado' => false, 'motivo' => 'Sin cambios en el monto'];
+            }
+            
+            // Determinar si requiere actualización (solo si hay aumento de monto)
+            $requiere_actualizacion = ($diferencia > 0) ? 1 : 0;
+            
+            // Actualizar la reserva
+            $consulta_update = $this->conexion->prepare("
+                UPDATE reservas 
+                SET monto = :nuevo_monto,
+                    diferencia_monto = :diferencia,
+                    requiere_actualizacion = :requiere_actualizacion,
+                    fecha_actualizacion_arancel = NOW()
+                WHERE id = :id_reserva
+            ");
+            
+            $consulta_update->execute([
+                ':nuevo_monto' => $nuevo_monto,
+                ':diferencia' => $diferencia,
+                ':requiere_actualizacion' => $requiere_actualizacion,
+                ':id_reserva' => $id_reserva
+            ]);
+            
+            // Registrar en historial
+            $tipo_cambio = ($diferencia > 0) ? 'aumento' : 'reducción';
+            $comentario = sprintf(
+                "Arancel actualizado automáticamente. Monto anterior: $%s. Nuevo monto: $%s. %s de $%s.",
+                number_format($monto_referencia, 2),
+                number_format($nuevo_monto, 2),
+                ucfirst($tipo_cambio),
+                number_format(abs($diferencia), 2)
+            );
+            
+            $this->registrarHistorial(
+                $id_reserva, 
+                $_SESSION['id_usuario'] ?? 1, 
+                'actualizacion_arancel',
+                null,
+                null,
+                $comentario
+            );
+            
+            return [
+                'actualizado' => true,
+                'monto_anterior' => $monto_referencia,
+                'monto_nuevo' => $nuevo_monto,
+                'diferencia' => $diferencia,
+                'tipo_cambio' => $tipo_cambio,
+                'id_reserva' => $id_reserva,
+                'id_usuario' => $reserva['id_usuario']
+            ];
+            
+        } catch (PDOException $e) {
+            error_log('Error al actualizar monto por cambio de arancel: ' . $e->getMessage());
+            return ['actualizado' => false, 'motivo' => 'Error de base de datos: ' . $e->getMessage()];
+        }
+    }
+
+    /**
+     * Obtiene todas las reservas que requieren actualización de arancel
+     * @return array Lista de reservas pendientes de actualización
+     */
+    public function obtenerReservasParaActualizarArancel() {
+        $consulta = $this->conexion->query("
+            SELECT r.id, r.id_usuario, r.fecha_evento, r.monto, r.estado,
+                   u.nombre, u.apellido, u.email
+            FROM reservas r
+            INNER JOIN usuarios u ON r.id_usuario = u.id
+            WHERE r.estado IN ('pendiente', 'aprobada')
+            AND r.fecha_evento >= CURDATE()
+            ORDER BY r.fecha_evento ASC
+        ");
+        return $consulta->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * Obtiene el arancel vigente para una fecha específica
+     * @param string $fecha Fecha en formato Y-m-d
+     * @return array|null Información del arancel o null si no existe
+     */
+    public function obtenerArancelVigentePorFecha($fecha) {
+        $consulta = $this->conexion->prepare("
+            SELECT * FROM configuracion_aranceles 
+            WHERE activo = 1 
+            AND :fecha BETWEEN fecha_inicio AND fecha_fin
+            ORDER BY id DESC LIMIT 1
+        ");
+        $consulta->bindParam(':fecha', $fecha);
+        $consulta->execute();
+        return $consulta->fetch(PDO::FETCH_ASSOC);
     }
 }
